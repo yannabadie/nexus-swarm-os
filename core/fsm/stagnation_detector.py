@@ -479,7 +479,8 @@ class StagnationDetector:
         if not self.should_swap_lead(current_lead):
             return {"should_swap": False, "reason": "No swap needed", "new_lead": None}
 
-        new_lead = "claude" if current_lead.lower() == "gemini" else "gemini"
+        from core.foundation.agents.unified_registry import get_registry
+        new_lead = get_registry().get_alternate(current_lead.lower()) or current_lead.lower()
 
         return {
             "should_swap": True,

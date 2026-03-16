@@ -988,14 +988,15 @@ class FSMHandlers:
         """
         from core.execution_pkg.routing.model_router import TaskType
 
-        # Select best agent based on fit scores
-        if task_analysis.recommended_lead == "gemini":
-            agent = "Gemini"
-        elif task_analysis.recommended_lead == "claude":
-            agent = "Claude"
+        # V12.4: Provider-agnostic agent selection via registry
+        registry = get_registry()
+        lead = task_analysis.recommended_lead
+        if lead and registry.get(lead):
+            agent = registry.get_display_name(lead)
         else:
-            # Equal fit - use Gemini by default (faster)
-            agent = "Gemini"
+            # Unknown or no recommendation - use first registered agent
+            active_ids = registry.get_active_builtin_ids()
+            agent = registry.get_display_name(active_ids[0]) if active_ids else "Gemini"
 
         self._logger.info(
             f"[SIMPLE MODE] Single agent: {agent}",
@@ -1817,26 +1818,29 @@ Be brutally honest. It's better to catch issues now than have them fail in produ
         """
         agent = agent or self._orch.active_agent
 
-        # Check for async driver availability
-        if agent == "gemini" and hasattr(self._orch, "async_gemini_driver"):
-            driver = self._orch.async_gemini_driver
-            return await driver.invoke(context)
+        # V12.4: Provider-agnostic async driver dispatch via factory
+        factory = self._orch._driver_factory
 
-        elif agent == "claude" and hasattr(self._orch, "async_claude_driver"):
-            driver = self._orch.async_claude_driver
-            return await driver.invoke(context)
+        # Try async driver from factory first
+        try:
+            async_driver = factory.get_driver(agent, prefer_sdk=True)
+            if hasattr(async_driver, "ainvoke"):
+                return await async_driver.ainvoke(context)
+            elif hasattr(async_driver, "invoke"):
+                # Fallback: run sync driver in executor to not block
+                import asyncio
 
-        else:
-            # Fallback: run sync driver in executor to not block
-            import asyncio
+                loop = asyncio.get_running_loop()
+                return await loop.run_in_executor(None, lambda: async_driver.invoke(context))
+        except (ValueError, AttributeError):
+            pass
 
-            # V12.4 FIX F19: Use get_running_loop() instead of deprecated get_event_loop()
-            loop = asyncio.get_running_loop()
+        # Last resort: run sync driver in executor
+        import asyncio
 
-            if agent == "gemini":
-                return await loop.run_in_executor(None, lambda: self._orch.gemini_driver.invoke(context))
-            else:
-                return await loop.run_in_executor(None, lambda: self._orch.claude_driver.invoke(context))
+        loop = asyncio.get_running_loop()
+        driver = factory.get_driver(agent, prefer_sdk=True)
+        return await loop.run_in_executor(None, lambda: driver.invoke(context))
 
     # Property to check if async handlers are available
     @property

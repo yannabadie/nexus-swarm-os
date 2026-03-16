@@ -6,7 +6,6 @@ Handles VALIDATING_CFL state - Cognitive Feedback Loop validation.
 
 import sys
 
-from core.execution_pkg.routing.model_router import TaskType
 from core.fsm.handlers.base import BaseHandler
 from core.fsm.states import OrchestratorState
 
@@ -27,11 +26,16 @@ class ValidatingCFLHandler(BaseHandler):
         try:
             cfl_timeout = getattr(self._orch.config, "cfl_timeout", 60)
 
-            if self._orch.active_agent == "claude":  # V9.3: lowercase normalized
-                driver = self._get_claude_driver(TaskType.VALIDATION, timeout_override=cfl_timeout)
-                response = driver.invoke(context)
-            else:
-                response = self._orch.gemini_driver.invoke(context)
+            # V12.4: Registry-based dispatch - use OPPOSITE agent for cross-validation
+            validator_id = self._registry.get_next(self._orch.active_agent)
+            factory = self._orch._driver_factory
+            driver = factory.get_driver(validator_id, prefer_sdk=True)
+
+            # Preserve timeout override for CFL validation
+            if cfl_timeout and hasattr(driver, "timeout"):
+                driver.timeout = cfl_timeout
+
+            response = driver.invoke(context)
 
             message = self._validate_message(response, expect_heavy=True)
         except Exception as e:
