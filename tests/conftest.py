@@ -287,6 +287,19 @@ def orchestrator_with_mocks(tmp_path):
     if hasattr(orch, "agent_invoker"):
         orch.agent_invoker.get_claude_driver = lambda *args, **kwargs: mock_claude
 
+    # V12.4: Patch factory.get_driver for provider-agnostic dispatch
+    _driver_map = {"gemini": mock_gemini, "claude": mock_claude}
+    if hasattr(orch, "_driver_factory"):
+        _original_get_driver = orch._driver_factory.get_driver
+
+        def _mock_get_driver(agent_id, model=None, prefer_sdk=False):
+            normalized = agent_id.lower()
+            if normalized in _driver_map:
+                return _driver_map[normalized]
+            return _original_get_driver(agent_id, model=model, prefer_sdk=prefer_sdk)
+
+        orch._driver_factory.get_driver = _mock_get_driver
+
     # Store drivers in a dict for easy access in tests
     # V8.4.0: Use lowercase normalized IDs (but keep titlecase aliases for backwards compat)
     orch.drivers = {
@@ -343,6 +356,19 @@ def orchestrator_with_swarm(tmp_path):
     # V7.8 Phase 14c.2: Also patch agent_invoker.get_claude_driver since _get_claude_driver now delegates
     if hasattr(orch, "agent_invoker"):
         orch.agent_invoker.get_claude_driver = lambda *args, **kwargs: mock_claude
+
+    # V12.4: Patch factory.get_driver for provider-agnostic dispatch
+    _driver_map = {"gemini": mock_gemini, "claude": mock_claude}
+    if hasattr(orch, "_driver_factory"):
+        _original_get_driver = orch._driver_factory.get_driver
+
+        def _mock_get_driver(agent_id, model=None, prefer_sdk=False):
+            normalized = agent_id.lower()
+            if normalized in _driver_map:
+                return _driver_map[normalized]
+            return _original_get_driver(agent_id, model=model, prefer_sdk=prefer_sdk)
+
+        orch._driver_factory.get_driver = _mock_get_driver
 
     orch.drivers = {"Gemini": mock_gemini, "Claude": mock_claude}
 

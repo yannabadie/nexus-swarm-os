@@ -178,36 +178,32 @@ class AgentInvoker:
         # V7.7 Phase 15: Use streaming if enabled and callback is set
         use_streaming = getattr(self._orch.config, "streaming_enabled", False) and self._orch.on_token is not None
 
-        # V8.4.0: Use registry for agent lookup
+        # V12.4: Provider-agnostic dispatch — use direct drivers for known agents,
+        # factory fallback for additional providers (DeepSeek, Kimi, etc.)
+        display_name = self._registry.get_display_name(self._orch.active_agent)
+
         if self._registry.is_claude(self._orch.active_agent):
             driver = self.get_claude_driver(task_type)
-            # V13.0: Emit active status before invocation
-            self._emit_agent_status("Claude", "active", task_type.value)
-            try:
-                if use_streaming:
-                    result = driver.invoke_stream(context, self._orch.on_token)
-                else:
-                    result = driver.invoke(context)
-                # V13.0: Emit idle status after invocation
-                self._emit_agent_status("Claude", "idle", task_type.value)
-                return result
-            except Exception:
-                self._emit_agent_status("Claude", "idle", task_type.value)
-                raise
+        elif self._registry.is_gemini(self._orch.active_agent):
+            driver = self._orch.gemini_driver
         else:
-            # V13.0: Emit active status before invocation
-            self._emit_agent_status("Gemini", "active", task_type.value)
-            try:
-                if use_streaming:
-                    result = self._orch.gemini_driver.invoke_stream(context, self._orch.on_token)
-                else:
-                    result = self._orch.gemini_driver.invoke(context)
-                # V13.0: Emit idle status after invocation
-                self._emit_agent_status("Gemini", "idle", task_type.value)
-                return result
-            except Exception:
-                self._emit_agent_status("Gemini", "idle", task_type.value)
-                raise
+            # Additional providers: use factory for dynamic driver creation
+            factory = self._orch._driver_factory
+            driver = factory.get_driver(self._orch.active_agent, prefer_sdk=True)
+
+        # V13.0: Emit active status before invocation
+        self._emit_agent_status(display_name, "active", task_type.value)
+        try:
+            if use_streaming and hasattr(driver, "invoke_stream"):
+                result = driver.invoke_stream(context, self._orch.on_token)
+            else:
+                result = driver.invoke(context)
+            # V13.0: Emit idle status after invocation
+            self._emit_agent_status(display_name, "idle", task_type.value)
+            return result
+        except Exception:
+            self._emit_agent_status(display_name, "idle", task_type.value)
+            raise
 
     def invoke_for_swarm(
         self,
@@ -420,43 +416,39 @@ class AgentInvoker:
         # V7.7 Phase 15: Use streaming if enabled and callback is set
         use_streaming = getattr(self._orch.config, "streaming_enabled", False) and self._orch.on_token is not None
 
-        # V8.4.0: Use registry for agent identification
+        # V12.4: Provider-agnostic dispatch — direct drivers for known agents,
+        # factory fallback for additional providers
+        display_name = self._registry.get_display_name(target_agent)
+
         if self._registry.is_claude(target_agent):
-            # Claude driver is stateless - no isolated_env needed
             driver = self.get_claude_driver(task_type)
-            # V13.0: Emit active status before invocation
-            self._emit_agent_status("Claude", "active", task_type.value)
-            try:
-                if use_streaming:
-                    # V8.1.6: Pass session_uuid for thread-safe file access
-                    result = driver.invoke_stream(context, self._orch.on_token, session_uuid=session_uuid)
-                else:
-                    result = driver.invoke(context, session_uuid=session_uuid)
-                # V13.0: Emit idle status after invocation
-                self._emit_agent_status("Claude", "idle", task_type.value)
-                return result
-            except Exception:
-                self._emit_agent_status("Claude", "idle", task_type.value)
-                raise
+        elif self._registry.is_gemini(target_agent):
+            driver = self._orch.gemini_driver
         else:
-            # V9.7.1: Gemini driver uses isolated_env for session isolation (HOME spoofing)
-            # V13.0: Emit active status before invocation
-            self._emit_agent_status("Gemini", "active", task_type.value)
-            try:
-                if use_streaming:
-                    result = self._orch.gemini_driver.invoke_stream(
-                        context, self._orch.on_token, session_uuid=session_uuid, isolated_env=isolated_env
-                    )
-                else:
-                    result = self._orch.gemini_driver.invoke(
-                        context, session_uuid=session_uuid, isolated_env=isolated_env
-                    )
-                # V13.0: Emit idle status after invocation
-                self._emit_agent_status("Gemini", "idle", task_type.value)
-                return result
-            except Exception:
-                self._emit_agent_status("Gemini", "idle", task_type.value)
-                raise
+            factory = self._orch._driver_factory
+            driver = factory.get_driver(target_agent, prefer_sdk=True)
+
+        # Build kwargs for driver invocation (session isolation, env spoofing)
+        invoke_kwargs: dict = {}
+        if session_uuid:
+            invoke_kwargs["session_uuid"] = session_uuid
+        if isolated_env and not self._registry.is_claude(target_agent):
+            # isolated_env is for subprocess-based drivers (e.g., Gemini CLI)
+            invoke_kwargs["isolated_env"] = isolated_env
+
+        # V13.0: Emit active status before invocation
+        self._emit_agent_status(display_name, "active", task_type.value)
+        try:
+            if use_streaming and hasattr(driver, "invoke_stream"):
+                result = driver.invoke_stream(context, self._orch.on_token, **invoke_kwargs)
+            else:
+                result = driver.invoke(context, **invoke_kwargs)
+            # V13.0: Emit idle status after invocation
+            self._emit_agent_status(display_name, "idle", task_type.value)
+            return result
+        except Exception:
+            self._emit_agent_status(display_name, "idle", task_type.value)
+            raise
 
     def record_invocation(
         self,

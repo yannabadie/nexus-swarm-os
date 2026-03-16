@@ -312,6 +312,11 @@ def handlers(mock_orch):
         registry.get_display_name.side_effect = lambda x: x.title() if x else "Unknown"
         registry.is_gemini.side_effect = lambda x: x and x.lower() in ("gemini",)
         registry.is_claude.side_effect = lambda x: x and x.lower() in ("claude",)
+        registry.is_builtin.side_effect = lambda x: x and x.lower() in ("gemini", "claude")
+        # get() returns a truthy sentinel for known agents, None for unknown
+        _known = {"gemini", "claude"}
+        registry.get.side_effect = lambda x: MagicMock() if x and x.lower() in _known else None
+        registry.get_active_builtin_ids.return_value = ["gemini", "claude"]
         mock_get_reg.return_value = registry
 
         from core.execution_pkg.orchestration.fsm_handlers import FSMHandlers
