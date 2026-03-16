@@ -34,6 +34,7 @@ from core.foundation.agents.unified_registry import get_registry  # V8.4.0
 from core.observability.events.telemetry_bridge import emit_agent_exchange, emit_agent_speak
 
 from ..adaptive_debate import AdaptiveDebateConfig, DebateParams, TaskComplexity
+from ..base_phase import BasePhase
 from ..context_manager import HiveMindContextManager
 from ..cost_estimator import CostEstimator
 from ..prompts import CONSENSUS_SYSTEM_PROMPT, DEBATE_SYSTEM_PROMPT  # V12.4.1: Static prompts for caching
@@ -254,7 +255,7 @@ class DebatePhaseResult:
     misalignment_flags: list[MisalignmentFlag] | None = None
 
 
-class StrategicDebatePhase:
+class StrategicDebatePhase(BasePhase):
     """
     Phase 2: Strategic Debate
 
@@ -265,28 +266,38 @@ class StrategicDebatePhase:
 
     def __init__(
         self,
-        gemini_driver: "BaseAsyncDriver",
-        claude_driver: "BaseAsyncDriver",
-        cost_estimator: CostEstimator,
-        context_manager: HiveMindContextManager,
+        gemini_driver: "BaseAsyncDriver | None" = None,
+        claude_driver: "BaseAsyncDriver | None" = None,
+        cost_estimator: CostEstimator | None = None,
+        context_manager: HiveMindContextManager | None = None,
         debate_config: AdaptiveDebateConfig = None,
         task_id: str | None = None,
         session_manager: Optional["SwarmSessionManager"] = None,
+        *,
+        agents: dict[str, "BaseAsyncDriver"] | None = None,
     ):
         """
         Initialize Phase 2.
 
         Args:
-            gemini_driver: Gemini driver
-            claude_driver: Claude driver
+            gemini_driver: Gemini driver (legacy, prefer agents dict)
+            claude_driver: Claude driver (legacy, prefer agents dict)
             cost_estimator: Cost estimator
             context_manager: Context manager
             debate_config: Adaptive debate configuration
             task_id: V9.2 - Unique task identifier for session isolation
             session_manager: V9.2 - Optional session manager for persistence
+            agents: V12.4 - Dict mapping provider IDs to driver instances
         """
-        self.gemini = gemini_driver
-        self.claude = claude_driver
+        # V12.4: N-agent support via BasePhase
+        if agents is None:
+            agents = {}
+            if gemini_driver is not None:
+                agents["gemini"] = gemini_driver
+            if claude_driver is not None:
+                agents["claude"] = claude_driver
+        super().__init__(agents=agents)
+        self.agent_ids = list(self.agents.keys())
         self.cost_estimator = cost_estimator
         self.context_manager = context_manager
         self.debate_config = debate_config or AdaptiveDebateConfig()
@@ -527,11 +538,12 @@ class StrategicDebatePhase:
 
     def _create_skipped_result(self, comparison: AnalysisComparison) -> DebatePhaseResult:
         """Create result when debate is skipped."""
-        # Use higher confidence analysis
-        if comparison.gemini_analysis.confidence >= comparison.claude_analysis.confidence:
-            primary = comparison.gemini_analysis
+        # V12.4: Use highest confidence analysis from any agent
+        all_analyses = list(comparison.analyses.values())
+        if all_analyses:
+            primary = max(all_analyses, key=lambda a: a.confidence)
         else:
-            primary = comparison.claude_analysis
+            primary = comparison.gemini_analysis or comparison.claude_analysis
 
         return DebatePhaseResult(
             debate_result=DebateResult(
@@ -544,7 +556,7 @@ class StrategicDebatePhase:
                 resolved_disagreements=[],
                 unresolved_disagreements=[],
                 consensus_confidence=comparison.agreement_score,
-                satisfactions={"gemini": 0.8, "claude": 0.8},
+                satisfactions={aid: 0.8 for aid in self.agent_ids} if self.agent_ids else {"gemini": 0.8, "claude": 0.8},
             ),
             final_approach=primary.proposed_approach,
             final_capabilities=comparison.merged_capabilities,
@@ -574,19 +586,19 @@ class StrategicDebatePhase:
         params: DebateParams,
     ) -> DebateArgument:
         """Get an argument from a speaker."""
-        # Determine positions (V8.4.0: via registry)
+        # Determine positions (V12.4: N-agent aware via agents dict)
         registry = get_registry()
 
-        if registry.is_gemini(speaker):
-            your_position = disagreement.gemini_position
-            other_position = disagreement.claude_position
-            your_confidence = comparison.gemini_analysis.confidence
-            driver = self.gemini
-        else:
-            your_position = disagreement.claude_position
-            other_position = disagreement.gemini_position
-            your_confidence = comparison.claude_analysis.confidence
-            driver = self.claude
+        # Get this agent's position from the positions dict
+        your_position = disagreement.positions.get(speaker, "default")
+        # Get first other agent's position as "other"
+        other_ids = [aid for aid in self.agent_ids if aid != speaker]
+        other_position = disagreement.positions.get(other_ids[0], "default") if other_ids else "default"
+        # Get confidence from analysis
+        agent_analysis = comparison.analyses.get(speaker)
+        your_confidence = agent_analysis.confidence if agent_analysis else 0.5
+        # Resolve driver from agents dict
+        driver = self.agents.get(speaker, self.gemini or self.claude)
 
         # V12.4.1: Build dynamic user prompt (static system prompt handled separately)
         if turn_number == 1 or (turn_number == 2 and registry.is_claude(speaker)):
@@ -698,6 +710,24 @@ Respond to this argument (SUPPORT, OPPOSE, or CONCEDE)."""
             return {"argument": raw[:300]}
         return data
 
+    def _build_satisfactions(self, consensus: dict[str, Any]) -> dict[str, float]:
+        """Build satisfactions dict from consensus data, supporting N agents.
+
+        Looks for '{agent_id}_satisfaction' keys first, then falls back to
+        a default of 0.5 for all known agent_ids.
+        """
+        satisfactions: dict[str, float] = {}
+        for agent_id in self.agent_ids:
+            key = f"{agent_id}_satisfaction"
+            satisfactions[agent_id] = consensus.get(key, 0.5)
+        # Ensure at least gemini/claude for backward compat
+        if not satisfactions:
+            satisfactions = {
+                "gemini": consensus.get("gemini_satisfaction", 0.5),
+                "claude": consensus.get("claude_satisfaction", 0.5),
+            }
+        return satisfactions
+
     def _format_debate_history(self, history: list[DebateArgument]) -> str:
         """Format debate history for prompts."""
         registry = get_registry()  # V8.4.0
@@ -732,22 +762,25 @@ ORIGINAL DISAGREEMENT: {disagreement.topic}
 
 Evaluate if consensus has been reached."""
 
-        # V9.2: Get session for consensus check (use gemini's session)
+        # V12.4: Use first available agent for consensus check
+        consensus_agent_id = self.agent_ids[0] if self.agent_ids else "gemini"
+        consensus_driver = self.agents.get(consensus_agent_id, self.gemini)
+
         session_uuid = None
         if self._session_integration:
-            session_uuid = self._session_integration.get_agent_session("gemini")
+            session_uuid = self._session_integration.get_agent_session(consensus_agent_id)
 
-        # Use Gemini for consensus check (neutral)
+        # Use first agent for consensus check (neutral)
         try:
             from ..json_parser import parse_json_response
 
             # V12.4.1: Use invoke() with consensus-specific system prompt
-            response = await self.gemini.invoke(
+            response = await consensus_driver.invoke(
                 user_prompt,
                 session_id=session_uuid,
                 system_prompt=CONSENSUS_SYSTEM_PROMPT,  # Static, cached
-                agent_name="gemini",
-                agent_id="gemini",
+                agent_name=consensus_agent_id,
+                agent_id=consensus_agent_id,
             )
 
             # Check for errors
@@ -858,10 +891,7 @@ Evaluate if consensus has been reached."""
             resolved_disagreements=consensus.get("resolved_points", []),
             unresolved_disagreements=consensus.get("unresolved_points", []),
             consensus_confidence=consensus.get("consensus_score", 0.5),
-            satisfactions={
-                "gemini": consensus.get("gemini_satisfaction", 0.5),
-                "claude": consensus.get("claude_satisfaction", 0.5),
-            },
+            satisfactions=self._build_satisfactions(consensus),
         )
 
         # V12.4: TrajectoryScorer - evaluate debate trajectory quality (arxiv:2509.11035)

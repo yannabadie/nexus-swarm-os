@@ -31,6 +31,7 @@ from typing import TYPE_CHECKING, Any, Optional
 # V13.0 CEREBRO LIVE: Telemetry for agent exchanges
 from core.observability.events.telemetry_bridge import emit_agent_exchange, emit_agent_speak
 
+from ..base_phase import BasePhase
 from ..context_manager import HiveMindContextManager
 from ..context_scope import ContextScope, ScopedContext
 from ..cost_estimator import CostEstimator
@@ -65,7 +66,7 @@ class AnalysisPhaseResult:
     skip_reason: str | None = None
 
 
-class IndependentAnalysisPhase:
+class IndependentAnalysisPhase(BasePhase):
     """
     Phase 1: Independent Analysis
 
@@ -80,28 +81,38 @@ class IndependentAnalysisPhase:
 
     def __init__(
         self,
-        gemini_driver: "BaseAsyncDriver",
-        claude_driver: "BaseAsyncDriver",
-        cost_estimator: CostEstimator,
-        context_manager: HiveMindContextManager,
+        gemini_driver: "BaseAsyncDriver | None" = None,
+        claude_driver: "BaseAsyncDriver | None" = None,
+        cost_estimator: CostEstimator | None = None,
+        context_manager: HiveMindContextManager | None = None,
         task_id: str | None = None,
         session_manager: Optional["SwarmSessionManager"] = None,
         workspace_path: Optional["Path"] = None,  # V12.4.1 Epic 1.4: For V2 memory access
+        *,
+        agents: dict[str, "BaseAsyncDriver"] | None = None,
     ):
         """
         Initialize Phase 1.
 
         Args:
-            gemini_driver: Gemini driver instance
-            claude_driver: Claude driver instance
+            gemini_driver: Gemini driver instance (legacy, prefer agents dict)
+            claude_driver: Claude driver instance (legacy, prefer agents dict)
             cost_estimator: Cost estimator for budget control
             context_manager: Context manager for state
             task_id: V9.2 - Unique task identifier for session isolation
             session_manager: V9.2 - Optional session manager for persistence
             workspace_path: V12.4.1 - Workspace path for V2 memory access
+            agents: V12.4 - Dict mapping provider IDs to driver instances
         """
-        self.gemini = gemini_driver
-        self.claude = claude_driver
+        # V12.4: N-agent support via BasePhase
+        if agents is None:
+            agents = {}
+            if gemini_driver is not None:
+                agents["gemini"] = gemini_driver
+            if claude_driver is not None:
+                agents["claude"] = claude_driver
+        super().__init__(agents=agents)
+        self.agent_ids = list(self.agents.keys())
         self.cost_estimator = cost_estimator
         self.context_manager = context_manager
 
@@ -182,48 +193,50 @@ class IndependentAnalysisPhase:
         if memory_context:
             user_prompt += f"\n\n{memory_context}"
 
-        # Run analyses in parallel with isolated sessions
-        gemini_task = self._analyze_with_gemini(user_prompt, parallel_sessions.get("gemini"))
-        claude_task = self._analyze_with_claude(user_prompt, parallel_sessions.get("claude"))
+        # V12.4: Run analyses in parallel with isolated sessions for ALL agents
+        analysis_tasks = []
+        for agent_id, driver in self.agents.items():
+            session_uuid = parallel_sessions.get(agent_id)
+            analysis_tasks.append(self._analyze_with_agent(agent_id, driver, user_prompt, session_uuid))
 
-        # Wait for both to complete
-        gemini_analysis, claude_analysis = await asyncio.gather(gemini_task, claude_task, return_exceptions=True)
+        raw_results = await asyncio.gather(*analysis_tasks, return_exceptions=True)
 
-        # Handle errors
-        if isinstance(gemini_analysis, Exception):
-            logger.error(f"Gemini analysis failed: {gemini_analysis}")
-            gemini_analysis = self._create_fallback_analysis("gemini", str(gemini_analysis))
+        # Collect results by agent_id, handling errors
+        analyses: dict[str, IndependentAnalysis] = {}
+        for agent_id, result in zip(self.agent_ids, raw_results):
+            if isinstance(result, Exception):
+                logger.error(f"{agent_id} analysis failed: {result}")
+                analyses[agent_id] = self._create_fallback_analysis(agent_id, str(result))
+            else:
+                analyses[agent_id] = result
 
-        if isinstance(claude_analysis, Exception):
-            logger.error(f"Claude analysis failed: {claude_analysis}")
-            claude_analysis = self._create_fallback_analysis("claude", str(claude_analysis))
+        # Backward compat: set gemini_analysis/claude_analysis for downstream code
+        gemini_analysis = analyses.get("gemini", list(analyses.values())[0] if analyses else None)
+        claude_analysis = analyses.get("claude", list(analyses.values())[-1] if analyses else None)
 
-        # Add to context
-        self.context_manager.add_analysis("gemini", gemini_analysis.to_dict())
-        self.context_manager.add_analysis("claude", claude_analysis.to_dict())
+        # Add all analyses to context
+        for agent_id, analysis in analyses.items():
+            self.context_manager.add_analysis(agent_id, analysis.to_dict())
 
         # V13.0 CEREBRO LIVE: Emit agent exchanges for analysis phase
-        emit_agent_speak("gemini", f"Analysis: {gemini_analysis.task_understanding[:200]}", action_type="ANALYSIS")
-        emit_agent_speak("claude", f"Analysis: {claude_analysis.task_understanding[:200]}", action_type="ANALYSIS")
-        emit_agent_exchange(
-            "gemini",
-            "claude",
-            f"Complexity: {gemini_analysis.complexity_assessment}, Confidence: {gemini_analysis.confidence:.0%}",
-            exchange_type="analysis",
-        )
-        emit_agent_exchange(
-            "claude",
-            "gemini",
-            f"Complexity: {claude_analysis.complexity_assessment}, Confidence: {claude_analysis.confidence:.0%}",
-            exchange_type="analysis",
-        )
+        agent_id_list = list(analyses.keys())
+        for i, (agent_id, analysis) in enumerate(analyses.items()):
+            emit_agent_speak(agent_id, f"Analysis: {analysis.task_understanding[:200]}", action_type="ANALYSIS")
+            # Emit exchange to next agent (round-robin)
+            next_agent = agent_id_list[(i + 1) % len(agent_id_list)]
+            emit_agent_exchange(
+                agent_id,
+                next_agent,
+                f"Complexity: {analysis.complexity_assessment}, Confidence: {analysis.confidence:.0%}",
+                exchange_type="analysis",
+            )
 
         # V12.4: Evaluate analysis quality via ThoughtEvaluator
         try:
             from core.intelligence.reasoning.thought_evaluator import get_thought_evaluator
 
             evaluator = get_thought_evaluator()
-            for agent_id, analysis in [("gemini", gemini_analysis), ("claude", claude_analysis)]:
+            for agent_id, analysis in analyses.items():
                 # Novelty: higher if approach is specific (more words = more detail)
                 approach_len = len(analysis.proposed_approach.split())
                 novelty = min(1.0, approach_len / 30.0)  # ~30 words = full novelty
@@ -244,38 +257,23 @@ class IndependentAnalysisPhase:
 
             tracker = get_consensus_tracker()
             session_id = self._task_id
-            tracker.record(
-                session_id,
-                "analysis",
-                "gemini",
-                gemini_analysis.proposed_approach[:100],
-                topic="approach",
-                confidence=gemini_analysis.confidence,
-            )
-            tracker.record(
-                session_id,
-                "analysis",
-                "claude",
-                claude_analysis.proposed_approach[:100],
-                topic="approach",
-                confidence=claude_analysis.confidence,
-            )
-            tracker.record(
-                session_id,
-                "analysis",
-                "gemini",
-                gemini_analysis.complexity_assessment,
-                topic="complexity",
-                confidence=gemini_analysis.confidence,
-            )
-            tracker.record(
-                session_id,
-                "analysis",
-                "claude",
-                claude_analysis.complexity_assessment,
-                topic="complexity",
-                confidence=claude_analysis.confidence,
-            )
+            for agent_id, analysis in analyses.items():
+                tracker.record(
+                    session_id,
+                    "analysis",
+                    agent_id,
+                    analysis.proposed_approach[:100],
+                    topic="approach",
+                    confidence=analysis.confidence,
+                )
+                tracker.record(
+                    session_id,
+                    "analysis",
+                    agent_id,
+                    analysis.complexity_assessment,
+                    topic="complexity",
+                    confidence=analysis.confidence,
+                )
         except Exception as e:
             logger.debug(f"ConsensusTracker recording failed: {e}")
 
@@ -284,7 +282,7 @@ class IndependentAnalysisPhase:
             from core.intelligence.reasoning.evaluation_panel import get_evaluation_panel
 
             eval_panel = get_evaluation_panel()
-            for agent_id, analysis in [("gemini", gemini_analysis), ("claude", claude_analysis)]:
+            for agent_id, analysis in analyses.items():
                 panel_result = eval_panel.evaluate(
                     output=analysis.proposed_approach[:500],
                     context=task[:200],
@@ -297,8 +295,8 @@ class IndependentAnalysisPhase:
         except Exception as e:
             logger.debug(f"EvaluationPanel scoring failed: {e}")
 
-        # Compare analyses
-        comparison = self._compare_analyses(gemini_analysis, claude_analysis)
+        # Compare analyses (V12.4: N-agent comparison)
+        comparison = self._compare_analyses_multi(analyses)
 
         # Record costs
         self.cost_estimator.record_cost("compare_analyses", 500)
@@ -469,6 +467,80 @@ class IndependentAnalysisPhase:
             logger.error(f"Claude analysis error: {e}")
             raise
 
+    async def _analyze_with_agent(
+        self, agent_id: str, driver: "BaseAsyncDriver", prompt: str, session_uuid: str | None = None
+    ) -> IndependentAnalysis:
+        """
+        Get analysis from any agent.
+
+        V12.4: Generic N-agent analysis method. The legacy _analyze_with_gemini
+        and _analyze_with_claude methods are retained for backward compat but
+        this is the canonical path.
+
+        Args:
+            agent_id: Agent identifier (e.g. "gemini", "claude", "openai")
+            driver: The async driver instance for this agent
+            prompt: Dynamic user prompt (task + principles)
+            session_uuid: Unique session for isolation
+
+        Returns:
+            IndependentAnalysis from the agent
+        """
+        logger.debug(f"Requesting {agent_id} analysis (session: {session_uuid[:8] if session_uuid else 'none'})")
+
+        try:
+            from ..schemas import AnalysisOutput
+
+            response = await driver.invoke_structured(
+                prompt,
+                output_type=AnalysisOutput,
+                system_prompt=ANALYSIS_SYSTEM_PROMPT,
+                agent_name=agent_id,
+                agent_id=agent_id,
+            )
+
+            if not response.is_success:
+                raise RuntimeError(f"{agent_id} analysis failed: {response.error_message}")
+
+            parsed = response.raw.get("parsed")
+            if parsed is None:
+                import json
+
+                from ..schemas import AnalysisOutput as Schema
+
+                try:
+                    data = json.loads(response.content)
+                    parsed = Schema(**data)
+                except Exception as err:
+                    raise RuntimeError("Failed to parse structured output") from err
+
+            analysis_data = {
+                "task_understanding": parsed.task_understanding,
+                "complexity_assessment": parsed.complexity_assessment.value,
+                "proposed_approach": parsed.proposed_approach,
+                "required_capabilities": parsed.required_capabilities,
+                "potential_risks": parsed.potential_risks,
+                "confidence": parsed.confidence,
+                "reasoning": parsed.reasoning,
+            }
+
+            cost_key = f"independent_analysis_{agent_id}"
+            if hasattr(self.cost_estimator, "record_tokens"):
+                self.cost_estimator.record_tokens(
+                    cost_key,
+                    input_tokens=response.input_tokens,
+                    output_tokens=response.output_tokens,
+                )
+            else:
+                total_tokens = (response.input_tokens or 0) + (response.output_tokens or 0)
+                self.cost_estimator.record_cost(cost_key, total_tokens)
+
+            return IndependentAnalysis(agent_id=agent_id, **analysis_data)
+
+        except Exception as e:
+            logger.error(f"{agent_id} analysis error: {e}")
+            raise
+
     def _create_fallback_analysis(self, agent_id: str, error: str) -> IndependentAnalysis:
         """Create fallback analysis when an agent fails."""
         return IndependentAnalysis(
@@ -600,6 +672,101 @@ class IndependentAnalysisPhase:
             merged_risks=merged_risks,
         )
 
+    def _compare_analyses_multi(self, analyses: dict[str, IndependentAnalysis]) -> AnalysisComparison:
+        """
+        Compare N independent analyses to find disagreements.
+
+        V12.4: Generalized from 2-agent to N-agent comparison.
+        For 2 agents, delegates to the original pairwise method.
+        For N>2 agents, computes pairwise agreement and merges.
+
+        Args:
+            analyses: Dict mapping agent_id to IndependentAnalysis
+
+        Returns:
+            AnalysisComparison with disagreements and agreement score
+        """
+        agent_ids = list(analyses.keys())
+
+        # Fast path: 2 agents (or fewer) -- use original pairwise method
+        if len(agent_ids) <= 2:
+            vals = list(analyses.values())
+            a = vals[0] if vals else self._create_fallback_analysis("unknown", "no agents")
+            b = vals[1] if len(vals) > 1 else a
+            return self._compare_analyses(a, b)
+
+        # N-agent comparison: compute average pairwise agreement
+        from itertools import combinations
+
+        disagreements = []
+        total_agreement = 0.0
+        pair_count = 0
+
+        all_caps: set[str] = set()
+        all_risks: set[str] = set()
+
+        for a in analyses.values():
+            all_caps.update(c.lower() for c in a.required_capabilities)
+            all_risks.update(r.lower() for r in a.potential_risks)
+
+        # Check complexity consensus
+        complexity_values = {a.complexity_assessment for a in analyses.values()}
+        if len(complexity_values) > 1:
+            disagreements.append(
+                Disagreement(
+                    topic="complexity",
+                    positions={aid: a.complexity_assessment for aid, a in analyses.items()},
+                    severity=0.6,
+                )
+            )
+
+        # Check approach similarity (average pairwise)
+        approach_agreements = []
+        for (id_a, a), (id_b, b) in combinations(analyses.items(), 2):
+            sim = self._text_similarity(a.proposed_approach, b.proposed_approach)
+            approach_agreements.append(sim)
+            pair_count += 1
+
+        avg_approach = sum(approach_agreements) / len(approach_agreements) if approach_agreements else 1.0
+        if avg_approach < 0.6:
+            disagreements.append(
+                Disagreement(
+                    topic="approach",
+                    positions={aid: a.proposed_approach for aid, a in analyses.items()},
+                    severity=0.8,
+                )
+            )
+
+        # Check confidence spread
+        confidences = [a.confidence for a in analyses.values()]
+        confidence_spread = max(confidences) - min(confidences)
+        if confidence_spread > 0.3:
+            disagreements.append(
+                Disagreement(
+                    topic="confidence",
+                    positions={aid: a.confidence for aid, a in analyses.items()},
+                    severity=0.4,
+                )
+            )
+
+        # Calculate overall agreement score from multiple dimensions
+        complexity_agree = 1.0 if len(complexity_values) == 1 else 1.0 / len(complexity_values)
+        confidence_agree = 1.0 - confidence_spread
+        agreement_score = (complexity_agree + avg_approach + confidence_agree) / 3.0
+
+        needs_debate = agreement_score < self.AGREEMENT_THRESHOLD or any(
+            d.severity > self.DISAGREEMENT_SEVERITY_THRESHOLD for d in disagreements
+        )
+
+        return AnalysisComparison(
+            analyses=analyses,
+            disagreements=disagreements,
+            agreement_score=agreement_score,
+            needs_debate=needs_debate,
+            merged_capabilities=list(all_caps),
+            merged_risks=list(all_risks),
+        )
+
     def _text_similarity(self, text1: str, text2: str) -> float:
         """Calculate simple text similarity using word overlap."""
         words1 = set(text1.lower().split())
@@ -637,10 +804,13 @@ class IndependentAnalysisPhase:
         if severe_disagreements:
             return True
 
-        # Debate if confidence gap is large
-        confidence_gap = abs(comparison.gemini_analysis.confidence - comparison.claude_analysis.confidence)
-        if confidence_gap > 0.4:
-            return True
+        # Debate if confidence gap is large (V12.4: check all agent pairs)
+        all_analyses = list(comparison.analyses.values())
+        if len(all_analyses) >= 2:
+            confidences = [a.confidence for a in all_analyses]
+            confidence_gap = max(confidences) - min(confidences)
+            if confidence_gap > 0.4:
+                return True
 
         # V12.4: Check quality profiles - poorly calibrated agents
         # should trigger debate even at moderate agreement
@@ -650,7 +820,7 @@ class IndependentAnalysisPhase:
 
             scorer = get_quality_scorer()
             detector = get_degradation_detector()
-            for agent_id in ("claude", "gemini"):
+            for agent_id in comparison.analyses.keys():
                 profile = scorer.get_agent_profile(agent_id)
                 if profile and profile.avg_calibration < 0.5 and comparison.agreement_score < 0.9:
                     return True  # Low calibration + moderate agreement = debate
@@ -688,8 +858,11 @@ class IndependentAnalysisPhase:
         """
         comparison = result.comparison
 
-        # Use higher confidence analysis as primary
-        if result.gemini_analysis.confidence >= result.claude_analysis.confidence:
+        # Use highest confidence analysis as primary (V12.4: N-agent aware)
+        all_analyses = list(comparison.analyses.values()) if comparison.analyses else []
+        if all_analyses:
+            primary = max(all_analyses, key=lambda a: a.confidence)
+        elif result.gemini_analysis is not None:
             primary = result.gemini_analysis
         else:
             primary = result.claude_analysis

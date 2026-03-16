@@ -28,6 +28,7 @@ import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional
 
+from ..base_phase import BasePhase
 from ..context_manager import HiveMindContextManager
 from ..cost_estimator import CostEstimator
 from ..prompts import DIAGNOSIS_SYSTEM_PROMPT  # V12.4.1: Static prompt for caching
@@ -124,7 +125,7 @@ class DiagnosisPhaseResult:
     user_modifications: str | None = None
 
 
-class FailureDiagnosisPhase:
+class FailureDiagnosisPhase(BasePhase):
     """
     Phase 5: Failure Diagnosis
 
@@ -135,28 +136,38 @@ class FailureDiagnosisPhase:
 
     def __init__(
         self,
-        gemini_driver: "BaseAsyncDriver",
-        claude_driver: "BaseAsyncDriver",
-        cost_estimator: CostEstimator,
-        context_manager: HiveMindContextManager,
-        user_handler: UserInteractionHandler,
+        gemini_driver: "BaseAsyncDriver | None" = None,
+        claude_driver: "BaseAsyncDriver | None" = None,
+        cost_estimator: CostEstimator | None = None,
+        context_manager: HiveMindContextManager | None = None,
+        user_handler: UserInteractionHandler | None = None,
         task_id: str | None = None,
         session_manager: Optional["SwarmSessionManager"] = None,
+        *,
+        agents: dict[str, "BaseAsyncDriver"] | None = None,
     ):
         """
         Initialize Phase 5.
 
         Args:
-            gemini_driver: Gemini driver
-            claude_driver: Claude driver
+            gemini_driver: Gemini driver (legacy, prefer agents dict)
+            claude_driver: Claude driver (legacy, prefer agents dict)
             cost_estimator: Cost estimator
             context_manager: Context manager
             user_handler: User interaction handler
             task_id: V9.2 - Unique task identifier for session isolation
             session_manager: V9.2 - Optional session manager for persistence
+            agents: V12.4 - Dict mapping provider IDs to driver instances
         """
-        self.gemini = gemini_driver
-        self.claude = claude_driver
+        # V12.4: N-agent support via BasePhase
+        if agents is None:
+            agents = {}
+            if gemini_driver is not None:
+                agents["gemini"] = gemini_driver
+            if claude_driver is not None:
+                agents["claude"] = claude_driver
+        super().__init__(agents=agents)
+        self.agent_ids = list(self.agents.keys())
         self.cost_estimator = cost_estimator
         self.context_manager = context_manager
         self.user_handler = user_handler

@@ -45,6 +45,7 @@ from typing import TYPE_CHECKING, Any, Optional
 from core.observability.events.telemetry_bridge import emit_agent_exchange, emit_agent_speak
 
 from ..agent_registry import AgentRegistry
+from ..base_phase import BasePhase
 from ..context_manager import HiveMindContextManager
 from ..cost_estimator import CostEstimator
 from ..prompts import ARCHITECTURE_SYSTEM_PROMPT  # V12.4.1: Static prompt for caching
@@ -243,7 +244,7 @@ class ArchitecturePhaseResult:
     spawn_skipped_reason: str | None = None
 
 
-class ArchitectureGenerationPhase:
+class ArchitectureGenerationPhase(BasePhase):
     """
     Phase 3: Architecture Generation
 
@@ -254,22 +255,24 @@ class ArchitectureGenerationPhase:
 
     def __init__(
         self,
-        gemini_driver: "BaseAsyncDriver",
-        claude_driver: "BaseAsyncDriver",
-        cost_estimator: CostEstimator,
-        context_manager: HiveMindContextManager,
-        agent_registry: AgentRegistry,
-        user_handler: UserInteractionHandler,
-        workspace_path: Path,
+        gemini_driver: "BaseAsyncDriver | None" = None,
+        claude_driver: "BaseAsyncDriver | None" = None,
+        cost_estimator: CostEstimator | None = None,
+        context_manager: HiveMindContextManager | None = None,
+        agent_registry: AgentRegistry | None = None,
+        user_handler: UserInteractionHandler | None = None,
+        workspace_path: Path | None = None,
         task_id: str | None = None,
         session_manager: Optional["SwarmSessionManager"] = None,
+        *,
+        agents: dict[str, "BaseAsyncDriver"] | None = None,
     ):
         """
         Initialize Phase 3.
 
         Args:
-            gemini_driver: Gemini driver
-            claude_driver: Claude driver
+            gemini_driver: Gemini driver (legacy, prefer agents dict)
+            claude_driver: Claude driver (legacy, prefer agents dict)
             cost_estimator: Cost estimator
             context_manager: Context manager
             agent_registry: Agent registry for spawn tracking
@@ -277,9 +280,17 @@ class ArchitectureGenerationPhase:
             workspace_path: Workspace path for agent files
             task_id: V9.2 - Unique task identifier for session isolation
             session_manager: V9.2 - Optional session manager for persistence
+            agents: V12.4 - Dict mapping provider IDs to driver instances
         """
-        self.gemini = gemini_driver
-        self.claude = claude_driver
+        # V12.4: N-agent support via BasePhase
+        if agents is None:
+            agents = {}
+            if gemini_driver is not None:
+                agents["gemini"] = gemini_driver
+            if claude_driver is not None:
+                agents["claude"] = claude_driver
+        super().__init__(agents=agents)
+        self.agent_ids = list(self.agents.keys())
         self.cost_estimator = cost_estimator
         self.context_manager = context_manager
         self.registry = agent_registry
@@ -749,7 +760,7 @@ class ArchitectureGenerationPhase:
             return AgentArchitecture(
                 status=status,
                 collaboration_mode=data.get("execution_strategy", "sequential"),
-                agents_to_use=data.get("agents_to_use", ["claude", "gemini"]),
+                agents_to_use=data.get("agents_to_use", self.agent_ids if self.agent_ids else ["claude", "gemini"]),
                 agents_to_spawn=agents_to_spawn,
                 rag_config=rag_config,
                 execution_plan=ExecutionPlan(
@@ -771,7 +782,7 @@ class ArchitectureGenerationPhase:
         return AgentArchitecture(
             status="READY",
             collaboration_mode="sequential",
-            agents_to_use=["claude", "gemini"],
+            agents_to_use=self.agent_ids if self.agent_ids else ["claude", "gemini"],
             agents_to_spawn=[],
             rag_config=RAGConfig(),
             execution_plan=ExecutionPlan(

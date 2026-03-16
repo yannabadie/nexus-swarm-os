@@ -37,6 +37,7 @@ from core.foundation.agents.unified_registry import get_registry  # V8.4.0
 # V13.0 CEREBRO LIVE: Telemetry for agent exchanges
 from core.observability.events.telemetry_bridge import emit_agent_exchange, emit_agent_speak
 
+from ..base_phase import BasePhase
 from ..context_manager import HiveMindContextManager
 from ..cost_estimator import CostEstimator
 from ..prompts import EXECUTION_SYSTEM_PROMPT  # V12.4.1: Static prompt for caching
@@ -101,7 +102,7 @@ class ExecutionPhaseResult:
     quality_score: float = 0.0  # V12.4: composite reasoning quality (0.0-1.0)
 
 
-class MonitoredExecutionPhase:
+class MonitoredExecutionPhase(BasePhase):
     """
     Phase 4: Monitored Execution
 
@@ -128,30 +129,40 @@ class MonitoredExecutionPhase:
 
     def __init__(
         self,
-        gemini_driver: "BaseAsyncDriver",
-        claude_driver: "BaseAsyncDriver",
-        cost_estimator: CostEstimator,
-        context_manager: HiveMindContextManager,
+        gemini_driver: "BaseAsyncDriver | None" = None,
+        claude_driver: "BaseAsyncDriver | None" = None,
+        cost_estimator: CostEstimator | None = None,
+        context_manager: HiveMindContextManager | None = None,
         tool_executor: Callable = None,
         swarm_engine: "HybridSwarmEngine" = None,
         task_id: str | None = None,
         session_manager: Optional["SwarmSessionManager"] = None,
+        *,
+        agents: dict[str, "BaseAsyncDriver"] | None = None,
     ):
         """
         Initialize Phase 4.
 
         Args:
-            gemini_driver: Gemini driver
-            claude_driver: Claude driver
+            gemini_driver: Gemini driver (legacy, prefer agents dict)
+            claude_driver: Claude driver (legacy, prefer agents dict)
             cost_estimator: Cost estimator
             context_manager: Context manager
             tool_executor: Optional tool execution callback
             swarm_engine: V8.3 - Optional Swarm Engine for delegation
             task_id: V9.2 - Unique task identifier for session isolation
             session_manager: V9.2 - Optional session manager for persistence
+            agents: V12.4 - Dict mapping provider IDs to driver instances
         """
-        self.gemini = gemini_driver
-        self.claude = claude_driver
+        # V12.4: N-agent support via BasePhase
+        if agents is None:
+            agents = {}
+            if gemini_driver is not None:
+                agents["gemini"] = gemini_driver
+            if claude_driver is not None:
+                agents["claude"] = claude_driver
+        super().__init__(agents=agents)
+        self.agent_ids = list(self.agents.keys())
         self.cost_estimator = cost_estimator
         self.context_manager = context_manager
         self.tool_executor = tool_executor
