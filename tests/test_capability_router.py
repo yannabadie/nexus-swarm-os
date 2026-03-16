@@ -11,7 +11,6 @@ from core.intelligence.swarm.capability_router import (
     SLOT_PRIMARY,
     SLOT_SECONDARY,
     SLOT_CRITIC,
-    SLOT_EXECUTOR,
     ALL_SLOTS,
 )
 from core.intelligence.swarm.task_analyzer import TaskAnalysis, TaskDomain, TaskComplexity
