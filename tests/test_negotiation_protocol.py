@@ -125,6 +125,21 @@ def _make_no_tag_response() -> str:
 
 
 # ===================================================================
+# Fixtures for auto-mocking get_registry
+# ===================================================================
+
+
+@pytest.fixture(autouse=True)
+def mock_registry():
+    """Auto-mock get_registry for all tests to avoid empty registry errors."""
+    with patch("core.intelligence.swarm.negotiation_protocol.get_registry") as mock_get:
+        mock_reg = MagicMock()
+        mock_reg.get_active_builtin_ids.return_value = ["gemini", "claude"]
+        mock_get.return_value = mock_reg
+        yield mock_get
+
+
+# ===================================================================
 # 1. NegotiationStatus enum
 # ===================================================================
 
@@ -941,6 +956,12 @@ class TestFinalizeAssignments:
     def test_assignments_from_subtasks(self, mock_get_registry):
         mock_registry = MagicMock()
         mock_registry.is_gemini.side_effect = lambda x: "gemini" in x.lower()
+        # V12.4: registry.get() resolves agent_id -> AgentDescriptor.id
+        gemini_desc = MagicMock()
+        gemini_desc.id = "gemini_primary"
+        claude_desc = MagicMock()
+        claude_desc.id = "claude_opus"
+        mock_registry.get.side_effect = lambda x: gemini_desc if "gemini" in x else claude_desc
         mock_get_registry.return_value = mock_registry
 
         proto = NegotiationProtocol()
@@ -1391,6 +1412,7 @@ class TestNegotiationSubtasks:
     def test_consensus_with_subtasks(self, mock_speak, mock_exchange, mock_get_registry):
         mock_registry = MagicMock()
         mock_registry.is_gemini.side_effect = lambda x: "gemini" in x.lower()
+        mock_registry.get_active_builtin_ids.return_value = ["gemini", "claude"]
         mock_get_registry.return_value = mock_registry
 
         proto = NegotiationProtocol(adaptive_turns=False)
