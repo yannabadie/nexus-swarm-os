@@ -157,8 +157,8 @@ class IndependentAnalysisPhase(BasePhase):
             logger.error("Cannot afford Phase 1 operations")
             raise RuntimeError("Budget exceeded for Phase 1")
 
-        # V9.2: Get isolated sessions for parallel execution
-        parallel_sessions = self._session_integration.get_parallel_sessions(agents=["gemini", "claude"])
+        # V9.2: Get isolated sessions for parallel execution (V12.4: use actual agent IDs)
+        parallel_sessions = self._session_integration.get_parallel_sessions(agents=self.agent_ids)
         logger.debug(f"Created isolated sessions: {parallel_sessions}")
 
         # V12.4: Retrieve relevant principles from EvolveR library (arxiv:2510.16079)
