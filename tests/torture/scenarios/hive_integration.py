@@ -119,11 +119,10 @@ def create_mock_analysis_result(needs_debate: bool = False):
         reasoning="Mock reasoning",
     )
     comparison = AnalysisComparison(
-        gemini_analysis=analysis,
-        claude_analysis=analysis,
+        analyses={"gemini": analysis, "claude": analysis},
         disagreements=[]
         if not needs_debate
-        else [Disagreement(topic="approach", gemini_position="A", claude_position="B")],
+        else [Disagreement(topic="approach", positions={"gemini": "A", "claude": "B"})],
         agreement_score=0.95 if not needs_debate else 0.5,
         needs_debate=needs_debate,
         merged_capabilities=["coding"],
@@ -150,8 +149,7 @@ def create_mock_debate_result():
         resolved_disagreements=["approach"],
         unresolved_disagreements=[],
         consensus_confidence=0.9,
-        gemini_satisfaction=0.85,
-        claude_satisfaction=0.85,
+        satisfactions={"gemini": 0.85, "claude": 0.85},
     )
 
     class DebatePhaseResult:

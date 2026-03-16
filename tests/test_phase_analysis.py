@@ -171,8 +171,7 @@ class TestAnalysisPhaseResult:
         gemini = _make_analysis("gemini")
         claude = _make_analysis("claude")
         comparison = AnalysisComparison(
-            gemini_analysis=gemini,
-            claude_analysis=claude,
+            analyses={"gemini": gemini, "claude": claude},
             disagreements=[],
             agreement_score=0.95,
             needs_debate=False,
@@ -195,8 +194,7 @@ class TestAnalysisPhaseResult:
         gemini = _make_analysis("gemini")
         claude = _make_analysis("claude")
         comparison = AnalysisComparison(
-            gemini_analysis=gemini,
-            claude_analysis=claude,
+            analyses={"gemini": gemini, "claude": claude},
             disagreements=[],
             agreement_score=0.96,
             needs_debate=False,
@@ -216,9 +214,8 @@ class TestAnalysisPhaseResult:
         gemini = _make_analysis("gemini")
         claude = _make_analysis("claude")
         comparison = AnalysisComparison(
-            gemini_analysis=gemini,
-            claude_analysis=claude,
-            disagreements=[Disagreement(topic="approach", gemini_position="X", claude_position="Y", severity=0.9)],
+            analyses={"gemini": gemini, "claude": claude},
+            disagreements=[Disagreement(topic="approach", positions={"gemini": "X", "claude": "Y"}, severity=0.9)],
             agreement_score=0.4,
             needs_debate=True,
             merged_capabilities=[],
@@ -612,8 +609,7 @@ class TestNeedsDebate:
         c = _make_analysis("claude", confidence=claude_confidence)
         disags = disagreements or []
         return AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
+            analyses={"gemini": g, "claude": c},
             disagreements=disags,
             agreement_score=agreement,
             needs_debate=agreement < 0.85 or any(d.severity > 0.5 for d in disags),
@@ -641,7 +637,7 @@ class TestNeedsDebate:
         phase = _make_phase()
         comp = self._make_comparison(
             agreement=0.8,
-            disagreements=[Disagreement(topic="approach", gemini_position="X", claude_position="Y", severity=0.8)],
+            disagreements=[Disagreement(topic="approach", positions={"gemini": "X", "claude": "Y"}, severity=0.8)],
         )
         assert phase._needs_debate(comp) is True
 
@@ -649,7 +645,7 @@ class TestNeedsDebate:
         phase = _make_phase()
         comp = self._make_comparison(
             agreement=0.92,
-            disagreements=[Disagreement(topic="risks", gemini_position="X", claude_position="Y", severity=0.3)],
+            disagreements=[Disagreement(topic="risks", positions={"gemini": "X", "claude": "Y"}, severity=0.3)],
         )
         assert phase._needs_debate(comp) is False
 
@@ -696,8 +692,7 @@ class TestGetSkipReason:
         g = _make_analysis("gemini")
         c = _make_analysis("claude")
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
+            analyses={"gemini": g, "claude": c},
             disagreements=[],
             agreement_score=0.96,
             needs_debate=False,
@@ -712,8 +707,7 @@ class TestGetSkipReason:
         g = _make_analysis("gemini")
         c = _make_analysis("claude")
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
+            analyses={"gemini": g, "claude": c},
             disagreements=[],
             agreement_score=0.92,
             needs_debate=False,
@@ -728,8 +722,7 @@ class TestGetSkipReason:
         g = _make_analysis("gemini")
         c = _make_analysis("claude")
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
+            analyses={"gemini": g, "claude": c},
             disagreements=[],
             agreement_score=0.87,
             needs_debate=False,
@@ -744,8 +737,7 @@ class TestGetSkipReason:
         g = _make_analysis("gemini")
         c = _make_analysis("claude")
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
+            analyses={"gemini": g, "claude": c},
             disagreements=[],
             agreement_score=0.80,
             needs_debate=False,
@@ -760,9 +752,8 @@ class TestGetSkipReason:
         g = _make_analysis("gemini")
         c = _make_analysis("claude")
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
-            disagreements=[Disagreement(topic="x", gemini_position="a", claude_position="b", severity=0.2)],
+            analyses={"gemini": g, "claude": c},
+            disagreements=[Disagreement(topic="x", positions={"gemini": "a", "claude": "b"}, severity=0.2)],
             agreement_score=0.80,
             needs_debate=False,
             merged_capabilities=[],
@@ -785,8 +776,7 @@ class TestConsensusSummary:
         g = _make_analysis("gemini", confidence=0.9)
         c = _make_analysis("claude", confidence=0.7)
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
+            analyses={"gemini": g, "claude": c},
             disagreements=[],
             agreement_score=0.95,
             needs_debate=False,
@@ -808,8 +798,7 @@ class TestConsensusSummary:
         g = _make_analysis("gemini", confidence=0.5)
         c = _make_analysis("claude", confidence=0.9)
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
+            analyses={"gemini": g, "claude": c},
             disagreements=[],
             agreement_score=0.95,
             needs_debate=False,
@@ -830,9 +819,8 @@ class TestConsensusSummary:
         g = _make_analysis("gemini", confidence=0.9)
         c = _make_analysis("claude", confidence=0.7)
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
-            disagreements=[Disagreement(topic="approach", gemini_position="X", claude_position="Y")],
+            analyses={"gemini": g, "claude": c},
+            disagreements=[Disagreement(topic="approach", positions={"gemini": "X", "claude": "Y"})],
             agreement_score=0.5,
             needs_debate=True,
             merged_capabilities=[],
@@ -852,12 +840,11 @@ class TestConsensusSummary:
         g = _make_analysis("gemini")
         c = _make_analysis("claude")
         disags = [
-            Disagreement(topic="complexity", gemini_position="X", claude_position="Y"),
-            Disagreement(topic="approach", gemini_position="A", claude_position="B"),
+            Disagreement(topic="complexity", positions={"gemini": "X", "claude": "Y"}),
+            Disagreement(topic="approach", positions={"gemini": "A", "claude": "B"}),
         ]
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
+            analyses={"gemini": g, "claude": c},
             disagreements=disags,
             agreement_score=0.6,
             needs_debate=True,
@@ -879,8 +866,7 @@ class TestConsensusSummary:
         g = _make_analysis("gemini")
         c = _make_analysis("claude")
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
+            analyses={"gemini": g, "claude": c},
             disagreements=[],
             agreement_score=0.95,
             needs_debate=False,
@@ -1080,8 +1066,7 @@ class TestPhaseTransitionContext:
         g = _make_analysis("gemini")
         c = _make_analysis("claude")
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
+            analyses={"gemini": g, "claude": c},
             disagreements=[],
             agreement_score=0.95,
             needs_debate=False,
@@ -1420,7 +1405,7 @@ class TestEdgeCases:
         assert isinstance(result, AnalysisPhaseResult)
 
     def test_disagreement_dataclass_defaults(self):
-        d = Disagreement(topic="test", gemini_position="A", claude_position="B")
+        d = Disagreement(topic="test", positions={"gemini": "A", "claude": "B"})
         assert d.severity == 0.5
         assert d.gemini_only == []
         assert d.claude_only == []
@@ -1445,8 +1430,7 @@ class TestEdgeCases:
         g = _make_analysis("gemini")
         c = _make_analysis("claude")
         comp = AnalysisComparison(
-            gemini_analysis=g,
-            claude_analysis=c,
+            analyses={"gemini": g, "claude": c},
             disagreements=[],
             agreement_score=1.0,
             needs_debate=False,

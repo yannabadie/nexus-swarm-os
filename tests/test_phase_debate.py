@@ -161,14 +161,15 @@ def _make_comparison(
         disagreements = [
             Disagreement(
                 topic="approach",
-                gemini_position="Use parallel processing",
-                claude_position="Use sequential processing",
+                positions={"gemini": "Use parallel processing", "claude": "Use sequential processing"},
                 severity=0.7,
             )
         ]
     return AnalysisComparison(
-        gemini_analysis=_make_analysis("gemini", gemini_confidence, "Use parallel processing"),
-        claude_analysis=_make_analysis("claude", claude_confidence, "Use sequential processing"),
+        analyses={
+            "gemini": _make_analysis("gemini", gemini_confidence, "Use parallel processing"),
+            "claude": _make_analysis("claude", claude_confidence, "Use sequential processing"),
+        },
         disagreements=disagreements,
         agreement_score=agreement_score,
         needs_debate=needs_debate,
@@ -585,9 +586,9 @@ class TestGetPrimaryDisagreement:
 
     def test_returns_highest_severity(self, phase):
         disagreements = [
-            Disagreement(topic="approach", gemini_position="a", claude_position="b", severity=0.3),
-            Disagreement(topic="security", gemini_position="c", claude_position="d", severity=0.9),
-            Disagreement(topic="mode", gemini_position="e", claude_position="f", severity=0.5),
+            Disagreement(topic="approach", positions={"gemini": "a", "claude": "b"}, severity=0.3),
+            Disagreement(topic="security", positions={"gemini": "c", "claude": "d"}, severity=0.9),
+            Disagreement(topic="mode", positions={"gemini": "e", "claude": "f"}, severity=0.5),
         ]
         result = phase._get_primary_disagreement(disagreements)
         assert result.topic == "security"
@@ -600,7 +601,7 @@ class TestGetPrimaryDisagreement:
 
     def test_single_disagreement(self, phase):
         disagreements = [
-            Disagreement(topic="mode", gemini_position="a", claude_position="b", severity=0.6),
+            Disagreement(topic="mode", positions={"gemini": "a", "claude": "b"}, severity=0.6),
         ]
         result = phase._get_primary_disagreement(disagreements)
         assert result.topic == "mode"
@@ -2003,8 +2004,8 @@ class TestEdgeCases:
     def test_comparison_all_same_severity(self, phase):
         """When all disagreements have same severity, first by sorted order returned."""
         disagreements = [
-            Disagreement(topic="a", gemini_position="x", claude_position="y", severity=0.5),
-            Disagreement(topic="b", gemini_position="x", claude_position="y", severity=0.5),
+            Disagreement(topic="a", positions={"gemini": "x", "claude": "y"}, severity=0.5),
+            Disagreement(topic="b", positions={"gemini": "x", "claude": "y"}, severity=0.5),
         ]
         result = phase._get_primary_disagreement(disagreements)
         assert result.severity == 0.5

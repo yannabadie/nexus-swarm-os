@@ -544,8 +544,7 @@ class StrategicDebatePhase:
                 resolved_disagreements=[],
                 unresolved_disagreements=[],
                 consensus_confidence=comparison.agreement_score,
-                gemini_satisfaction=0.8,
-                claude_satisfaction=0.8,
+                satisfactions={"gemini": 0.8, "claude": 0.8},
             ),
             final_approach=primary.proposed_approach,
             final_capabilities=comparison.merged_capabilities,
@@ -558,7 +557,7 @@ class StrategicDebatePhase:
         """Get the most significant disagreement to debate."""
         if not disagreements:
             # Create a default disagreement for the approach
-            return Disagreement(topic="approach", gemini_position="default", claude_position="default", severity=0.5)
+            return Disagreement(topic="approach", positions={"gemini": "default", "claude": "default"}, severity=0.5)
 
         # Sort by severity and return highest
         sorted_disagreements = sorted(disagreements, key=lambda d: d.severity, reverse=True)
@@ -859,8 +858,10 @@ Evaluate if consensus has been reached."""
             resolved_disagreements=consensus.get("resolved_points", []),
             unresolved_disagreements=consensus.get("unresolved_points", []),
             consensus_confidence=consensus.get("consensus_score", 0.5),
-            gemini_satisfaction=consensus.get("gemini_satisfaction", 0.5),
-            claude_satisfaction=consensus.get("claude_satisfaction", 0.5),
+            satisfactions={
+                "gemini": consensus.get("gemini_satisfaction", 0.5),
+                "claude": consensus.get("claude_satisfaction", 0.5),
+            },
         )
 
         # V12.4: TrajectoryScorer - evaluate debate trajectory quality (arxiv:2509.11035)

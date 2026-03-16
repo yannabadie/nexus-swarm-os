@@ -23,11 +23,15 @@ from typing import Any, Protocol, runtime_checkable
 
 
 class AgentProvider(Enum):
-    """Supported agent providers"""
+    """Supported agent providers - all 7 backends + spawned"""
 
     GEMINI = "gemini"
     CLAUDE = "claude"
-    OLLAMA = "ollama"  # V8.4.3 - Local models
+    OPENAI = "openai"
+    DEEPSEEK = "deepseek"
+    KIMI = "kimi"
+    MINIMAX = "minimax"
+    OLLAMA = "ollama"
     SPAWNED = "spawned"  # Custom agents from workspace/agents/
 
 
@@ -109,6 +113,7 @@ class UnifiedAgentRegistry:
         self._agents: dict[str, AgentDescriptor] = {}
         self._drivers: dict[str, DriverProtocol] = {}
         self._aliases: dict[str, str] = {}  # "Gemini" -> "gemini"
+        self._builtin_ids: list[str] = []  # Tracks registration order for round-robin
         self._register_builtins()
 
     def _register_builtins(self) -> None:
@@ -177,6 +182,8 @@ class UnifiedAgentRegistry:
         """
         normalized = self._normalize_id(agent_id)
         self._drivers[normalized] = driver
+        if normalized not in self._builtin_ids:
+            self._builtin_ids.append(normalized)
 
     def _normalize_id(self, agent_id: str) -> str:
         """Normalize agent ID to lowercase, resolving aliases"""
@@ -223,22 +230,77 @@ class UnifiedAgentRegistry:
         agent = self.get(agent_id)
         return agent.display_name if agent else agent_id.title()
 
+    def get_active_builtin_ids(self) -> list[str]:
+        """
+        Return ordered list of all registered agent IDs that have drivers.
+
+        The order matches driver registration order, enabling deterministic
+        round-robin across N agents.
+
+        Returns:
+            List of agent IDs with registered drivers, in registration order
+        """
+        return [aid for aid in self._builtin_ids if aid in self._drivers]
+
+    def get_next(self, current: str) -> str:
+        """
+        Get the next agent after `current` in round-robin order.
+
+        For 2 agents: identical behavior to the legacy get_alternate().
+        For 3+ agents: cycles through in registration order.
+        For 1 agent: returns itself.
+        Unknown agent: returns first registered agent.
+
+        Args:
+            current: Current agent ID or alias
+
+        Returns:
+            Next agent ID in round-robin order, or first registered
+            agent if current is unknown. Returns empty string if no
+            agents have drivers registered.
+        """
+        active = self.get_active_builtin_ids()
+        if not active:
+            return ""
+        normalized = self._normalize_id(current)
+        try:
+            idx = active.index(normalized)
+            return active[(idx + 1) % len(active)]
+        except ValueError:
+            # Unknown agent: return first registered
+            return active[0]
+
     def get_alternate(self, agent_id: str) -> str | None:
         """
-        Get the 'other' builtin agent (for alternation in BRAINSTORMING).
+        Get the next agent for alternation (e.g., BRAINSTORMING mode).
+
+        When 2+ drivers are registered, delegates to get_next() for N-agent
+        round-robin support. Falls back to legacy gemini/claude swap when
+        fewer than 2 drivers are registered (backward compatibility for
+        cases where Claude driver is created dynamically).
 
         Args:
             agent_id: Current agent ID
 
         Returns:
-            Alternate agent ID, or None for non-builtin agents
+            Next agent ID, or None if current agent is not in the
+            active round-robin list (e.g., spawned agents without drivers)
         """
         normalized = self._normalize_id(agent_id)
+        active = self.get_active_builtin_ids()
+        if len(active) >= 2:
+            # N-agent round-robin via get_next()
+            if normalized not in active:
+                return None
+            return self.get_next(agent_id)
+        # Legacy fallback: hardcoded swap when <2 drivers registered
+        # This handles the common case where Claude driver is created
+        # dynamically and not pre-registered
         if normalized == "gemini":
             return "claude"
         elif normalized == "claude":
             return "gemini"
-        return None  # Spawned agents don't have a default alternate
+        return None
 
     def is_gemini(self, agent_id: str) -> bool:
         """

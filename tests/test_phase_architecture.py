@@ -86,8 +86,7 @@ def _make_debate_result(
         resolved_disagreements=["approach"],
         unresolved_disagreements=[],
         consensus_confidence=consensus_confidence,
-        gemini_satisfaction=0.8,
-        claude_satisfaction=0.9,
+        satisfactions={"gemini": 0.8, "claude": 0.9},
     )
 
 

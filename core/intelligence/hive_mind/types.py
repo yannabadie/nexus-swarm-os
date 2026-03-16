@@ -177,24 +177,40 @@ class Disagreement:
     """A specific point of disagreement between agents."""
 
     topic: str  # "complexity", "approach", "capabilities", etc.
-    gemini_position: Any
-    claude_position: Any
+    positions: dict[str, Any] = field(default_factory=dict)  # {agent_id: position}
     severity: float = 0.5  # 0-1, how significant is this disagreement
     gemini_only: list[str] = field(default_factory=list)
     claude_only: list[str] = field(default_factory=list)
 
+    # Backward compatibility properties
+    @property
+    def gemini_position(self) -> Any:
+        return self.positions.get("gemini")
+
+    @property
+    def claude_position(self) -> Any:
+        return self.positions.get("claude")
+
 
 @dataclass
 class AnalysisComparison:
-    """Comparison of two independent analyses."""
+    """Comparison of two or more independent analyses."""
 
-    gemini_analysis: IndependentAnalysis
-    claude_analysis: IndependentAnalysis
-    disagreements: list[Disagreement]
-    agreement_score: float  # 0-1
-    needs_debate: bool
-    merged_capabilities: list[str]
-    merged_risks: list[str]
+    analyses: dict[str, "IndependentAnalysis"] = field(default_factory=dict)
+    disagreements: list[Disagreement] = field(default_factory=list)
+    agreement_score: float = 0.0  # 0-1
+    needs_debate: bool = False
+    merged_capabilities: list[str] = field(default_factory=list)
+    merged_risks: list[str] = field(default_factory=list)
+
+    # Backward compatibility properties
+    @property
+    def gemini_analysis(self) -> "IndependentAnalysis | None":
+        return self.analyses.get("gemini")
+
+    @property
+    def claude_analysis(self) -> "IndependentAnalysis | None":
+        return self.analyses.get("claude")
 
 
 # =============================================================================
@@ -230,8 +246,16 @@ class DebateResult:
     resolved_disagreements: list[str]
     unresolved_disagreements: list[str]
     consensus_confidence: float
-    gemini_satisfaction: float  # How satisfied Gemini is with outcome
-    claude_satisfaction: float  # How satisfied Claude is with outcome
+    satisfactions: dict[str, float] = field(default_factory=dict)  # {agent_id: satisfaction}
+
+    # Backward compatibility properties
+    @property
+    def gemini_satisfaction(self) -> float:
+        return self.satisfactions.get("gemini", 0.0)
+
+    @property
+    def claude_satisfaction(self) -> float:
+        return self.satisfactions.get("claude", 0.0)
 
 
 # =============================================================================

@@ -106,8 +106,8 @@ class TrueHiveMind:
         self,
         workspace_path: Path,
         config: Any,
-        gemini_driver: "BaseAsyncDriver",
-        claude_driver: "BaseAsyncDriver",
+        gemini_driver: "BaseAsyncDriver" = None,
+        claude_driver: "BaseAsyncDriver" = None,
         agent_pool: "AgentPool" = None,
         budget_tracker: "BudgetTracker" = None,
         project_memory: "ProjectMemory" = None,
@@ -116,6 +116,8 @@ class TrueHiveMind:
         auto_breakpoints: bool = True,
         swarm_engine: "HybridSwarmEngine" = None,  # V8.4.5: SwarmBridge wiring fix
         saga_enabled: bool = True,  # V8.4.4b: Enable Saga checkpointing
+        *,
+        agents: dict[str, "BaseAsyncDriver"] | None = None,
     ):
         """
         Initialize TRUE HIVE MIND.
@@ -123,8 +125,8 @@ class TrueHiveMind:
         Args:
             workspace_path: NEXUS workspace path
             config: NEXUS configuration
-            gemini_driver: Gemini driver instance
-            claude_driver: Claude driver instance
+            gemini_driver: Gemini driver instance (legacy, prefer agents dict)
+            claude_driver: Claude driver instance (legacy, prefer agents dict)
             agent_pool: Existing V7 AgentPool (for DyLAN metrics)
             budget_tracker: Existing V7 BudgetTracker (for USD limits)
             project_memory: Existing V7 ProjectMemory (for RAG)
@@ -132,11 +134,27 @@ class TrueHiveMind:
             on_state_change: Callback for state changes
             auto_breakpoints: Enable user breakpoints
             swarm_engine: V8.4.5 - Optional Swarm Engine for Phase 4 delegation
+            agents: V12.4 - Dict mapping provider IDs to driver instances.
+                    When provided, takes precedence over gemini_driver/claude_driver.
         """
         self.workspace_path = Path(workspace_path)
         self.config = config
-        self.gemini = gemini_driver
-        self.claude = claude_driver
+
+        # V12.4: Support both new (agents dict) and legacy (positional drivers)
+        if agents is not None:
+            self.agents = agents
+        else:
+            self.agents = {}
+            if gemini_driver is not None:
+                self.agents["gemini"] = gemini_driver
+            if claude_driver is not None:
+                self.agents["claude"] = claude_driver
+
+        self.agent_ids = list(self.agents.keys())
+
+        # Backward compat: self.gemini and self.claude still work
+        self.gemini = self.agents.get("gemini")
+        self.claude = self.agents.get("claude")
         self.agent_pool = agent_pool
         self.budget_tracker = budget_tracker
         self.project_memory = project_memory

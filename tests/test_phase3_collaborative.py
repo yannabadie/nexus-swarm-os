@@ -40,8 +40,7 @@ def make_debate_result(final_approach="Test approach", final_capabilities=None):
         resolved_disagreements=[],
         unresolved_disagreements=[],
         consensus_confidence=0.9,
-        gemini_satisfaction=0.9,
-        claude_satisfaction=0.9,
+        satisfactions={"gemini": 0.9, "claude": 0.9},
     )
 
 

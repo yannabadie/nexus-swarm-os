@@ -501,8 +501,7 @@ class IndependentAnalysisPhase:
             disagreements.append(
                 Disagreement(
                     topic="complexity",
-                    gemini_position=gemini.complexity_assessment,
-                    claude_position=claude.complexity_assessment,
+                    positions={"gemini": gemini.complexity_assessment, "claude": claude.complexity_assessment},
                     severity=0.6,  # Complexity disagreement is significant
                 )
             )
@@ -522,8 +521,7 @@ class IndependentAnalysisPhase:
             disagreements.append(
                 Disagreement(
                     topic="capabilities",
-                    gemini_position=list(gemini_caps),
-                    claude_position=list(claude_caps),
+                    positions={"gemini": list(gemini_caps), "claude": list(claude_caps)},
                     severity=0.7,
                     gemini_only=list(gemini_caps - claude_caps),
                     claude_only=list(claude_caps - gemini_caps),
@@ -539,8 +537,7 @@ class IndependentAnalysisPhase:
             disagreements.append(
                 Disagreement(
                     topic="approach",
-                    gemini_position=gemini.proposed_approach,
-                    claude_position=claude.proposed_approach,
+                    positions={"gemini": gemini.proposed_approach, "claude": claude.proposed_approach},
                     severity=0.8,  # Approach disagreement is very significant
                 )
             )
@@ -560,8 +557,7 @@ class IndependentAnalysisPhase:
             disagreements.append(
                 Disagreement(
                     topic="risks",
-                    gemini_position=list(gemini_risks),
-                    claude_position=list(claude_risks),
+                    positions={"gemini": list(gemini_risks), "claude": list(claude_risks)},
                     severity=0.5,
                     gemini_only=list(gemini_risks - claude_risks),
                     claude_only=list(claude_risks - gemini_risks),
@@ -578,8 +574,7 @@ class IndependentAnalysisPhase:
             disagreements.append(
                 Disagreement(
                     topic="confidence",
-                    gemini_position=gemini.confidence,
-                    claude_position=claude.confidence,
+                    positions={"gemini": gemini.confidence, "claude": claude.confidence},
                     severity=0.4,
                 )
             )
@@ -597,8 +592,7 @@ class IndependentAnalysisPhase:
         )
 
         return AnalysisComparison(
-            gemini_analysis=gemini,
-            claude_analysis=claude,
+            analyses={"gemini": gemini, "claude": claude},
             disagreements=disagreements,
             agreement_score=agreement_score,
             needs_debate=needs_debate,
