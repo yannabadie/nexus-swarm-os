@@ -1,0 +1,61 @@
+{
+  "timestamp": "2026-03-16T07:28:42.645943+00:00",
+  "prompt": "What is 2+2? Answer with just the number.",
+  "results": [
+    {
+      "provider": "google",
+      "model": "gemini-2.5-flash",
+      "latency_ms": 1259.5,
+      "input_tokens": 14,
+      "output_tokens": 1,
+      "status": "success",
+      "response_snippet": "4",
+      "contains_4": true,
+      "error": null
+    },
+    {
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "latency_ms": 2681.1,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "status": "fail",
+      "response_snippet": "",
+      "contains_4": false,
+      "error": "Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}"
+    },
+    {
+      "provider": "deepseek",
+      "model": "deepseek-chat",
+      "latency_ms": 1807.8,
+      "input_tokens": 17,
+      "output_tokens": 1,
+      "status": "success",
+      "response_snippet": "4",
+      "contains_4": true,
+      "error": null
+    },
+    {
+      "provider": "kimi",
+      "model": "kimi-k2.5",
+      "latency_ms": 3436.5,
+      "input_tokens": 20,
+      "output_tokens": 82,
+      "status": "success",
+      "response_snippet": "4",
+      "contains_4": true,
+      "error": null
+    },
+    {
+      "provider": "minimax",
+      "model": "MiniMax-M2.5",
+      "latency_ms": 1181.1,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "status": "fail",
+      "response_snippet": "",
+      "contains_4": false,
+      "error": "Error code: 401 - {'type': 'error', 'error': {'type': 'authorized_error', 'message': 'invalid api key (2049)', 'http_code': '401'}, 'request_id': '0606e42b5af518535345420893837d63'}"
+    }
+  ]
+}

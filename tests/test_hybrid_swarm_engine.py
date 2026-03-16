@@ -1204,7 +1204,7 @@ class TestWrapInvokeAgent:
         assert response.status == "mock"
 
     def test_string_response_wrapped(self):
-        def fake_invoke(agent_id, task_type, context, session_uuid=None):
+        def fake_invoke(agent_id, task_type, context, session_uuid=None, isolated_env=None):
             return "Hello from agent"
 
         engine = HybridSwarmEngine(invoke_agent=fake_invoke)
@@ -1215,7 +1215,7 @@ class TestWrapInvokeAgent:
         assert response.status == "success"
 
     def test_error_string_detected(self):
-        def fake_invoke(agent_id, task_type, context, session_uuid=None):
+        def fake_invoke(agent_id, task_type, context, session_uuid=None, isolated_env=None):
             return "Error: connection refused"
 
         engine = HybridSwarmEngine(invoke_agent=fake_invoke)
@@ -1225,7 +1225,7 @@ class TestWrapInvokeAgent:
         assert response.error is not None
 
     def test_timeout_string_detected(self):
-        def fake_invoke(agent_id, task_type, context, session_uuid=None):
+        def fake_invoke(agent_id, task_type, context, session_uuid=None, isolated_env=None):
             return "Agent timed out after 30 seconds"
 
         engine = HybridSwarmEngine(invoke_agent=fake_invoke)
@@ -1234,7 +1234,7 @@ class TestWrapInvokeAgent:
         assert response.status == "error"
 
     def test_dict_response_wrapped(self):
-        def fake_invoke(agent_id, task_type, context, session_uuid=None):
+        def fake_invoke(agent_id, task_type, context, session_uuid=None, isolated_env=None):
             return {"content": "dict result", "status": "success", "tokens_used": 100}
 
         engine = HybridSwarmEngine(invoke_agent=fake_invoke)
@@ -1246,7 +1246,7 @@ class TestWrapInvokeAgent:
     def test_agent_response_passthrough(self):
         expected = AgentResponse(agent_id="test", content="direct", status="ok")
 
-        def fake_invoke(agent_id, task_type, context, session_uuid=None):
+        def fake_invoke(agent_id, task_type, context, session_uuid=None, isolated_env=None):
             return expected
 
         engine = HybridSwarmEngine(invoke_agent=fake_invoke)
@@ -1257,7 +1257,7 @@ class TestWrapInvokeAgent:
     def test_expert_complexity_injects_cot(self):
         contexts_received = []
 
-        def fake_invoke(agent_id, task_type, context, session_uuid=None):
+        def fake_invoke(agent_id, task_type, context, session_uuid=None, isolated_env=None):
             contexts_received.append(context)
             return "done"
 
@@ -1270,7 +1270,7 @@ class TestWrapInvokeAgent:
     def test_non_expert_no_cot_injection(self):
         contexts_received = []
 
-        def fake_invoke(agent_id, task_type, context, session_uuid=None):
+        def fake_invoke(agent_id, task_type, context, session_uuid=None, isolated_env=None):
             contexts_received.append(context)
             return "done"
 
@@ -1281,7 +1281,7 @@ class TestWrapInvokeAgent:
         assert "<thinking>" not in contexts_received[0]
 
     def test_unknown_response_type_stringified(self):
-        def fake_invoke(agent_id, task_type, context, session_uuid=None):
+        def fake_invoke(agent_id, task_type, context, session_uuid=None, isolated_env=None):
             return 42  # unexpected type
 
         engine = HybridSwarmEngine(invoke_agent=fake_invoke)
