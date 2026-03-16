@@ -110,7 +110,7 @@ CRITICAL_PATTERNS: dict[str, dict] = {
     },
     "role_override": {
         "patterns": [
-            r"you\s+are\s+now\s+(a|an|the)\s+\w+",
+            r"you\s+are\s+now\s+(?!(?:ready|able|going|here|set|available|equipped|free\s+to|prepared|about\s+to|allowed\s+to)\b)(?:(?:a|an|the)\s+)?\w+",
             r"from\s+now\s+on[,]?\s+you\s+(are|will\s+be)",
             r"your\s+new\s+(role|persona|identity|character)\s+is",
         ],
@@ -252,10 +252,27 @@ class InputGuard:
 
     HOMOGLYPH_MAP = str.maketrans(
         {
+            # Roman numerals / fullwidth
             "\u2160": "I",  # Roman numeral one
             "\uff29": "I",  # Fullwidth I
+            # Greek capital
             "\u0399": "I",  # Greek capital iota
+            # Cyrillic capital
             "\u0406": "I",  # Cyrillic Byelorussian-Ukrainian I
+            # Cyrillic lowercase homoglyphs
+            "\u0430": "a",  # Cyrillic а → Latin a
+            "\u0435": "e",  # Cyrillic е → Latin e
+            "\u043e": "o",  # Cyrillic о → Latin o
+            "\u0440": "p",  # Cyrillic р → Latin p
+            "\u0441": "c",  # Cyrillic с → Latin c
+            "\u0443": "y",  # Cyrillic у → Latin y
+            "\u0445": "x",  # Cyrillic х → Latin x
+            "\u04bb": "h",  # Cyrillic һ → Latin h
+            "\u0456": "i",  # Cyrillic і → Latin i
+            "\u0455": "s",  # Cyrillic ѕ → Latin s
+            # Greek lowercase homoglyphs
+            "\u03bf": "o",  # Greek ο → Latin o
+            "\u03b1": "a",  # Greek α → Latin a
         }
     )
 

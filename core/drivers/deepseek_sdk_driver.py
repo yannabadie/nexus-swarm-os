@@ -293,7 +293,7 @@ class DeepSeekSDKDriver(BaseAsyncDriver):
 
             # Cache successful response (if caching enabled and no tools)
             if self._response_cache and not tools and content:
-                self._response_cache.set(
+                self._response_cache.put(
                     self._model,
                     prompt,
                     content,

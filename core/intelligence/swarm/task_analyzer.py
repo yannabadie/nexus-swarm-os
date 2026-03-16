@@ -167,6 +167,7 @@ DOMAIN_KEYWORDS: dict[TaskDomain, list[str]] = {
     ],
     TaskDomain.TESTING: ["test", "pytest", "unittest", "coverage", "mock", "assert", "verify", "validate", "qa"],
     TaskDomain.ARCHITECTURE: [
+        "architect",
         "architecture",
         "design pattern",
         "structure",
@@ -175,6 +176,8 @@ DOMAIN_KEYWORDS: dict[TaskDomain, list[str]] = {
         "refactor",
         "reorganize",
         "modular",
+        "microservices",
+        "distributed",
     ],
     TaskDomain.WEB_INTERACTION: [
         "web",
@@ -265,17 +268,20 @@ STAGE2_CONFIDENCE_THRESHOLD = 0.6
 
 # Keywords that increase complexity
 COMPLEXITY_INDICATORS: dict[str, int] = {
-    # High complexity (+2)
-    "security": 2,
-    "vulnerability": 2,
-    "architecture": 2,
+    # High complexity (+2) - system-level concerns requiring deep expertise
+    "architect": 2,
     "refactor entire": 2,
     "redesign": 2,
     "migrate": 2,
     "critical": 2,
     "production": 2,
     "scalability": 2,
-    # Medium complexity (+1)
+    "microservices": 2,
+    "event sourcing": 2,
+    # Medium complexity (+1) - notable effort but not system-level
+    "security": 1,
+    "vulnerability": 1,
+    "architecture": 1,
     "implement": 1,
     "debug": 1,
     "analyze": 1,
@@ -285,6 +291,10 @@ COMPLEXITY_INDICATORS: dict[str, int] = {
     "multiple files": 1,
     "across": 1,
     "complex": 1,
+    "distributed": 1,
+    "design": 1,
+    "platform": 1,
+    "cqrs": 1,
     # Low complexity (-1)
     "simple": -1,
     "quick": -1,
@@ -733,27 +743,41 @@ class TaskAnalyzer:
         return sorted_domains, list(set(detected_keywords))
 
     def _calculate_complexity(self, text: str, domains: list[TaskDomain]) -> TaskComplexity:
-        """Calculate task complexity based on indicators and structure (V10 FIX F1)."""
-        score = 3  # Start at MODERATE
+        """Calculate task complexity based on indicators and structure (V10 FIX F1).
 
-        # Apply keyword modifiers
+        V12.4 FIX: Reworked scoring to avoid over-inflation from keyword/domain stacking.
+        - Base score starts at 2 (SIMPLE) instead of 3 to give keywords room to push up.
+        - Domain bonuses only apply when keywords didn't already cover that domain.
+        - "security" alone contributes to MODERATE, not EXPERT.
+        - "architect" + scale indicators properly reach EXPERT.
+        """
+        score = 2  # Start at SIMPLE baseline
+
+        # Apply keyword modifiers (track which domains were boosted by keywords)
+        keyword_boosted_domains: set[str] = set()
         for keyword, modifier in COMPLEXITY_INDICATORS.items():
             if keyword in text:
                 score += modifier
+                # Track domain coverage from keywords to avoid double-counting
+                if keyword in ("security", "vulnerability"):
+                    keyword_boosted_domains.add("security")
+                if keyword in ("architect", "architecture", "microservices",
+                               "distributed", "event sourcing"):
+                    keyword_boosted_domains.add("architecture")
 
-        # Domain-based modifiers
-        if TaskDomain.SECURITY in domains:
+        # Domain-based modifiers (only if not already boosted by keywords)
+        if TaskDomain.SECURITY in domains and "security" not in keyword_boosted_domains:
             score += 1
-        if TaskDomain.ARCHITECTURE in domains:
+        if TaskDomain.ARCHITECTURE in domains and "architecture" not in keyword_boosted_domains:
             score += 1
-        if len(domains) > 2:  # Multi-domain tasks are more complex
+        if len(domains) > 3:  # Multi-domain tasks are more complex
             score += 1
 
-        # Text length heuristic (longer = more complex)
+        # Text length heuristic (longer descriptions = more complex tasks)
         if len(text) > 500:
+            score += 2
+        elif len(text) > 200:
             score += 1
-        elif len(text) < 50:
-            score -= 1
 
         # V10 FIX F1: Apply structure-based complexity adjustments
         score = self._adjust_complexity_from_structure(score, text)
@@ -977,9 +1001,10 @@ class TaskAnalyzer:
         if structure.get("is_conditional"):
             base_complexity += 1
 
-        # Pure questions without action verbs are simpler
+        # Pure questions without action verbs are simpler, but never below SIMPLE(2)
+        # Questions still require substantive answers unlike greetings (TRIVIAL)
         if structure.get("is_question") and not structure.get("is_imperative"):
-            base_complexity -= 1
+            base_complexity = max(2, base_complexity - 1)
 
         # Context clues that indicate complexity
         clues = self._detect_context_clues(text)

@@ -375,14 +375,12 @@ class TestKimiSDKDriver:
 
         await driver.invoke("Test")
 
-        # Verify budget tracking
-        assert mock_tracker.record_cost.called
-        call_args = mock_tracker.record_cost.call_args
-        assert call_args[1]["provider"] == "kimi"
-        assert call_args[1]["model"] == "kimi-k2.5"
+        # Verify budget tracking (record_cost renamed to track_cost with new signature)
+        assert mock_tracker.track_cost.called
+        call_args = mock_tracker.track_cost.call_args
+        assert call_args[0][0] == "kimi-k2.5"  # positional: model
         assert call_args[1]["input_tokens"] == 1000
         assert call_args[1]["output_tokens"] == 500
-        assert call_args[1]["cost_usd"] > 0
 
     async def test_health_monitor_integration(self, mock_openai_client):
         """Test health monitor integration."""
