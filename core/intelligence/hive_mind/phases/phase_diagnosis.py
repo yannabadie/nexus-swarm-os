@@ -204,8 +204,8 @@ class FailureDiagnosisPhase(BasePhase):
         )
         self._session_integration.set_previous_phase("execution")
 
-        # V9.2: Get isolated sessions for parallel diagnosis
-        parallel_sessions = self._session_integration.get_parallel_sessions(agents=["gemini", "claude"])
+        # V9.2: Get isolated sessions for parallel diagnosis (V12.4: use actual agent IDs)
+        parallel_sessions = self._session_integration.get_parallel_sessions(agents=self.agent_ids)
         logger.debug(f"Created isolated diagnosis sessions: {parallel_sessions}")
 
         # Check budget

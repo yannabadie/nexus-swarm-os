@@ -1310,8 +1310,9 @@ class TrueHiveMind:
         Returns:
             Dict with swap result
         """
-        if new_lead.lower() not in ("gemini", "claude"):
-            return {"swapped": False, "error": f"Invalid lead agent: {new_lead}. Must be 'gemini' or 'claude'"}
+        # V12.4: Accept any registered agent ID, not just gemini/claude
+        if new_lead.lower() not in self.agent_ids:
+            return {"swapped": False, "error": f"Invalid lead agent: {new_lead}. Must be one of: {self.agent_ids}"}
 
         old_lead = self._current_lead
         self._current_lead = new_lead.lower()
