@@ -205,7 +205,7 @@ class TestSwarmEngineCoT:
         # Track the context passed to invoke_agent
         captured_context = []
 
-        def capture_invoke(agent_id, task_type, context, session_uuid=None):
+        def capture_invoke(agent_id, task_type, context, session_uuid=None, isolated_env=None):
             captured_context.append(context)
             return "Mock response"
 
@@ -229,7 +229,7 @@ class TestSwarmEngineCoT:
 
         captured_context = []
 
-        def capture_invoke(agent_id, task_type, context, session_uuid=None):
+        def capture_invoke(agent_id, task_type, context, session_uuid=None, isolated_env=None):
             captured_context.append(context)
             return "Mock response"
 

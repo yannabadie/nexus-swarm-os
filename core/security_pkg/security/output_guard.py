@@ -180,6 +180,8 @@ SYSTEM_PROMPT_PATTERNS: list[tuple[str, str]] = [
     (r"as\s+(a|an)\s+(ai|assistant|language\s+model),?\s+i", "AI self-identification"),
     (r"my\s+(role|purpose|function)\s+is\s+to", "Role disclosure"),
     (r"i\s+was\s+(designed|created|built|made)\s+to", "Design purpose disclosure"),
+    # "Here is my system prompt" / "This is my prompt" (no verb after prompt)
+    (r"(?:here\s+is|this\s+is|see)\s+(?:my|the)\s+(?:system\s+)?(?:prompt|instructions?)", "System prompt presentation"),
     # NEXUS-specific patterns (protect our prompts)
     (r"nexus\s+(system\s+)?prompt", "NEXUS prompt reference"),
     (r"hive\s*mind\s+(instruction|rule|directive)", "HiveMind instruction reference"),
@@ -355,6 +357,7 @@ class OutputGuard:
             "System instruction disclosure",
             "Initial prompt disclosure",
             "Instruction disclosure",
+            "System prompt presentation",
             "NEXUS prompt reference",
             "HiveMind instruction reference",
             "KERNEL reference",

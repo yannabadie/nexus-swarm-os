@@ -402,7 +402,7 @@ class TestKimiSDKDriver:
         # Error call
         mock_openai_client.chat.completions.create = AsyncMock(side_effect=Exception("API error"))
         await driver.invoke("Test")
-        assert mock_monitor.record_error.called
+        assert mock_monitor.record_failure.called
 
 
 # =============================================================================

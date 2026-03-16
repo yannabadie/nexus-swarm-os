@@ -1,0 +1,54 @@
+{
+  "test": "Research CLI Evidence Pack Verification",
+  "command": "python nexus_research.py \"How does the AsyncDriverFactory select between SDK and CLI drivers?\" --mode mock --path core/drivers/async_factory.py --output benchmarks/research_evidence_pack",
+  "output_dir": "benchmarks/research_evidence_pack",
+  "artifacts": {
+    "report.md": {
+      "exists": true,
+      "grounded": true,
+      "notes": "Contains real question, 6 subqueries, 2 supported + 1 weak verified claims, 5 sources all from core/drivers/async_factory.py, medium confidence (0.67). No boilerplate -- all content derived from real RAG retrieval."
+    },
+    "sources.json": {
+      "exists": true,
+      "grounded": true,
+      "notes": "Contains 5 real sources with file_path, line ranges, chunk types, term lists, excerpts, query matches, verification scores. All excerpts contain real code from async_factory.py including class AsyncDriverFactory, __init__, get_gemini_driver, claude_sdk_available."
+    },
+    "trace.jsonl": {
+      "exists": true,
+      "grounded": true,
+      "notes": "6 trace events: start, index (29 chunks), plan (6 subqueries), retrieve (30 raw hits, 5 selected), synthesize (3 claims, 0 contradictions), write_outputs. All events have UTC timestamps."
+    },
+    "reasoning_graph.mmd": {
+      "exists": true,
+      "grounded": true,
+      "notes": "Valid Mermaid graph TD with question -> 3 claims -> 5 sources. References real code entities: AsyncDriverFactory, __init__, claude_sdk_available."
+    },
+    "metrics.json": {
+      "exists": true,
+      "grounded": true,
+      "notes": "Shows 29 indexed chunks, 6 subqueries, 5 sources, 3 claims (2 supported, 0 mixed, 1 weak), 3 findings, 0 contradictions, confidence 0.67 (medium), duration 14ms."
+    },
+    "manifest.sha256": {
+      "exists": true,
+      "grounded": true,
+      "notes": "SHA-256 hashes for all 5 content artifacts (report.md, sources.json, trace.jsonl, reasoning_graph.mmd, metrics.json). Integrity verification chain complete."
+    }
+  },
+  "content_quality": {
+    "real_rag_used": true,
+    "mock_llm_mode": true,
+    "indexed_chunks": 29,
+    "retrieved_sources": 5,
+    "all_sources_from_real_file": true,
+    "source_file": "core/drivers/async_factory.py",
+    "claims_verified": 3,
+    "supported_claims": 2,
+    "overall_confidence": 0.67,
+    "contains_boilerplate": false,
+    "contains_real_code_excerpts": true,
+    "evidence_chain_complete": true
+  },
+  "verdict": "PASS",
+  "all_6_artifacts_exist": true,
+  "all_6_artifacts_grounded": true
+}

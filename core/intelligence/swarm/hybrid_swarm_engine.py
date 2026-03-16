@@ -483,7 +483,13 @@ class HybridSwarmEngine:
         V8.1.6: Added session_uuid parameter for thread-safe parallel execution.
         """
 
-        def wrapper(agent_id: str, task_type: str, context: str, session_uuid: str | None = None) -> AgentResponse:
+        def wrapper(
+            agent_id: str,
+            task_type: str,
+            context: str,
+            session_uuid: str | None = None,
+            isolated_env: dict[str, str] | None = None,
+        ) -> AgentResponse:
             if self.invoke_agent is None:
                 return AgentResponse(agent_id=agent_id, content=f"[Mock {agent_id} response]", status="mock")
 
@@ -493,7 +499,11 @@ class HybridSwarmEngine:
 
             start = datetime.now()
             # V8.1.6: Pass session_uuid for thread-safe file access
-            response = self.invoke_agent(agent_id, task_type, context, session_uuid=session_uuid)
+            # V12.4 FIX: Pass isolated_env for session isolation (5th param from executors)
+            response = self.invoke_agent(
+                agent_id, task_type, context,
+                session_uuid=session_uuid, isolated_env=isolated_env,
+            )
             elapsed = (datetime.now() - start).total_seconds()
 
             if isinstance(response, AgentResponse):

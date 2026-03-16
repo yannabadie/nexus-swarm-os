@@ -1,0 +1,322 @@
+{
+  "benchmark": "swarm_live",
+  "started_at": "2026-03-16T07:28:23.233488+00:00",
+  "tests": {
+    "test1_swarm_eval": {
+      "test": "swarm_eval_harness",
+      "status": "completed",
+      "output_dir": "C:\\Code\\NEXUS-NX-CG\\benchmarks\\swarm_eval\\swarm_eval_20260316_072939",
+      "strategies": {
+        "single_agent": {
+          "strategy": "single_agent",
+          "task_count": 4,
+          "pass_rate": 0.25,
+          "average_score": 0.462,
+          "score_variance": 0.0332,
+          "average_latency_seconds": 1.125,
+          "average_tokens": 103.8,
+          "recovery_rate": 0.0,
+          "failure_modes": {}
+        },
+        "deterministic_pipeline": {
+          "strategy": "deterministic_pipeline",
+          "task_count": 4,
+          "pass_rate": 0.5,
+          "average_score": 0.671,
+          "score_variance": 0.028,
+          "average_latency_seconds": 3.5,
+          "average_tokens": 333.8,
+          "recovery_rate": 0.0,
+          "failure_modes": {}
+        },
+        "swarm": {
+          "strategy": "swarm",
+          "task_count": 4,
+          "pass_rate": 0.0,
+          "average_score": 0.138,
+          "score_variance": 0.0,
+          "average_latency_seconds": 0.016,
+          "average_tokens": 0,
+          "recovery_rate": 0.75,
+          "failure_modes": {}
+        }
+      },
+      "best_strategy": "deterministic_pipeline",
+      "best_score": 0.671,
+      "task_count": 4
+    },
+    "test2_provider_canaries": {
+      "test": "provider_canaries",
+      "status": "completed",
+      "output_path": "C:\\Code\\NEXUS-NX-CG\\benchmarks\\provider_canaries.json",
+      "summary": {
+        "configured_providers": 5,
+        "attempted_providers": 5,
+        "passed_providers": 0,
+        "failed_providers": 5,
+        "skipped_providers": 1,
+        "pass_rate": 0.0
+      },
+      "results": [
+        {
+          "provider": "anthropic",
+          "configured": false,
+          "attempted": false,
+          "passed": false,
+          "model": "claude-sonnet-4-6",
+          "health_check_passed": null,
+          "response_status": null,
+          "output_preview": "",
+          "latency_ms": 0.0,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "error": "Provider SDK not configured in this environment."
+        },
+        {
+          "provider": "google",
+          "configured": true,
+          "attempted": true,
+          "passed": false,
+          "model": "gemini-3.1-pro-preview",
+          "health_check_passed": true,
+          "response_status": "SUCCESS",
+          "output_preview": "NEX",
+          "latency_ms": 2416.05,
+          "input_tokens": 15,
+          "output_tokens": 2,
+          "error": "Unexpected output: NEX"
+        },
+        {
+          "provider": "openai",
+          "configured": true,
+          "attempted": true,
+          "passed": false,
+          "model": "gpt-5.4",
+          "health_check_passed": true,
+          "response_status": "RATE_LIMITED",
+          "output_preview": "",
+          "latency_ms": 2136.32,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "error": "Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}"
+        },
+        {
+          "provider": "deepseek",
+          "configured": true,
+          "attempted": true,
+          "passed": false,
+          "model": "deepseek-chat",
+          "health_check_passed": true,
+          "response_status": "ERROR",
+          "output_preview": "",
+          "latency_ms": 1813.93,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "error": "'ResponseCache' object has no attribute 'set'"
+        },
+        {
+          "provider": "kimi",
+          "configured": true,
+          "attempted": true,
+          "passed": false,
+          "model": "kimi-k2-thinking",
+          "health_check_passed": true,
+          "response_status": null,
+          "output_preview": "",
+          "latency_ms": 0.0,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "error": "Canary invocation failed: 'DriverHealthMonitor' object has no attribute 'record_error'"
+        },
+        {
+          "provider": "minimax",
+          "configured": true,
+          "attempted": true,
+          "passed": false,
+          "model": "MiniMax-M2.5",
+          "health_check_passed": true,
+          "response_status": "AUTHENTICATION_ERROR",
+          "output_preview": "",
+          "latency_ms": 2199.43,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "error": "Error code: 401 - {'type': 'error', 'error': {'type': 'authorized_error', 'message': 'invalid api key (2049)', 'http_code': '401'}, 'request_id': '0606e4764e6139c67901a7e9bc926e84'}"
+        }
+      ]
+    },
+    "test3_multi_provider": {
+      "test": "multi_provider_task",
+      "status": "completed",
+      "part_a": {
+        "question": "Explain the concept of dependency injection in 3 sentences.",
+        "results": [
+          {
+            "provider": "google",
+            "model": "gemini-3.1-pro-preview",
+            "content": "Dependency injection is a software design pattern where an object receives its required components from an external source",
+            "latency_s": 6.53,
+            "response_length": 122,
+            "input_tokens": 12,
+            "output_tokens": 18,
+            "status": "SUCCESS"
+          },
+          {
+            "provider": "deepseek",
+            "model": "deepseek-chat",
+            "content": "",
+            "latency_s": 4.595,
+            "response_length": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "status": "ERROR"
+          },
+          {
+            "provider": "openai",
+            "model": "gpt-5.4",
+            "content": "",
+            "latency_s": 2.561,
+            "response_length": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "status": "RATE_LIMITED"
+          }
+        ]
+      },
+      "part_b": {
+        "chain": [
+          {
+            "step": 1,
+            "provider": "google",
+            "model": "gemini-3.1-pro-preview",
+            "prompt": "Write a code review checklist for Python projects. Include 8-10 items.",
+            "response": "8. Testing** - Mention `pytest`, edge cases, and mocking.\n    *   *Refinement 9 (Dependencies):* **9. Imports and Dependencies** - Standardize import order",
+            "response_length": 155,
+            "latency_s": 12.233,
+            "input_tokens": 18,
+            "output_tokens": 40
+          },
+          {
+            "step": 2,
+            "provider": "deepseek",
+            "model": "deepseek-chat",
+            "prompt": "Improve and expand this Python code review checklist. Add missing items, reorder by importance, and ...",
+            "response": "",
+            "response_length": 0,
+            "latency_s": 49.088,
+            "input_tokens": 0,
+            "output_tokens": 0
+          },
+          {
+            "step": 3,
+            "provider": "openai",
+            "model": "gpt-5.4",
+            "prompt": "Rate this Python code review checklist from 1 to 10 and explain your rating. Identify its strongest ...",
+            "response": "",
+            "response_length": 0,
+            "latency_s": 2.023,
+            "input_tokens": 0,
+            "output_tokens": 0
+          }
+        ],
+        "total_latency_s": 63.344,
+        "total_tokens_in": 18,
+        "total_tokens_out": 40
+      }
+    },
+    "test4_task_analyzer": {
+      "test": "task_analyzer",
+      "status": "completed",
+      "results": [
+        {
+          "task": "Hello!",
+          "expected_complexity": "TRIVIAL",
+          "actual_complexity": "TRIVIAL",
+          "complexity_value": 1,
+          "primary_domain": "creative",
+          "all_domains": [],
+          "recommended_mode": "parallel",
+          "gemini_fit": 0.5,
+          "claude_fit": 0.5,
+          "recommended_lead": "equal",
+          "confidence": 1.0,
+          "analysis_stage": "STAGE1_REGEX",
+          "match": true
+        },
+        {
+          "task": "What is Python?",
+          "expected_complexity": "SIMPLE",
+          "actual_complexity": "SIMPLE",
+          "complexity_value": 2,
+          "primary_domain": "coding",
+          "all_domains": [
+            "coding",
+            "research",
+            "analysis"
+          ],
+          "recommended_mode": "parallel",
+          "gemini_fit": 0.7954545454545453,
+          "claude_fit": 0.8772727272727273,
+          "recommended_lead": "equal",
+          "confidence": 0.8500000000000001,
+          "analysis_stage": "STAGE2_HEURISTIC",
+          "match": true
+        },
+        {
+          "task": "Review this code for security vulnerabilities",
+          "expected_complexity": "MODERATE",
+          "actual_complexity": "EXPERT",
+          "complexity_value": 5,
+          "primary_domain": "coding",
+          "all_domains": [
+            "coding",
+            "analysis",
+            "security"
+          ],
+          "recommended_mode": "red_blue",
+          "gemini_fit": 0.7318181818181819,
+          "claude_fit": 0.9909090909090911,
+          "recommended_lead": "claude",
+          "confidence": 0.8500000000000001,
+          "analysis_stage": "STAGE2_HEURISTIC",
+          "match": false
+        },
+        {
+          "task": "Design a distributed cache system",
+          "expected_complexity": "COMPLEX",
+          "actual_complexity": "SIMPLE",
+          "complexity_value": 2,
+          "primary_domain": "creative",
+          "all_domains": [
+            "creative"
+          ],
+          "recommended_mode": "parallel",
+          "gemini_fit": 0.7,
+          "claude_fit": 0.9,
+          "recommended_lead": "claude",
+          "confidence": 0.65,
+          "analysis_stage": "STAGE2_HEURISTIC",
+          "match": false
+        },
+        {
+          "task": "Architect a new microservices platform with service mesh, distributed tracing, event sourcing, and CQRS pattern across multiple availability zones with automated failover",
+          "expected_complexity": "EXPERT",
+          "actual_complexity": "COMPLEX",
+          "complexity_value": 4,
+          "primary_domain": "coding",
+          "all_domains": [
+            "coding"
+          ],
+          "recommended_mode": "specialist",
+          "gemini_fit": 0.5,
+          "claude_fit": 0.55,
+          "recommended_lead": "equal",
+          "confidence": 0.6,
+          "analysis_stage": "STAGE2_HEURISTIC",
+          "match": false
+        }
+      ],
+      "match_rate": 0.4
+    }
+  },
+  "completed_at": "2026-03-16T07:31:07.557735+00:00"
+}

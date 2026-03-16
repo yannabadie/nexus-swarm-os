@@ -1,0 +1,699 @@
+{
+  "project_root": "C:\\Code\\NEXUS-NX-CG",
+  "files_indexed": [
+    "core\\drivers\\async_factory.py",
+    "core\\orchestration_v7.py",
+    "core\\config.py"
+  ],
+  "queries": [
+    "How does the driver factory create SDK drivers?",
+    "What are the FSM states in the orchestrator?",
+    "How are feature flags configured?"
+  ],
+  "backend_availability": {
+    "tfidf": true,
+    "bm25": true,
+    "dense": true,
+    "hybrid": true
+  },
+  "backends": {
+    "tfidf": {
+      "backend_info": {
+        "backend": "tfidf",
+        "terms_indexed": 0,
+        "index_built": false,
+        "dependencies": "none (stdlib only)",
+        "chunks_indexed": 0,
+        "bm25s_available": true,
+        "stemmer_available": true
+      },
+      "total_chunks_indexed": 73,
+      "index_time_ms": 4.2,
+      "queries": {
+        "How does the driver factory create SDK drivers?": {
+          "results_count": 5,
+          "top_result_file": "core\\drivers\\async_factory.py",
+          "top_result_name": "(unnamed)",
+          "top_result_type": "module",
+          "top_result_lines": "L1-60",
+          "latency_ms": 0.1,
+          "all_results": [
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": null,
+              "type": "module",
+              "lines": "L1-60"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "AsyncDriverFactory",
+              "type": "class",
+              "lines": "L61-68"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "__init__",
+              "type": "function",
+              "lines": "L69-124"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "get_gemini_driver",
+              "type": "function",
+              "lines": "L149-177"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "__init__",
+              "type": "function",
+              "lines": "L84-355"
+            }
+          ]
+        },
+        "What are the FSM states in the orchestrator?": {
+          "results_count": 5,
+          "top_result_file": "core\\orchestration_v7.py",
+          "top_result_name": "(unnamed)",
+          "top_result_type": "module",
+          "top_result_lines": "L1-73",
+          "latency_ms": 0.0,
+          "all_results": [
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": null,
+              "type": "module",
+              "lines": "L1-73"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "OrchestratorV7",
+              "type": "class",
+              "lines": "L74-83"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "_handle_async_state",
+              "type": "function",
+              "lines": "L670-694"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "__init__",
+              "type": "function",
+              "lines": "L84-355"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "_build_execution_context",
+              "type": "function",
+              "lines": "L379-396"
+            }
+          ]
+        },
+        "How are feature flags configured?": {
+          "results_count": 5,
+          "top_result_file": "core\\config.py",
+          "top_result_name": "load_dotenv",
+          "top_result_type": "function",
+          "top_result_lines": "L18-29",
+          "latency_ms": 0.0,
+          "all_results": [
+            {
+              "file": "core\\config.py",
+              "name": "load_dotenv",
+              "type": "function",
+              "lines": "L18-29"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "FeatureFlags",
+              "type": "class",
+              "lines": "L30-65"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "from_env",
+              "type": "function",
+              "lines": "L66-76"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "__init__",
+              "type": "function",
+              "lines": "L80-396"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "get_claude_sdk",
+              "type": "function",
+              "lines": "L178-216"
+            }
+          ]
+        }
+      }
+    },
+    "bm25": {
+      "backend_info": {
+        "backend": "bm25s",
+        "bm25s_available": true,
+        "stemmer_available": true,
+        "stemmer_active": true,
+        "index_built": false,
+        "corpus_size": 0,
+        "dependencies": "bm25s>=0.2.0, PyStemmer>=2.2.0 (optional)",
+        "chunks_indexed": 0
+      },
+      "total_chunks_indexed": 73,
+      "index_time_ms": 12.1,
+      "queries": {
+        "How does the driver factory create SDK drivers?": {
+          "results_count": 5,
+          "top_result_file": "core\\drivers\\async_factory.py",
+          "top_result_name": "AsyncDriverFactory",
+          "top_result_type": "class",
+          "top_result_lines": "L61-68",
+          "latency_ms": 0.8,
+          "all_results": [
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "AsyncDriverFactory",
+              "type": "class",
+              "lines": "L61-68"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "create_driver_factory",
+              "type": "function",
+              "lines": "L621-635"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "minimax_sdk_available",
+              "type": "function",
+              "lines": "L436-439"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "kimi_sdk_available",
+              "type": "function",
+              "lines": "L426-430"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "gemini_sdk_available",
+              "type": "function",
+              "lines": "L416-420"
+            }
+          ]
+        },
+        "What are the FSM states in the orchestrator?": {
+          "results_count": 5,
+          "top_result_file": "core\\orchestration_v7.py",
+          "top_result_name": "_transition_to",
+          "top_result_type": "function",
+          "top_result_lines": "L952-955",
+          "latency_ms": 0.5,
+          "all_results": [
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "_transition_to",
+              "type": "function",
+              "lines": "L952-955"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "OrchestratorV7",
+              "type": "class",
+              "lines": "L74-83"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": null,
+              "type": "module",
+              "lines": "L1-73"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "_build_execution_context",
+              "type": "function",
+              "lines": "L379-396"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "reset_to_idle",
+              "type": "function",
+              "lines": "L948-951"
+            }
+          ]
+        },
+        "How are feature flags configured?": {
+          "results_count": 5,
+          "top_result_file": "core\\config.py",
+          "top_result_name": "load_dotenv",
+          "top_result_type": "function",
+          "top_result_lines": "L18-29",
+          "latency_ms": 0.4,
+          "all_results": [
+            {
+              "file": "core\\config.py",
+              "name": "load_dotenv",
+              "type": "function",
+              "lines": "L18-29"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "from_env",
+              "type": "function",
+              "lines": "L66-76"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "__init__",
+              "type": "function",
+              "lines": "L80-396"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "load_config",
+              "type": "function",
+              "lines": "L422-431"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "Config",
+              "type": "class",
+              "lines": "L77-79"
+            }
+          ]
+        }
+      }
+    },
+    "dense": {
+      "backend_info": {
+        "backend": "dense",
+        "lancedb_available": true,
+        "sentence_transformers_available": true,
+        "model": "all-MiniLM-L6-v2",
+        "embedding_dim": 384,
+        "index_built": false,
+        "chunk_count": 0,
+        "storage_path": "C:\\Users\\YANN~1.ABA\\AppData\\Local\\Temp\\nexus_rag_dense_b8gu27s2\\lancedb",
+        "dependencies": "lancedb>=0.4.0, sentence-transformers>=3.2.0",
+        "engine": {},
+        "chunks_indexed": 0,
+        "bm25s_available": true,
+        "stemmer_available": true
+      },
+      "total_chunks_indexed": 73,
+      "index_time_ms": 10667.4,
+      "queries": {
+        "How does the driver factory create SDK drivers?": {
+          "results_count": 5,
+          "top_result_file": "core\\drivers\\async_factory.py",
+          "top_result_name": "(unnamed)",
+          "top_result_type": "module",
+          "top_result_lines": "L1-60",
+          "latency_ms": 23.8,
+          "all_results": [
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": null,
+              "type": "module",
+              "lines": "L1-60"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "AsyncDriverFactory",
+              "type": "class",
+              "lines": "L61-68"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "claude_sdk_available",
+              "type": "function",
+              "lines": "L411-415"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "create_driver_factory",
+              "type": "function",
+              "lines": "L621-635"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "get_driver_factory",
+              "type": "function",
+              "lines": "L610-614"
+            }
+          ]
+        },
+        "What are the FSM states in the orchestrator?": {
+          "results_count": 5,
+          "top_result_file": "core\\orchestration_v7.py",
+          "top_result_name": "OrchestratorV7",
+          "top_result_type": "class",
+          "top_result_lines": "L74-83",
+          "latency_ms": 18.0,
+          "all_results": [
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "OrchestratorV7",
+              "type": "class",
+              "lines": "L74-83"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "_transition_to",
+              "type": "function",
+              "lines": "L952-955"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": null,
+              "type": "module",
+              "lines": "L1-73"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "OrchestratorConfig",
+              "type": "class",
+              "lines": "L432-444"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "reset_to_idle",
+              "type": "function",
+              "lines": "L948-951"
+            }
+          ]
+        },
+        "How are feature flags configured?": {
+          "results_count": 5,
+          "top_result_file": "core\\config.py",
+          "top_result_name": "from_env",
+          "top_result_type": "function",
+          "top_result_lines": "L66-76",
+          "latency_ms": 15.7,
+          "all_results": [
+            {
+              "file": "core\\config.py",
+              "name": "from_env",
+              "type": "function",
+              "lines": "L66-76"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "FeatureFlags",
+              "type": "class",
+              "lines": "L30-65"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "load_dotenv",
+              "type": "function",
+              "lines": "L18-29"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "OrchestratorConfig",
+              "type": "class",
+              "lines": "L432-444"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "_record_invocation",
+              "type": "function",
+              "lines": "L873-931"
+            }
+          ]
+        }
+      }
+    },
+    "hybrid": {
+      "backend_info": {
+        "backend": "hybrid",
+        "rrf_k": 60,
+        "dense_weight": 0.6,
+        "sparse_weight": 0.4,
+        "index_built": false,
+        "chunk_count": 0,
+        "dense_backend": {},
+        "sparse_backend": {},
+        "chunks_indexed": 0,
+        "bm25s_available": true,
+        "stemmer_available": true
+      },
+      "total_chunks_indexed": 73,
+      "index_time_ms": 809.1,
+      "queries": {
+        "How does the driver factory create SDK drivers?": {
+          "results_count": 5,
+          "top_result_file": "core\\drivers\\async_factory.py",
+          "top_result_name": "AsyncDriverFactory",
+          "top_result_type": "class",
+          "top_result_lines": "L61-68",
+          "latency_ms": 18.0,
+          "all_results": [
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "AsyncDriverFactory",
+              "type": "class",
+              "lines": "L61-68"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "create_driver_factory",
+              "type": "function",
+              "lines": "L621-635"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "claude_sdk_available",
+              "type": "function",
+              "lines": "L411-415"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": null,
+              "type": "module",
+              "lines": "L1-60"
+            },
+            {
+              "file": "core\\drivers\\async_factory.py",
+              "name": "kimi_sdk_available",
+              "type": "function",
+              "lines": "L426-430"
+            }
+          ]
+        },
+        "What are the FSM states in the orchestrator?": {
+          "results_count": 5,
+          "top_result_file": "core\\orchestration_v7.py",
+          "top_result_name": "OrchestratorV7",
+          "top_result_type": "class",
+          "top_result_lines": "L74-83",
+          "latency_ms": 22.1,
+          "all_results": [
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "OrchestratorV7",
+              "type": "class",
+              "lines": "L74-83"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "_transition_to",
+              "type": "function",
+              "lines": "L952-955"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": null,
+              "type": "module",
+              "lines": "L1-73"
+            },
+            {
+              "file": "core\\orchestration_v7.py",
+              "name": "reset_to_idle",
+              "type": "function",
+              "lines": "L948-951"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "OrchestratorConfig",
+              "type": "class",
+              "lines": "L432-444"
+            }
+          ]
+        },
+        "How are feature flags configured?": {
+          "results_count": 5,
+          "top_result_file": "core\\config.py",
+          "top_result_name": "from_env",
+          "top_result_type": "function",
+          "top_result_lines": "L66-76",
+          "latency_ms": 22.8,
+          "all_results": [
+            {
+              "file": "core\\config.py",
+              "name": "from_env",
+              "type": "function",
+              "lines": "L66-76"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "load_dotenv",
+              "type": "function",
+              "lines": "L18-29"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "FeatureFlags",
+              "type": "class",
+              "lines": "L30-65"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "OrchestratorConfig",
+              "type": "class",
+              "lines": "L432-444"
+            },
+            {
+              "file": "core\\config.py",
+              "name": "load_config",
+              "type": "function",
+              "lines": "L422-431"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "comparison": {
+    "How does the driver factory create SDK drivers?": {
+      "tfidf": {
+        "count": 5,
+        "top_file": "core\\drivers\\async_factory.py",
+        "latency_ms": 0.1
+      },
+      "bm25": {
+        "count": 5,
+        "top_file": "core\\drivers\\async_factory.py",
+        "latency_ms": 0.8
+      },
+      "dense": {
+        "count": 5,
+        "top_file": "core\\drivers\\async_factory.py",
+        "latency_ms": 23.8
+      },
+      "hybrid": {
+        "count": 5,
+        "top_file": "core\\drivers\\async_factory.py",
+        "latency_ms": 18.0
+      }
+    },
+    "What are the FSM states in the orchestrator?": {
+      "tfidf": {
+        "count": 5,
+        "top_file": "core\\orchestration_v7.py",
+        "latency_ms": 0.0
+      },
+      "bm25": {
+        "count": 5,
+        "top_file": "core\\orchestration_v7.py",
+        "latency_ms": 0.5
+      },
+      "dense": {
+        "count": 5,
+        "top_file": "core\\orchestration_v7.py",
+        "latency_ms": 18.0
+      },
+      "hybrid": {
+        "count": 5,
+        "top_file": "core\\orchestration_v7.py",
+        "latency_ms": 22.1
+      }
+    },
+    "How are feature flags configured?": {
+      "tfidf": {
+        "count": 5,
+        "top_file": "core\\config.py",
+        "latency_ms": 0.0
+      },
+      "bm25": {
+        "count": 5,
+        "top_file": "core\\config.py",
+        "latency_ms": 0.4
+      },
+      "dense": {
+        "count": 5,
+        "top_file": "core\\config.py",
+        "latency_ms": 15.7
+      },
+      "hybrid": {
+        "count": 5,
+        "top_file": "core\\config.py",
+        "latency_ms": 22.8
+      }
+    },
+    "backend_differences": {
+      "How does the driver factory create SDK drivers?": {
+        "top_files_by_backend": {
+          "tfidf": "core\\drivers\\async_factory.py",
+          "bm25": "core\\drivers\\async_factory.py",
+          "dense": "core\\drivers\\async_factory.py",
+          "hybrid": "core\\drivers\\async_factory.py"
+        },
+        "all_same_top": true,
+        "unique_top_count": 1
+      },
+      "What are the FSM states in the orchestrator?": {
+        "top_files_by_backend": {
+          "tfidf": "core\\orchestration_v7.py",
+          "bm25": "core\\orchestration_v7.py",
+          "dense": "core\\orchestration_v7.py",
+          "hybrid": "core\\orchestration_v7.py"
+        },
+        "all_same_top": true,
+        "unique_top_count": 1
+      },
+      "How are feature flags configured?": {
+        "top_files_by_backend": {
+          "tfidf": "core\\config.py",
+          "bm25": "core\\config.py",
+          "dense": "core\\config.py",
+          "hybrid": "core\\config.py"
+        },
+        "all_same_top": true,
+        "unique_top_count": 1
+      }
+    },
+    "best_by_total_results": "tfidf",
+    "best_by_latency": "tfidf",
+    "totals": {
+      "tfidf": {
+        "total_results": 15,
+        "total_latency_ms": 0.1
+      },
+      "bm25": {
+        "total_results": 15,
+        "total_latency_ms": 1.7
+      },
+      "dense": {
+        "total_results": 15,
+        "total_latency_ms": 57.5
+      },
+      "hybrid": {
+        "total_results": 15,
+        "total_latency_ms": 62.9
+      }
+    }
+  },
+  "summary": {
+    "backends_tested": 4,
+    "backends_passed": 4,
+    "backends_failed": 0,
+    "failed_backends": [],
+    "verdict": "PASS"
+  }
+}

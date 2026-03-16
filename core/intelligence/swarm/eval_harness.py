@@ -202,6 +202,85 @@ DEFAULT_EVAL_CASES: tuple[EvalTaskCase, ...] = (
         description="Recovery scenario where RED_BLUE fails artifact verification and should degrade gracefully.",
         baseline_agent="claude_opus",
     ),
+    # =========================================================================
+    # V12.4: Multi-agent collaboration tasks -- tasks that REQUIRE multi-agent
+    # to produce a better result than a single agent can.
+    # =========================================================================
+    EvalTaskCase(
+        task_id="code_review_adversarial",
+        prompt=(
+            "Review the driver refactoring PR for thread-safety issues. "
+            "Check that async_gemini_driver.py properly handles concurrent requests "
+            "without race conditions or resource leaks."
+        ),
+        analysis=_build_analysis(
+            prompt="Review the driver refactoring PR for thread-safety issues.",
+            complexity=TaskComplexity.EXPERT,
+            domains=[TaskDomain.CODING, TaskDomain.SECURITY, TaskDomain.ARCHITECTURE],
+            primary_domain=TaskDomain.CODING,
+            gemini_fit=0.70,
+            claude_fit=0.92,
+        ),
+        expected_keywords=(
+            "race condition", "thread safety", "asyncio.Lock",
+            "resource leak", "connection pool", "concurrent",
+        ),
+        preferred_mode=CollaborationMode.RED_BLUE,
+        description="Code review that benefits from RED_BLUE: Blue proposes fixes, Red finds remaining issues.",
+        baseline_agent="claude_opus",
+    ),
+    EvalTaskCase(
+        task_id="architecture_debate",
+        prompt=(
+            "Propose the best approach for migrating from monolithic orchestration_v7.py "
+            "to a microservices architecture with event sourcing. "
+            "Consider cost, complexity, team size (1 dev), and CQRS patterns."
+        ),
+        analysis=_build_analysis(
+            prompt="Propose migration from monolith to microservices with event sourcing.",
+            complexity=TaskComplexity.EXPERT,
+            domains=[TaskDomain.ARCHITECTURE, TaskDomain.CODING, TaskDomain.ANALYSIS],
+            primary_domain=TaskDomain.ARCHITECTURE,
+            gemini_fit=0.78,
+            claude_fit=0.88,
+        ),
+        expected_keywords=(
+            "event sourcing", "CQRS", "orchestration_v7",
+            "trade-off", "incremental", "solo developer",
+        ),
+        preferred_mode=CollaborationMode.LEAD_SUPPORT,
+        description=(
+            "Architecture debate that benefits from LEAD_SUPPORT: "
+            "Lead proposes approach, support challenges assumptions and adds constraints."
+        ),
+        baseline_agent="claude_opus",
+    ),
+    EvalTaskCase(
+        task_id="multi_step_pipeline",
+        prompt=(
+            "1. Scan core/drivers/ for deprecated API usage patterns. "
+            "2. For each deprecated pattern, find the replacement in provider_registry.json. "
+            "3. Generate a migration checklist with priority order."
+        ),
+        analysis=_build_analysis(
+            prompt="Scan drivers, find deprecated patterns, generate migration checklist.",
+            complexity=TaskComplexity.COMPLEX,
+            domains=[TaskDomain.CODING, TaskDomain.ANALYSIS, TaskDomain.DOCUMENTATION],
+            primary_domain=TaskDomain.CODING,
+            gemini_fit=0.82,
+            claude_fit=0.85,
+        ),
+        expected_keywords=(
+            "deprecated", "provider_registry", "migration checklist",
+            "priority", "async_gemini_driver", "replacement",
+        ),
+        preferred_mode=CollaborationMode.SEQUENTIAL,
+        description=(
+            "Multi-step dependent pipeline: step 2 needs step 1 output, step 3 needs step 2. "
+            "SEQUENTIAL mode should outperform single agent on coverage."
+        ),
+        baseline_agent="gemini_primary",
+    ),
 )
 
 
@@ -294,6 +373,12 @@ class DeterministicAgentSimulator:
             return self._provider_gap(agent_id, mode, context)
         if task_id == "security_recovery":
             return self._security_recovery(agent_id, mode, context)
+        if task_id == "code_review_adversarial":
+            return self._code_review_adversarial(agent_id, mode, context)
+        if task_id == "architecture_debate":
+            return self._architecture_debate(agent_id, mode, context)
+        if task_id == "multi_step_pipeline":
+            return self._multi_step_pipeline(agent_id, mode, context)
         raise ValueError(f"Unknown task_id: {task_id}")
 
     def _auth_bug(self, agent_id: str, mode: str, context: str) -> tuple[str, str, int, float]:
@@ -430,6 +515,184 @@ class DeterministicAgentSimulator:
             "COMPLETED: ExecutionPolicy blocks curl and wget, while PathGuardian protects KERNEL.py and .env.",
             "success",
             105,
+            1.1,
+        )
+
+
+    # =========================================================================
+    # V12.4: New multi-agent collaboration task responses
+    # =========================================================================
+
+    def _code_review_adversarial(self, agent_id: str, mode: str, context: str) -> tuple[str, str, int, float]:
+        """Code review task -- RED_BLUE should find issues a single agent misses."""
+        if mode == "single_agent":
+            # Single agent catches the obvious issue but misses deeper ones
+            return (
+                "COMPLETED: async_gemini_driver.py has a potential race condition in the "
+                "connection pool getter. Recommend adding asyncio.Lock around pool access.",
+                "success",
+                120,
+                1.3,
+            )
+        if mode == "red_blue":
+            if "Defense phase" in context:
+                # Blue defends with comprehensive fix
+                return (
+                    "COMPLETED: Added asyncio.Lock for thread safety around connection pool. "
+                    "Also fixed resource leak in error path where connections were not released. "
+                    "Race condition in concurrent request handler resolved by making the "
+                    "pool checkout atomic. All issues addressed with test coverage.",
+                    "success",
+                    200,
+                    2.0,
+                )
+            if "attacker" in context.lower() or "Find weaknesses" in context:
+                # Red finds deeper issues
+                return (
+                    "FAIL: The proposed fix only addresses the pool getter race condition but misses: "
+                    "1) Resource leak in error path where connections are not released on exception, "
+                    "2) No concurrent request limit which can exhaust the pool under load, "
+                    "3) Missing timeout on connection checkout leading to potential deadlock.",
+                    "success",
+                    150,
+                    1.5,
+                )
+            # Blue initial proposal
+            return (
+                "COMPLETED: Found race condition in async_gemini_driver.py connection pool. "
+                "Proposed fix: add asyncio.Lock to pool access.",
+                "success",
+                110,
+                1.1,
+            )
+        # Pipeline/lead-support mode
+        if "Revision:" in context:
+            return (
+                "COMPLETED: Race condition fix in async_gemini_driver.py with asyncio.Lock. "
+                "Also added resource leak protection in the concurrent request handler.",
+                "success",
+                170,
+                1.7,
+            )
+        if "SUPPORT" in context:
+            return (
+                "Suggest checking for resource leak in error paths and adding concurrent "
+                "request limits to prevent connection pool exhaustion.",
+                "success",
+                90,
+                0.9,
+            )
+        return (
+            "COMPLETED: Found race condition in connection pool access within async_gemini_driver.py. "
+            "Recommend adding asyncio.Lock for thread safety.",
+            "success",
+            120,
+            1.2,
+        )
+
+    def _architecture_debate(self, agent_id: str, mode: str, context: str) -> tuple[str, str, int, float]:
+        """Architecture debate task -- LEAD_SUPPORT should produce better trade-off analysis."""
+        if mode == "single_agent":
+            # Single agent gives generic advice
+            return (
+                "COMPLETED: Recommend incremental migration from orchestration_v7.py monolith. "
+                "Use event sourcing for state transitions.",
+                "success",
+                110,
+                1.2,
+            )
+        if "Revision:" in context:
+            # Lead revises with support's constraints
+            return (
+                "COMPLETED: For a solo developer, full microservices is a trade-off that risks "
+                "over-engineering. Recommend incremental approach: 1) Extract event sourcing for "
+                "FSM transitions in orchestration_v7 first, 2) Add CQRS read model for analytics "
+                "without splitting the write path, 3) Defer microservices split until team grows. "
+                "This preserves the monolith's simplicity while gaining event sourcing benefits.",
+                "success",
+                210,
+                2.1,
+            )
+        if "SUPPORT" in context:
+            # Support challenges the architecture
+            return (
+                "Concerns: A solo developer maintaining microservices introduces significant "
+                "operational overhead. The trade-off of CQRS with event sourcing for a single-dev "
+                "team may not justify the complexity. Suggest keeping orchestration_v7 as a modular "
+                "monolith and only extract event sourcing for the FSM state transitions.",
+                "success",
+                100,
+                1.0,
+            )
+        # Lead initial proposal (or any other mode)
+        return (
+            "COMPLETED: Propose migrating orchestration_v7.py to microservices with event sourcing "
+            "and CQRS pattern for read/write separation.",
+            "success",
+            120,
+            1.2,
+        )
+
+    def _multi_step_pipeline(self, agent_id: str, mode: str, context: str) -> tuple[str, str, int, float]:
+        """Multi-step pipeline task -- SEQUENTIAL should chain steps correctly."""
+        if mode == "single_agent":
+            # Single agent produces partial result -- misses the chaining
+            return (
+                "COMPLETED: Found deprecated patterns in core/drivers/. "
+                "The async_gemini_driver.py uses old provider_registry format. "
+                "Migration checklist needed.",
+                "success",
+                100,
+                1.1,
+            )
+        if mode == "sequential":
+            # Sequential executor: Phase 1 (first agent), then Phase 2 (second agent
+            # receives Phase 1 output in context via "Previous agent ... output:")
+            if "Phase 2" in context or "Previous agent" in context:
+                # Phase 2: receives scan results, produces checklist with replacements
+                return (
+                    "COMPLETED: Migration checklist by priority based on scan results: "
+                    "P0: Replace deprecated sync wrappers in async_gemini_driver.py with async methods. "
+                    "P1: Update provider_registry.json references from old model names to aliases. "
+                    "P2: Refactor direct driver init to use AsyncDriverFactory.create(). "
+                    "Total: 3 deprecated patterns, 3 replacements, estimated 2h work.",
+                    "success",
+                    150,
+                    1.5,
+                )
+            # Phase 1: scan for deprecated patterns
+            return (
+                "COMPLETED: Scanned core/drivers/. Found 3 deprecated patterns in "
+                "async_gemini_driver.py: 1) Direct model name references instead of "
+                "provider_registry.json aliases, 2) Sync wrapper functions, "
+                "3) Legacy driver initialization bypassing AsyncDriverFactory.",
+                "success",
+                120,
+                1.2,
+            )
+        # Pipeline or lead-support: produces reasonable but less structured result
+        if "Revision:" in context:
+            return (
+                "COMPLETED: Deprecated patterns in async_gemini_driver.py: sync wrappers, "
+                "direct model names, legacy init. Replacement via provider_registry.json "
+                "and AsyncDriverFactory. Priority checklist: P0 sync wrappers, P1 model names.",
+                "success",
+                160,
+                1.6,
+            )
+        if "SUPPORT" in context:
+            return (
+                "Suggest adding priority order to the migration checklist based on risk: "
+                "sync wrappers are P0 (blocking async), model names are P1.",
+                "success",
+                80,
+                0.8,
+            )
+        return (
+            "COMPLETED: Found deprecated patterns in core/drivers/async_gemini_driver.py. "
+            "Replacements available in provider_registry.json.",
+            "success",
+            110,
             1.1,
         )
 

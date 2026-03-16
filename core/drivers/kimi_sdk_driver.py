@@ -378,7 +378,7 @@ class KimiSDKDriver(BaseAsyncDriver):
                 status = DriverResponseStatus.AUTHENTICATION_ERROR
 
             if self._health_monitor:
-                self._health_monitor.record_error(
+                self._health_monitor.record_failure(
                     f"{self._provider}/{self._model}",
                     error=error_msg,
                     latency_ms=latency_ms,

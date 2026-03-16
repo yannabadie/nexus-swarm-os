@@ -86,12 +86,22 @@ def query_dependencies(
     """
     # Find symbol (try qualified name first, then simple name)
     symbol = graph.get_symbol(symbol_name)
+
+    # If exact match is a phantom target (no file_path), try simple name search
+    if symbol and not symbol.file_path:
+        matches = graph.find_symbols_by_name(symbol_name)
+        real_matches = [m for m in matches if m.file_path]
+        if real_matches:
+            symbol = real_matches[0]
+
     if not symbol:
         # Try finding by simple name
         matches = graph.find_symbols_by_name(symbol_name)
         if not matches:
             return None
-        symbol = matches[0]  # Take first match
+        # Prefer symbols with actual file paths (skip phantom target symbols)
+        real_matches = [m for m in matches if m.file_path]
+        symbol = real_matches[0] if real_matches else matches[0]
 
     # Get direct dependencies
     direct_deps = graph.get_dependencies(symbol.qualified_name)
@@ -166,12 +176,19 @@ def analyze_impact(
         )
         all_transitive_deps.update(transitive_deps)
 
-    # Extract affected files
-    affected_files = {dep.source.file_path for dep in all_direct_deps if dep.source.file_path}
-    affected_files.update(sym.file_path for sym in all_transitive_deps if sym.file_path)
+    # Extract affected files (normalize paths for cross-platform comparison)
+    normalized_input = file_path.replace("\\", "/")
+    affected_files = {
+        dep.source.file_path.replace("\\", "/")
+        for dep in all_direct_deps if dep.source.file_path
+    }
+    affected_files.update(
+        sym.file_path.replace("\\", "/")
+        for sym in all_transitive_deps if sym.file_path
+    )
 
     # Remove the file itself
-    affected_files.discard(file_path)
+    affected_files.discard(normalized_input)
 
     # Calculate impact score (0-1, higher = more impact)
     impact_score = _calculate_impact_score(
