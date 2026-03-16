@@ -1,0 +1,17 @@
+[package]
+name = "nexus_core"
+version = "0.1.0"
+edition = "2021"
+description = "NEXUS V12.4 - Rust native extensions for performance-critical paths"
+authors = ["Yann Abadie"]
+license = "MIT"
+
+[lib]
+name = "nexus_core"
+crate-type = ["cdylib"]  # Required for PyO3
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module"] }
+sha2 = "0.10"
+hmac = "0.12"
+rayon = "1.10"  # Parallel iterators for batch scoring

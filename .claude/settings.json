@@ -1,0 +1,71 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "allow": [
+      "Bash(pytest:*)",
+      "Bash(python:*)",
+      "Bash(git:*)",
+      "Bash(pip:*)",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "TodoWrite",
+      "Bash(tree:*)",
+      "Bash(test:*)",
+      "Bash(rm:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git fetch:*)",
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)",
+      "WebSearch"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf /*)",
+      "Read(./archives/**)",
+      "Read(./docs/archive/**)",
+      "Glob(./archives/**)",
+      "Grep(./archives/**)",
+      "Read(./KERNEL.py)",
+      "Edit(./KERNEL.py)",
+      "Write(./KERNEL.py)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/session_start.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash.*pytest",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/post_test.py"
+          }
+        ]
+      }
+    ]
+  },
+  "env": {
+    "PYTHONPATH": ".",
+    "PROJECT_NAME": "NEXUS",
+    "PROJECT_VERSION": "V12.4"
+  }
+}

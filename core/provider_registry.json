@@ -1,0 +1,159 @@
+{
+  "schema_version": "2.0",
+  "generated_by": "scripts/refresh_provider_registry.py",
+  "generated_at": "2026-03-09T15:44:21.054523+00:00",
+  "providers": {
+    "anthropic": {
+      "display_name": "Anthropic",
+      "sdk_supported": true,
+      "docs_url": "https://docs.anthropic.com/en/docs/about-claude/models/overview",
+      "lookup": {
+        "strategy": "docs",
+        "requires_api_key": false
+      },
+      "models": {
+        "opus": {
+          "default": "claude-opus-4-6",
+          "fallback": "claude-opus-4-6",
+          "status": "active"
+        },
+        "sonnet": {
+          "default": "claude-sonnet-4-6",
+          "fallback": "claude-sonnet-4-6",
+          "status": "active"
+        }
+      }
+    },
+    "google": {
+      "display_name": "Google",
+      "sdk_supported": true,
+      "docs_url": "https://ai.google.dev/gemini-api/docs/models",
+      "lookup": {
+        "strategy": "api+docs",
+        "requires_api_key": false,
+        "endpoint": "https://generativelanguage.googleapis.com/v1beta/models"
+      },
+      "models": {
+        "pro": {
+          "default": "gemini-3.1-pro-preview",
+          "fallback": "gemini-2.5-pro",
+          "status": "active"
+        },
+        "flash": {
+          "default": "gemini-3-flash-preview",
+          "fallback": "gemini-2.5-flash",
+          "status": "active"
+        }
+      }
+    },
+    "deepseek": {
+      "display_name": "DeepSeek",
+      "sdk_supported": true,
+      "docs_url": "https://api-docs.deepseek.com/news/news250929",
+      "lookup": {
+        "strategy": "api+docs",
+        "requires_api_key": false,
+        "endpoint": "https://api.deepseek.com/models"
+      },
+      "models": {
+        "chat": {
+          "default": "deepseek-chat",
+          "fallback": "deepseek-chat",
+          "status": "active"
+        },
+        "reasoner": {
+          "default": "deepseek-reasoner",
+          "fallback": "deepseek-reasoner",
+          "status": "active"
+        }
+      }
+    },
+    "kimi": {
+      "display_name": "Moonshot Kimi",
+      "sdk_supported": true,
+      "docs_url": "https://platform.moonshot.ai/docs/guide/use-kimi-k2-thinking-model",
+      "lookup": {
+        "strategy": "api+docs",
+        "requires_api_key": false,
+        "endpoint": "https://api.moonshot.ai/v1/models"
+      },
+      "models": {
+        "thinking": {
+          "default": "kimi-k2-thinking",
+          "fallback": "kimi-k2-thinking",
+          "status": "active"
+        },
+        "turbo": {
+          "default": "kimi-k2-thinking-turbo",
+          "fallback": "kimi-k2-thinking-turbo",
+          "status": "active"
+        }
+      }
+    },
+    "openai": {
+      "display_name": "OpenAI",
+      "sdk_supported": true,
+      "docs_url": "https://platform.openai.com/docs/models",
+      "lookup": {
+        "strategy": "api+docs",
+        "requires_api_key": false,
+        "endpoint": "https://api.openai.com/v1/models"
+      },
+      "models": {
+        "flagship": {
+          "default": "gpt-5.4",
+          "fallback": "gpt-5.4",
+          "status": "active"
+        },
+        "balanced": {
+          "default": "gpt-5-mini",
+          "fallback": "gpt-5-mini",
+          "status": "active"
+        },
+        "economy": {
+          "default": "gpt-5-nano",
+          "fallback": "gpt-5-nano",
+          "status": "active"
+        }
+      }
+    },
+    "minimax": {
+      "display_name": "MiniMax",
+      "sdk_supported": true,
+      "docs_url": "https://platform.minimaxi.com/docs/api-reference/text-openai-api",
+      "lookup": {
+        "strategy": "api+docs",
+        "requires_api_key": false,
+        "endpoint": "https://api.minimaxi.com/v1/models"
+      },
+      "models": {
+        "reasoning": {
+          "default": "MiniMax-M2.5",
+          "fallback": "MiniMax-M2.5",
+          "status": "active"
+        },
+        "chat": {
+          "default": "MiniMax-M2.5-HighSpeed",
+          "fallback": "MiniMax-M2.5-HighSpeed",
+          "status": "active"
+        }
+      }
+    }
+  },
+  "replacements": {
+    "claude-opus-4-20250514": "claude-opus-4-6",
+    "claude-opus-4-1-20250805": "claude-opus-4-6",
+    "claude-opus-4-6-20250116": "claude-opus-4-6",
+    "claude-sonnet-4-20250514": "claude-sonnet-4-6",
+    "claude-sonnet-4-5-20250929": "claude-sonnet-4-6",
+    "gemini-3-pro-preview": "gemini-3.1-pro-preview",
+    "gemini-2.5-flash": "gemini-3-flash-preview",
+    "gpt-5.2": "gpt-5.4",
+    "gpt-5.2-mini": "gpt-5-mini",
+    "gpt-5.2-nano": "gpt-5-nano",
+    "kimi-k2.5": "kimi-k2-thinking",
+    "kimi-k2-turbo-preview": "kimi-k2-thinking-turbo",
+    "MiniMax-M1": "MiniMax-M2.5"
+  },
+  "sync_errors": []
+}

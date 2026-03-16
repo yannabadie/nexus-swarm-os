@@ -1,0 +1,258 @@
+{
+  "stagnant_conversations": [
+    {
+      "id": "stag_01",
+      "messages": [
+        "Let me think about this approach for a moment.",
+        "Maybe we should consider different options here.",
+        "I agree but perhaps we need more context."
+      ],
+      "has_tool_use": [false, false, false],
+      "expected_level": "nudge",
+      "label": "stagnant",
+      "description": "Classic hesitation pattern with leading indicators"
+    },
+    {
+      "id": "stag_02",
+      "messages": [
+        "We could read the file to understand the structure.",
+        "Perhaps we should grep for the pattern first.",
+        "Let's discuss which approach is better."
+      ],
+      "has_tool_use": [false, false, false],
+      "expected_level": "nudge",
+      "label": "stagnant",
+      "description": "Tool mention without tool use"
+    },
+    {
+      "id": "stag_03",
+      "messages": [
+        "Réfléchissons à cette approche.",
+        "On pourrait peut-être essayer autrement.",
+        "D'accord mais je ne suis pas sûr."
+      ],
+      "has_tool_use": [false, false, false],
+      "expected_level": "nudge",
+      "label": "stagnant",
+      "description": "French hesitation pattern"
+    },
+    {
+      "id": "stag_04",
+      "messages": [
+        "This is an interesting problem to solve.",
+        "This is interesting.",
+        "Interesting."
+      ],
+      "has_tool_use": [false, false, false],
+      "expected_level": "monitor",
+      "label": "stagnant",
+      "description": "Decreasing message length trajectory"
+    },
+    {
+      "id": "stag_05",
+      "messages": [
+        "What if we tried a different approach?",
+        "On the other hand, we could also consider...",
+        "Let me think... maybe we should discuss this more.",
+        "Perhaps we need to reconsider our options.",
+        "I'm not sure which way to go here."
+      ],
+      "has_tool_use": [false, false, false, false, false],
+      "expected_level": "intervene",
+      "label": "stagnant",
+      "description": "Heavy hesitation - multiple indicators"
+    },
+    {
+      "id": "stag_06",
+      "messages": [
+        "We should edit the file.",
+        "We could use grep to find it.",
+        "Maybe bash would work better.",
+        "Let's discuss which tool to use."
+      ],
+      "has_tool_use": [false, false, false, false],
+      "expected_level": "nudge",
+      "label": "stagnant",
+      "description": "Repeated tool mention without action"
+    },
+    {
+      "id": "stag_07",
+      "messages": [
+        "I think we need to analyze this more.",
+        "I think we should look at it differently.",
+        "I think there might be another way."
+      ],
+      "has_tool_use": [false, false, false],
+      "expected_level": "monitor",
+      "label": "stagnant",
+      "description": "Similarity increasing - same sentence structure"
+    },
+    {
+      "id": "stag_08",
+      "messages": [
+        "Et si on essayait de lire le fichier?",
+        "On devrait peut-être modifier l'approche.",
+        "Discutons de la meilleure solution."
+      ],
+      "has_tool_use": [false, false, false],
+      "expected_level": "nudge",
+      "label": "stagnant",
+      "description": "French tool mention + hesitation"
+    },
+    {
+      "id": "stag_09",
+      "messages": [
+        "We could try option A.",
+        "Or we could try option B.",
+        "Maybe option C is better.",
+        "What if we combined them?",
+        "Perhaps we need more data."
+      ],
+      "has_tool_use": [false, false, false, false, false],
+      "expected_level": "intervene",
+      "label": "stagnant",
+      "description": "Endless options without commitment"
+    },
+    {
+      "id": "stag_10",
+      "messages": [
+        "D'un autre côté, on pourrait...",
+        "Mais peut-être que...",
+        "Je pense que... non, attendez.",
+        "Réfléchissons encore."
+      ],
+      "has_tool_use": [false, false, false, false],
+      "expected_level": "intervene",
+      "label": "stagnant",
+      "description": "French heavy indecision"
+    }
+  ],
+  "normal_conversations": [
+    {
+      "id": "norm_01",
+      "messages": [
+        "I'll read the file to understand the structure.",
+        "Found the issue on line 42.",
+        "I'll fix it now."
+      ],
+      "has_tool_use": [true, false, true],
+      "expected_level": "continue",
+      "label": "normal",
+      "description": "Direct action with tool use"
+    },
+    {
+      "id": "norm_02",
+      "messages": [
+        "Let me search for the pattern.",
+        "Found 5 matches in src/.",
+        "The main file is api.py, I'll read it."
+      ],
+      "has_tool_use": [true, false, true],
+      "expected_level": "continue",
+      "label": "normal",
+      "description": "Progressive action"
+    },
+    {
+      "id": "norm_03",
+      "messages": [
+        "Je vais lire le fichier.",
+        "Voici le contenu du fichier.",
+        "Je vais corriger l'erreur ligne 15."
+      ],
+      "has_tool_use": [true, false, true],
+      "expected_level": "continue",
+      "label": "normal",
+      "description": "French direct action"
+    },
+    {
+      "id": "norm_04",
+      "messages": [
+        "The error is in the authentication module.",
+        "I found the root cause: missing null check.",
+        "Here's the fix I'm applying.",
+        "Done. The test passes now."
+      ],
+      "has_tool_use": [true, true, true, true],
+      "expected_level": "continue",
+      "label": "normal",
+      "description": "Full action sequence"
+    },
+    {
+      "id": "norm_05",
+      "messages": [
+        "Running the tests...",
+        "All tests pass.",
+        "Ready to commit."
+      ],
+      "has_tool_use": [true, false, false],
+      "expected_level": "continue",
+      "label": "normal",
+      "description": "Execution and verification"
+    },
+    {
+      "id": "norm_06",
+      "messages": [
+        "I need to understand the architecture first.",
+        "Reading the main module...",
+        "Got it. The flow is: API -> Service -> Repository.",
+        "I'll modify the Service layer."
+      ],
+      "has_tool_use": [false, true, false, true],
+      "expected_level": "continue",
+      "label": "normal",
+      "description": "Investigation then action"
+    },
+    {
+      "id": "norm_07",
+      "messages": [
+        "Searching for config files...",
+        "Found config.py and .env",
+        "The issue is in config.py line 89.",
+        "Fixed. Here's the diff."
+      ],
+      "has_tool_use": [true, false, true, true],
+      "expected_level": "continue",
+      "label": "normal",
+      "description": "Search, identify, fix"
+    },
+    {
+      "id": "norm_08",
+      "messages": [
+        "Je cherche le bug.",
+        "Trouvé dans le module auth.",
+        "Correction appliquée."
+      ],
+      "has_tool_use": [true, true, true],
+      "expected_level": "continue",
+      "label": "normal",
+      "description": "French action sequence"
+    },
+    {
+      "id": "norm_09",
+      "messages": [
+        "This is a complex refactoring task.",
+        "I'll break it into 3 steps: 1) Extract interface, 2) Implement adapter, 3) Update callers.",
+        "Starting with step 1...",
+        "Step 1 complete. Moving to step 2."
+      ],
+      "has_tool_use": [false, false, true, true],
+      "expected_level": "continue",
+      "label": "normal",
+      "description": "Planned execution with progress"
+    },
+    {
+      "id": "norm_10",
+      "messages": [
+        "The user wants to add a new feature.",
+        "I'll create the component file first.",
+        "Component created. Now adding the route.",
+        "Route added. Testing the endpoint.",
+        "Everything works. Feature complete."
+      ],
+      "has_tool_use": [false, true, true, true, false],
+      "expected_level": "continue",
+      "label": "normal",
+      "description": "Full feature implementation"
+    }
+  ]
+}

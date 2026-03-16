@@ -1,0 +1,111 @@
+# NEXUS V12.4 - OpenTelemetry Collector Configuration
+#
+# Receives traces, metrics, and logs from NEXUS backend and exports to:
+# - Jaeger (traces visualization)
+# - Prometheus (metrics storage)
+# - Console (debugging)
+#
+# Epic 4.3: OpenTelemetry & Deployment
+
+receivers:
+  # OTLP receiver (gRPC + HTTP)
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "http://localhost:*"
+            - "http://127.0.0.1:*"
+
+processors:
+  # Memory limiter (prevent OOM)
+  memory_limiter:
+    limit_mib: 512
+    spike_limit_mib: 128
+    check_interval: 5s
+
+  # Batch processor (reduce network calls)
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+
+  # Resource processor (add environment attributes)
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: ${NEXUS_ENV:-development}
+        action: upsert
+      - key: service.namespace
+        value: nexus
+        action: upsert
+
+  # Attributes processor (add custom attributes)
+  attributes:
+    actions:
+      - key: nexus.version
+        value: "12.4.0"
+        action: insert
+
+exporters:
+  # Jaeger exporter (traces)
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+
+  # Logging exporter (debug)
+  logging:
+    loglevel: info
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+  # Debug exporter (verbose)
+  debug:
+    verbosity: detailed
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+extensions:
+  # Health check extension
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+  # pprof extension (performance profiling)
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  # zpages extension (service z-pages)
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+
+  pipelines:
+    # Traces pipeline
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource, attributes]
+      exporters: [otlp/jaeger, logging]
+
+    # Metrics pipeline
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource, attributes]
+      exporters: [logging]
+
+    # Logs pipeline
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [logging]
+
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      address: 0.0.0.0:8888

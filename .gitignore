@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NEXUS specific
+workspace/
+workspace_archive.tar.gz
+*.log
+*.jsonl
+.nexus/
+data/
+workspace_registry.json
+
+# Temporary analysis files
+repomix-output.xml
+repomix-output.txt
+prompt.txt
+test_run_output.txt
+
+# Node.js (for Playwright/UI tests)
+node_modules/
+package-lock.json
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Test artifacts
+test-results/
+playwright-report/
+*.png
+
+# Secrets
+*.pem
+*.key
+credentials.json
+
+# Compiled
+*.pyc
+MagicMock

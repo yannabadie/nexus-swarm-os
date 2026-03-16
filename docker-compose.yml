@@ -1,0 +1,183 @@
+# NEXUS V12.4 COGNITIVE BOOST - Docker Compose
+#
+# Services:
+#   redis          - Event bus, FSM event store, workflow registry
+#   nexus          - NEXUS backend (headless mode, SDK drivers)
+#   cerebro        - CEREBRO WebSocket API (optional, profile: api)
+#   otel-collector - OpenTelemetry Collector (optional, profile: observability)
+#   jaeger         - Jaeger tracing UI (optional, profile: observability)
+#
+# Usage:
+#   docker compose up -d redis                    # Redis only (local dev)
+#   docker compose up -d                          # Full stack (no observability)
+#   docker compose --profile api up -d            # Include CEREBRO API
+#   docker compose --profile observability up -d  # Include OTel + Jaeger
+#   docker compose --profile api --profile observability up -d  # Full stack
+#   docker compose logs -f nexus                  # Watch NEXUS logs
+#   docker compose down                           # Stop all
+
+services:
+  # ===========================================================================
+  # Redis: Event Bus + State Store
+  # ===========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: nexus-redis
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --tcp-keepalive 60
+      --timeout 0
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - nexus-network
+
+  # ===========================================================================
+  # NEXUS Backend: Headless Orchestrator
+  # ===========================================================================
+  nexus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        RUST_EXTENSIONS: "false"
+    container_name: nexus-backend
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - NEXUS_DRIVER_MODE=auto
+      - LOG_LEVEL=INFO
+      - WORKSPACE_PATH=/app/workspace
+      # API keys - set in .env file or docker compose override
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      # Feature flags
+      - NEXUS_FF_HEADLESS_MODE=true
+      - NEXUS_FF_TELEMETRY_JSONL=true
+      # OpenTelemetry (Epic 4.3)
+      - NEXUS_FF_OTEL_ENABLED=${NEXUS_FF_OTEL_ENABLED:-false}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
+      - OTEL_SERVICE_NAME=nexus-backend
+      - OTEL_SERVICE_VERSION=12.4.0
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=${NEXUS_ENV:-development}
+    volumes:
+      - nexus_workspace:/app/workspace
+    restart: unless-stopped
+    networks:
+      - nexus-network
+
+  # ===========================================================================
+  # CEREBRO API: WebSocket + REST API (optional profile)
+  # ===========================================================================
+  cerebro:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexus-cerebro
+    profiles:
+      - api
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: >
+      uvicorn core.api.cerebro.app:create_app
+      --factory
+      --host 0.0.0.0
+      --port 8000
+      --workers 2
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=INFO
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - nexus-network
+
+  # ===========================================================================
+  # OpenTelemetry Collector (Epic 4.3)
+  # ===========================================================================
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: nexus-otel-collector
+    profiles:
+      - observability
+    command: ["--config", "/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./config/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "13133:13133" # Health check
+      - "55679:55679" # zpages
+    environment:
+      - NEXUS_ENV=${NEXUS_ENV:-development}
+    depends_on:
+      - jaeger
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:13133"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - nexus-network
+
+  # ===========================================================================
+  # Jaeger: Distributed Tracing UI (Epic 4.3)
+  # ===========================================================================
+  jaeger:
+    image: jaegertracing/all-in-one:1.54
+    container_name: nexus-jaeger
+    profiles:
+      - observability
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "14268:14268" # Accept spans directly (HTTP)
+      - "14250:14250" # Accept spans (gRPC)
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=memory
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:14269"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - nexus-network
+
+networks:
+  nexus-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    name: nexus-redis-data
+  nexus_workspace:
+    name: nexus-workspace
