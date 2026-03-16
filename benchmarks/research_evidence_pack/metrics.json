@@ -1,0 +1,19 @@
+{
+  "question": "How does the AsyncDriverFactory select between SDK and CLI drivers?",
+  "mode": "mock",
+  "backend": "tfidf",
+  "generated_at": "2026-03-16T07:28:18.696087+00:00",
+  "indexed_chunks": 29,
+  "subquery_count": 6,
+  "source_count": 5,
+  "claim_count": 3,
+  "supported_claim_count": 2,
+  "mixed_claim_count": 0,
+  "weak_claim_count": 1,
+  "finding_count": 3,
+  "contradiction_count": 0,
+  "unique_files": 1,
+  "confidence_score": 0.67,
+  "confidence_label": "medium",
+  "duration_ms": 14
+}

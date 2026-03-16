@@ -258,6 +258,39 @@ class IdleWaitingHandler(BaseHandler):
 
         return False
 
+    def _build_hivemind_agents(self) -> dict:
+        """Build agents dict from all available drivers for HiveMind.
+
+        Auto-discovers providers via the driver factory. Falls back to
+        gemini-only if no factory is available.
+
+        Returns:
+            Dict mapping provider IDs to driver instances.
+        """
+        agents: dict = {}
+        factory = getattr(self._orch, "_driver_factory", None)
+        if factory:
+            # Always include primary Gemini
+            agents["gemini"] = self._orch.gemini_driver
+            # Add Claude if available
+            try:
+                if factory.claude_sdk_available:
+                    agents["claude"] = factory.get_best_claude()
+            except Exception:
+                pass
+            # Add additional providers if available
+            for provider in ["deepseek", "openai", "kimi", "minimax"]:
+                avail = getattr(factory, f"{provider}_sdk_available", False)
+                if avail:
+                    try:
+                        agents[provider] = factory.get_driver(provider, prefer_sdk=True)
+                    except Exception:
+                        pass
+        else:
+            # No factory - fall back to orchestrator's primary driver
+            agents["gemini"] = self._orch.gemini_driver
+        return agents
+
     def _route_to_hive_mind(self, user_input: str, task_analysis) -> dict:
         """
         Route task to V8 TRUE HIVE MIND pipeline.
@@ -278,6 +311,8 @@ class IdleWaitingHandler(BaseHandler):
         try:
             # Initialize Hive Mind if not exists
             if not hasattr(self._orch, "_hive_mind") or self._orch._hive_mind is None:
+                # V12.4: Auto-discover all available providers for HiveMind
+                hivemind_agents = self._build_hivemind_agents()
                 # V8.4.5: Pass swarm_engine for SwarmBridge delegation (Dictator Mode)
                 self._orch._hive_mind = TrueHiveMind(
                     workspace_path=self._orch.workspace_path,
@@ -291,6 +326,7 @@ class IdleWaitingHandler(BaseHandler):
                     project_memory=self._orch.project_memory,
                     auto_breakpoints=getattr(self._orch.config, "hive_mind_breakpoints_enabled", True),
                     swarm_engine=getattr(self._orch, "swarm_engine", None),
+                    agents=hivemind_agents,
                 )
 
             # Map TaskComplexity to HiveComplexity

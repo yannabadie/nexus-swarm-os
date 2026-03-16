@@ -1,0 +1,99 @@
+{
+  "generated_at": "2026-03-16T07:29:57.653837+00:00",
+  "prompt": "Reply with exactly NEXUS_CANARY_OK and nothing else.",
+  "expected": "NEXUS_CANARY_OK",
+  "summary": {
+    "configured_providers": 5,
+    "attempted_providers": 5,
+    "passed_providers": 0,
+    "failed_providers": 5,
+    "skipped_providers": 1,
+    "pass_rate": 0.0
+  },
+  "results": [
+    {
+      "provider": "anthropic",
+      "configured": false,
+      "attempted": false,
+      "passed": false,
+      "model": "claude-sonnet-4-6",
+      "health_check_passed": null,
+      "response_status": null,
+      "output_preview": "",
+      "latency_ms": 0.0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "Provider SDK not configured in this environment."
+    },
+    {
+      "provider": "google",
+      "configured": true,
+      "attempted": true,
+      "passed": false,
+      "model": "gemini-3.1-pro-preview",
+      "health_check_passed": true,
+      "response_status": "SUCCESS",
+      "output_preview": "NEX",
+      "latency_ms": 2416.05,
+      "input_tokens": 15,
+      "output_tokens": 2,
+      "error": "Unexpected output: NEX"
+    },
+    {
+      "provider": "openai",
+      "configured": true,
+      "attempted": true,
+      "passed": false,
+      "model": "gpt-5.4",
+      "health_check_passed": true,
+      "response_status": "RATE_LIMITED",
+      "output_preview": "",
+      "latency_ms": 2136.32,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}"
+    },
+    {
+      "provider": "deepseek",
+      "configured": true,
+      "attempted": true,
+      "passed": false,
+      "model": "deepseek-chat",
+      "health_check_passed": true,
+      "response_status": "ERROR",
+      "output_preview": "",
+      "latency_ms": 1813.93,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "'ResponseCache' object has no attribute 'set'"
+    },
+    {
+      "provider": "kimi",
+      "configured": true,
+      "attempted": true,
+      "passed": false,
+      "model": "kimi-k2-thinking",
+      "health_check_passed": true,
+      "response_status": null,
+      "output_preview": "",
+      "latency_ms": 0.0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "Canary invocation failed: 'DriverHealthMonitor' object has no attribute 'record_error'"
+    },
+    {
+      "provider": "minimax",
+      "configured": true,
+      "attempted": true,
+      "passed": false,
+      "model": "MiniMax-M2.5",
+      "health_check_passed": true,
+      "response_status": "AUTHENTICATION_ERROR",
+      "output_preview": "",
+      "latency_ms": 2199.43,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "error": "Error code: 401 - {'type': 'error', 'error': {'type': 'authorized_error', 'message': 'invalid api key (2049)', 'http_code': '401'}, 'request_id': '0606e4764e6139c67901a7e9bc926e84'}"
+    }
+  ]
+}

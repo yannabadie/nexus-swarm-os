@@ -1,0 +1,309 @@
+{
+  "generated_at": "2026-03-16T11:18:03.579777+00:00",
+  "task_count": 4,
+  "strategy_summaries": [
+    {
+      "strategy": "single_agent",
+      "task_count": 4,
+      "pass_rate": 0.25,
+      "average_score": 0.462,
+      "score_variance": 0.0332,
+      "average_latency_seconds": 1.125,
+      "average_tokens": 103.8,
+      "recovery_rate": 0.0,
+      "failure_modes": {}
+    },
+    {
+      "strategy": "deterministic_pipeline",
+      "task_count": 4,
+      "pass_rate": 0.5,
+      "average_score": 0.671,
+      "score_variance": 0.028,
+      "average_latency_seconds": 3.5,
+      "average_tokens": 333.8,
+      "recovery_rate": 0.0,
+      "failure_modes": {}
+    },
+    {
+      "strategy": "swarm",
+      "task_count": 4,
+      "pass_rate": 0.0,
+      "average_score": 0.154,
+      "score_variance": 0.0008,
+      "average_latency_seconds": 13.115,
+      "average_tokens": 0,
+      "recovery_rate": 0.5,
+      "failure_modes": {}
+    }
+  ],
+  "runs": [
+    {
+      "strategy": "single_agent",
+      "task_id": "auth_expiry_bug",
+      "mode": "single_agent",
+      "passed": false,
+      "overall_score": 0.505,
+      "keyword_coverage": 0.5,
+      "panel_score": 0.515,
+      "latency_seconds": 1.4,
+      "tokens_used": 110,
+      "recovered": false,
+      "failure_mode": null,
+      "output_preview": "COMPLETED: Root cause in token.py is a missing expiry check during token validation.",
+      "metadata": {}
+    },
+    {
+      "strategy": "deterministic_pipeline",
+      "task_id": "auth_expiry_bug",
+      "mode": "deterministic_pipeline",
+      "passed": true,
+      "overall_score": 0.841,
+      "keyword_coverage": 1.0,
+      "panel_score": 0.545,
+      "latency_seconds": 3.6,
+      "tokens_used": 330,
+      "recovered": false,
+      "failure_mode": null,
+      "output_preview": "COMPLETED: Root cause in token.py is a missing expiry check. Add security regression test test_token_expiry so expired tokens are rejected.",
+      "metadata": {}
+    },
+    {
+      "strategy": "swarm",
+      "task_id": "auth_expiry_bug",
+      "mode": "lead_support",
+      "passed": false,
+      "overall_score": 0.138,
+      "keyword_coverage": 0.0,
+      "panel_score": 0.395,
+      "latency_seconds": 0.016,
+      "tokens_used": 0,
+      "recovered": false,
+      "failure_mode": null,
+      "output_preview": "",
+      "metadata": {
+        "execution_type": "lead_support",
+        "artifacts_verified": true,
+        "artifact_successes": [
+          "No file artifacts to verify"
+        ],
+        "artifact_failures": [],
+        "spawning_suggestion": {
+          "suggested": true,
+          "reason": "Task complexity (COMPLEX) suggests spawning a specialist",
+          "recommended_config": {
+            "mission": "Specialist for coding tasks",
+            "domains": [
+              "coding",
+              "security",
+              "testing"
+            ],
+            "role": "coding_specialist"
+          },
+          "command": "/spawn \"coding_expert\" --mission \"Expert for coding, security, testing\""
+        }
+      }
+    },
+    {
+      "strategy": "single_agent",
+      "task_id": "memory_storage_contradiction",
+      "mode": "single_agent",
+      "passed": false,
+      "overall_score": 0.498,
+      "keyword_coverage": 0.5,
+      "panel_score": 0.494,
+      "latency_seconds": 1.0,
+      "tokens_used": 95,
+      "recovered": false,
+      "failure_mode": null,
+      "output_preview": "COMPLETED: README documentation still describes LanceDB storage in workspace/.nexus.",
+      "metadata": {}
+    },
+    {
+      "strategy": "deterministic_pipeline",
+      "task_id": "memory_storage_contradiction",
+      "mode": "deterministic_pipeline",
+      "passed": false,
+      "overall_score": 0.508,
+      "keyword_coverage": 0.5,
+      "panel_score": 0.524,
+      "latency_seconds": 3.3,
+      "tokens_used": 300,
+      "recovered": false,
+      "failure_mode": null,
+      "output_preview": "COMPLETED: Initial claim from docs: storage appears to live in workspace/.nexus according to README.",
+      "metadata": {}
+    },
+    {
+      "strategy": "swarm",
+      "task_id": "memory_storage_contradiction",
+      "mode": "red_blue",
+      "passed": false,
+      "overall_score": 0.138,
+      "keyword_coverage": 0.0,
+      "panel_score": 0.395,
+      "latency_seconds": 0.016,
+      "tokens_used": 0,
+      "recovered": true,
+      "failure_mode": null,
+      "output_preview": "",
+      "metadata": {
+        "execution_type": "lead_support",
+        "artifacts_verified": true,
+        "artifact_successes": [
+          "No file artifacts to verify"
+        ],
+        "artifact_failures": [],
+        "status": "RECOVERED",
+        "original_mode": "red_blue",
+        "fallback_path": [
+          "red_blue",
+          "lead_support"
+        ],
+        "fallback_count": 1,
+        "spawning_suggestion": {
+          "suggested": true,
+          "reason": "Task complexity (COMPLEX) suggests spawning a specialist",
+          "recommended_config": {
+            "mission": "Specialist for analysis tasks",
+            "domains": [
+              "analysis",
+              "documentation",
+              "coding"
+            ],
+            "role": "analysis_specialist"
+          },
+          "command": "/spawn \"analysis_expert\" --mission \"Expert for analysis, documentation, coding\""
+        }
+      }
+    },
+    {
+      "strategy": "single_agent",
+      "task_id": "provider_compatibility_gap",
+      "mode": "single_agent",
+      "passed": false,
+      "overall_score": 0.17,
+      "keyword_coverage": 0.0,
+      "panel_score": 0.485,
+      "latency_seconds": 1.0,
+      "tokens_used": 100,
+      "recovered": false,
+      "failure_mode": null,
+      "output_preview": "COMPLETED: core/provider_registry.json gives structural provider compatibility evidence and replacements.",
+      "metadata": {}
+    },
+    {
+      "strategy": "deterministic_pipeline",
+      "task_id": "provider_compatibility_gap",
+      "mode": "deterministic_pipeline",
+      "passed": false,
+      "overall_score": 0.5,
+      "keyword_coverage": 0.5,
+      "panel_score": 0.5,
+      "latency_seconds": 3.6,
+      "tokens_used": 360,
+      "recovered": false,
+      "failure_mode": null,
+      "output_preview": "COMPLETED: Provider evidence is partial and should be separated into structural smoke and live canaries.",
+      "metadata": {}
+    },
+    {
+      "strategy": "swarm",
+      "task_id": "provider_compatibility_gap",
+      "mode": "parallel",
+      "passed": false,
+      "overall_score": 0.204,
+      "keyword_coverage": 0.0,
+      "panel_score": 0.584,
+      "latency_seconds": 52.414,
+      "tokens_used": 0,
+      "recovered": false,
+      "failure_mode": null,
+      "output_preview": "[Gemini_Primary] [NO] Error: HybridSwarmEngine._wrap_invoke_agent.<locals>.wrapper() takes from 3 to 4 positional arguments but 5 were given  ---  [Claude_Opus] [NO] Error: HybridS",
+      "metadata": {
+        "execution_type": "parallel_async",
+        "merge_strategy": "naive",
+        "conflict_report": {
+          "has_conflicts": false,
+          "file_conflicts": [],
+          "command_conflicts": [],
+          "semantic_conflicts": [],
+          "severity": "NONE"
+        },
+        "agent_count": 2,
+        "total_chars": 0
+      }
+    },
+    {
+      "strategy": "single_agent",
+      "task_id": "security_recovery",
+      "mode": "single_agent",
+      "passed": true,
+      "overall_score": 0.673,
+      "keyword_coverage": 0.75,
+      "panel_score": 0.53,
+      "latency_seconds": 1.1,
+      "tokens_used": 110,
+      "recovered": false,
+      "failure_mode": null,
+      "output_preview": "COMPLETED: ExecutionPolicy blocks curl and wget, and PathGuardian protects KERNEL.py and .env.",
+      "metadata": {}
+    },
+    {
+      "strategy": "deterministic_pipeline",
+      "task_id": "security_recovery",
+      "mode": "deterministic_pipeline",
+      "passed": true,
+      "overall_score": 0.836,
+      "keyword_coverage": 1.0,
+      "panel_score": 0.53,
+      "latency_seconds": 3.5,
+      "tokens_used": 345,
+      "recovered": false,
+      "failure_mode": null,
+      "output_preview": "COMPLETED: ExecutionPolicy blocks curl and wget, PathGuardian protects KERNEL.py and .env, and the remaining gap is Shadow Red Team bypass coverage.",
+      "metadata": {}
+    },
+    {
+      "strategy": "swarm",
+      "task_id": "security_recovery",
+      "mode": "red_blue",
+      "passed": false,
+      "overall_score": 0.138,
+      "keyword_coverage": 0.0,
+      "panel_score": 0.395,
+      "latency_seconds": 0.014,
+      "tokens_used": 0,
+      "recovered": true,
+      "failure_mode": null,
+      "output_preview": "",
+      "metadata": {
+        "execution_type": "lead_support",
+        "artifacts_verified": true,
+        "artifact_successes": [
+          "No file artifacts to verify"
+        ],
+        "artifact_failures": [],
+        "status": "RECOVERED",
+        "original_mode": "red_blue",
+        "fallback_path": [
+          "red_blue",
+          "lead_support"
+        ],
+        "fallback_count": 1,
+        "spawning_suggestion": {
+          "suggested": true,
+          "reason": "Task complexity (EXPERT) suggests spawning a specialist",
+          "recommended_config": {
+            "mission": "Specialist for security tasks",
+            "domains": [
+              "security",
+              "analysis"
+            ],
+            "role": "security_specialist"
+          },
+          "command": "/spawn \"security_expert\" --mission \"Expert for security, analysis\""
+        }
+      }
+    }
+  ]
+}

@@ -443,12 +443,16 @@ class TestAgentProvider:
         """Each provider should have correct value"""
         assert AgentProvider.GEMINI.value == "gemini"
         assert AgentProvider.CLAUDE.value == "claude"
+        assert AgentProvider.OPENAI.value == "openai"
+        assert AgentProvider.DEEPSEEK.value == "deepseek"
+        assert AgentProvider.KIMI.value == "kimi"
+        assert AgentProvider.MINIMAX.value == "minimax"
         assert AgentProvider.OLLAMA.value == "ollama"
         assert AgentProvider.SPAWNED.value == "spawned"
 
     def test_provider_count(self):
-        """Should have 4 providers"""
-        assert len(list(AgentProvider)) == 4
+        """Should have 8 providers (7 backends + spawned)"""
+        assert len(list(AgentProvider)) == 8
 
 
 class TestAgentCapability:

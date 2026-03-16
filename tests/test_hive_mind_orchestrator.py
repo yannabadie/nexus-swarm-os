@@ -98,8 +98,7 @@ def _make_analysis_comparison(
     gemini = _make_independent_analysis("gemini", 0.9)
     claude = _make_independent_analysis("claude", 0.88)
     return AnalysisComparison(
-        gemini_analysis=gemini,
-        claude_analysis=claude,
+        analyses={"gemini": gemini, "claude": claude},
         disagreements=[],
         agreement_score=agreement_score,
         needs_debate=needs_debate,
@@ -123,8 +122,7 @@ def _make_debate_result(
         resolved_disagreements=[],
         unresolved_disagreements=[],
         consensus_confidence=consensus_confidence,
-        gemini_satisfaction=0.8,
-        claude_satisfaction=0.8,
+        satisfactions={"gemini": 0.8, "claude": 0.8},
     )
 
 

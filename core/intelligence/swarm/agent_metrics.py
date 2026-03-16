@@ -45,11 +45,15 @@ if TYPE_CHECKING:
 
 
 class AgentProvider(Enum):
-    """Agent providers - extensible for future integrations"""
+    """Agent providers - all 7 supported backends"""
 
     GEMINI = "gemini"
     CLAUDE = "claude"
-    # Future: OPENAI = "openai", LOCAL = "local"
+    OPENAI = "openai"
+    DEEPSEEK = "deepseek"
+    KIMI = "kimi"
+    MINIMAX = "minimax"
+    OLLAMA = "ollama"
 
 
 @dataclass
@@ -230,12 +234,15 @@ class AgentPool:
 
     def get_internal_agents(self) -> list[AgentProfile]:
         """
-        Get internal agents (Gemini + Claude).
+        Get internal (non-spawned) agents.
+
+        Returns all active agents whose provider is not 'spawned',
+        covering all 7 backends (Gemini, Claude, OpenAI, DeepSeek, Kimi, MiniMax, Ollama).
 
         Returns:
             List of AgentProfile for internal agents only
         """
-        return [a for a in self.agents.values() if a.is_active and a.provider in ("gemini", "claude")]
+        return [a for a in self.agents.values() if a.is_active and a.provider != "spawned"]
 
     def select_best_for_task(self, task_type: str, top_k: int = 1, min_importance: float = 0.0) -> list[AgentProfile]:
         """

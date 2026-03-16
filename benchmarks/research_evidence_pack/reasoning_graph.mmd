@@ -1,0 +1,10 @@
+graph TD
+  Q["How does the AsyncDriverFactory select between SDK and CLI drivers?"]
+  Q --> CL1["Implementation evidence around `AsyncDriverFactory` indicates: Defines class AsyncDriverFactory:."]
+  CL1 --> S1["core\drivers\async_factory.py"]
+  CL1 --> S2["core\drivers\async_factory.py"]
+  Q --> CL2["Implementation evidence around `__init__` indicates: Defines def __init__(self, config: Any, workspace_path..."]
+  CL2 --> S3["core\drivers\async_factory.py"]
+  CL2 --> S4["core\drivers\async_factory.py"]
+  Q --> CL3["Implementation evidence around `claude_sdk_available` indicates: Check if Claude SDK driver can be created..."]
+  CL3 --> S5["core\drivers\async_factory.py"]
