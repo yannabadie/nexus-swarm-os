@@ -66,6 +66,10 @@ class TaskDomain(Enum):
     TESTING = "testing"
     ARCHITECTURE = "architecture"
     WEB_INTERACTION = "web_interaction"
+    # V12.4 Multi-provider: additional domains for fine-grained strength mapping
+    GENERAL = "general"
+    WRITING = "writing"
+    REASONING = "reasoning"
 
 
 # Keywords that indicate task domains
@@ -191,33 +195,155 @@ DOMAIN_KEYWORDS: dict[TaskDomain, list[str]] = {
         "upload",
         "endpoint",
     ],
+    # V12.4 Multi-provider: additional domains for fine-grained strength mapping
+    TaskDomain.GENERAL: [
+        "general",
+        "misc",
+        "other",
+        "anything",
+        "help",
+        "assist",
+        "do",
+        "can you",
+        "please",
+    ],
+    TaskDomain.WRITING: [
+        "write",
+        "draft",
+        "compose",
+        "essay",
+        "article",
+        "blog",
+        "report",
+        "letter",
+        "email",
+        "content",
+        "copywriting",
+        "prose",
+    ],
+    TaskDomain.REASONING: [
+        "reason",
+        "logic",
+        "infer",
+        "deduce",
+        "conclude",
+        "proof",
+        "theorem",
+        "argument",
+        "hypothesis",
+        "think through",
+        "step by step",
+        "chain of thought",
+    ],
 }
 
-# Agent strengths by domain (Gemini 3 Pro vs Claude Opus 4.5)
+# Agent strengths by domain - all 7 providers
+# V12.4 Multi-provider: Extended from 2 (gemini/claude) to 7 providers
 AGENT_DOMAIN_STRENGTHS: dict[str, dict[TaskDomain, float]] = {
     "gemini": {
         TaskDomain.RESEARCH: 0.95,  # Grounding, web search
         TaskDomain.WEB_INTERACTION: 0.90,  # Terminal-Bench leader
+        TaskDomain.WRITING: 0.85,
         TaskDomain.ANALYSIS: 0.85,  # Long-horizon planning
+        TaskDomain.REASONING: 0.85,
+        TaskDomain.GENERAL: 0.85,
         TaskDomain.DOCUMENTATION: 0.75,
         TaskDomain.CREATIVE: 0.70,
-        TaskDomain.CODING: 0.70,
+        TaskDomain.CODING: 0.80,
         TaskDomain.TESTING: 0.65,
         TaskDomain.DEBUGGING: 0.60,
         TaskDomain.ARCHITECTURE: 0.60,
         TaskDomain.SECURITY: 0.65,
     },
     "claude": {
-        TaskDomain.CODING: 0.95,  # SWE-bench 80.9%
+        TaskDomain.CODING: 0.95,  # SWE-bench leader
+        TaskDomain.ARCHITECTURE: 0.95,  # Complex reasoning
         TaskDomain.DEBUGGING: 0.90,  # Sustained autonomy
-        TaskDomain.ARCHITECTURE: 0.90,  # Complex reasoning
-        TaskDomain.SECURITY: 0.85,  # Red team expertise
-        TaskDomain.CREATIVE: 0.85,  # Creativity
+        TaskDomain.REASONING: 0.90,
+        TaskDomain.WRITING: 0.90,
+        TaskDomain.SECURITY: 0.90,  # Red team expertise
+        TaskDomain.CREATIVE: 0.85,
         TaskDomain.ANALYSIS: 0.80,
         TaskDomain.TESTING: 0.80,
         TaskDomain.DOCUMENTATION: 0.75,
+        TaskDomain.GENERAL: 0.85,
         TaskDomain.RESEARCH: 0.60,  # No native web search
         TaskDomain.WEB_INTERACTION: 0.50,
+    },
+    "openai": {
+        TaskDomain.CODING: 0.90,
+        TaskDomain.REASONING: 0.88,
+        TaskDomain.WRITING: 0.88,
+        TaskDomain.GENERAL: 0.90,
+        TaskDomain.RESEARCH: 0.82,
+        TaskDomain.ARCHITECTURE: 0.85,
+        TaskDomain.ANALYSIS: 0.85,
+        TaskDomain.DEBUGGING: 0.82,
+        TaskDomain.SECURITY: 0.80,
+        TaskDomain.CREATIVE: 0.82,
+        TaskDomain.TESTING: 0.78,
+        TaskDomain.DOCUMENTATION: 0.80,
+        TaskDomain.WEB_INTERACTION: 0.75,
+    },
+    "deepseek": {
+        TaskDomain.CODING: 0.92,
+        TaskDomain.REASONING: 0.90,
+        TaskDomain.DEBUGGING: 0.85,
+        TaskDomain.GENERAL: 0.80,
+        TaskDomain.ARCHITECTURE: 0.80,
+        TaskDomain.WRITING: 0.75,
+        TaskDomain.ANALYSIS: 0.78,
+        TaskDomain.TESTING: 0.78,
+        TaskDomain.SECURITY: 0.72,
+        TaskDomain.CREATIVE: 0.68,
+        TaskDomain.RESEARCH: 0.65,
+        TaskDomain.DOCUMENTATION: 0.70,
+        TaskDomain.WEB_INTERACTION: 0.55,
+    },
+    "kimi": {
+        TaskDomain.REASONING: 0.90,
+        TaskDomain.RESEARCH: 0.85,
+        TaskDomain.CODING: 0.82,
+        TaskDomain.WRITING: 0.80,
+        TaskDomain.GENERAL: 0.80,
+        TaskDomain.ARCHITECTURE: 0.78,
+        TaskDomain.ANALYSIS: 0.80,
+        TaskDomain.DEBUGGING: 0.72,
+        TaskDomain.SECURITY: 0.68,
+        TaskDomain.CREATIVE: 0.75,
+        TaskDomain.TESTING: 0.70,
+        TaskDomain.DOCUMENTATION: 0.72,
+        TaskDomain.WEB_INTERACTION: 0.70,
+    },
+    "minimax": {
+        TaskDomain.REASONING: 0.82,
+        TaskDomain.CODING: 0.80,
+        TaskDomain.WRITING: 0.78,
+        TaskDomain.GENERAL: 0.78,
+        TaskDomain.RESEARCH: 0.75,
+        TaskDomain.ARCHITECTURE: 0.72,
+        TaskDomain.ANALYSIS: 0.75,
+        TaskDomain.DEBUGGING: 0.68,
+        TaskDomain.SECURITY: 0.65,
+        TaskDomain.CREATIVE: 0.72,
+        TaskDomain.TESTING: 0.65,
+        TaskDomain.DOCUMENTATION: 0.68,
+        TaskDomain.WEB_INTERACTION: 0.60,
+    },
+    "ollama": {
+        TaskDomain.CODING: 0.70,
+        TaskDomain.GENERAL: 0.72,
+        TaskDomain.WRITING: 0.68,
+        TaskDomain.REASONING: 0.65,
+        TaskDomain.DEBUGGING: 0.65,
+        TaskDomain.RESEARCH: 0.50,
+        TaskDomain.ANALYSIS: 0.62,
+        TaskDomain.TESTING: 0.58,
+        TaskDomain.SECURITY: 0.50,
+        TaskDomain.CREATIVE: 0.60,
+        TaskDomain.ARCHITECTURE: 0.55,
+        TaskDomain.DOCUMENTATION: 0.60,
+        TaskDomain.WEB_INTERACTION: 0.40,
     },
 }
 

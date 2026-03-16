@@ -146,6 +146,16 @@ def _make_negotiation_result(
 
 
 @pytest.fixture(autouse=True)
+def mock_registry():
+    """Auto-mock get_registry for all tests — 2 providers to prevent mode degradation."""
+    with patch("core.intelligence.swarm.hybrid_swarm_engine.get_registry") as mock_get:
+        mock_reg = MagicMock()
+        mock_reg.get_active_builtin_ids.return_value = ["gemini", "claude"]
+        mock_get.return_value = mock_reg
+        yield mock_get
+
+
+@pytest.fixture(autouse=True)
 def mock_telemetry():
     """Mock the telemetry bridge for all tests to avoid Redis dependency."""
     mock_bridge = MagicMock()

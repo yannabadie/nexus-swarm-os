@@ -136,8 +136,8 @@ class TestTaskDomain:
     """Tests for TaskDomain Enum."""
 
     def test_has_ten_domains(self):
-        """TaskDomain has exactly 10 members."""
-        assert len(TaskDomain) == 10
+        """TaskDomain has exactly 13 members (10 original + 3 V12.4 multi-provider domains)."""
+        assert len(TaskDomain) == 13
 
     def test_all_domain_values(self):
         """All domain string values match expectations."""

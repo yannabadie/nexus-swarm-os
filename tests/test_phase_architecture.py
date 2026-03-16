@@ -1137,7 +1137,7 @@ class TestEdgeCases:
         arch = phase._create_fallback_architecture(["coding", "testing"])
         assert arch.status == "READY"
         assert arch.collaboration_mode == "sequential"
-        assert arch.agents_to_use == ["claude", "gemini"]
+        assert set(arch.agents_to_use) == {"claude", "gemini"}
         assert arch.agents_to_spawn == []
         assert len(arch.execution_plan.steps) == 1
         assert arch.execution_plan.steps[0].name == "main_execution"
@@ -1286,7 +1286,7 @@ class TestEdgeCases:
             "reasoning": "minimal",
         }
         arch = phase._parse_architecture_response(json.dumps(data), ["coding"])
-        assert arch.agents_to_use == ["claude", "gemini"]
+        assert set(arch.agents_to_use) == {"claude", "gemini"}
 
     @pytest.mark.asyncio
     async def test_execute_with_empty_approach(self):

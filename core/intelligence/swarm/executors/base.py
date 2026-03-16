@@ -303,8 +303,10 @@ class ModeExecutor(ABC):
 
         try:
             # Apply rate limiting
+            # V12.4 Multi-provider: resolve provider dynamically from registry
             registry = get_registry()
-            provider = "gemini" if registry.is_gemini(agent_id) else "claude"
+            agent_desc = registry.get(agent_id)
+            provider = agent_desc.provider.value if agent_desc else agent_id
             _rl = _get_rate_limiter_imports()
             rate_limiter = _rl.get_rate_limiter(provider)
 
@@ -379,8 +381,10 @@ class ModeExecutor(ABC):
 
         try:
             # Async rate limiting
+            # V12.4 Multi-provider: resolve provider dynamically from registry
             registry = get_registry()
-            provider = "gemini" if registry.is_gemini(agent_id) else "claude"
+            agent_desc = registry.get(agent_id)
+            provider = agent_desc.provider.value if agent_desc else agent_id
             _rl = _get_rate_limiter_imports()
             rate_limiter = _rl.get_rate_limiter(provider)
 

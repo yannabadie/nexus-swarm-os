@@ -138,6 +138,7 @@ W_CONFIDENCE: float = 0.15  # Confidence calibration weight
 W_PEER: float = 0.20  # Peer assessment weight
 
 # Domain capability profiles (default priors based on model strengths)
+# V12.4 Multi-provider: Extended from 2 (claude/gemini) to all 7 providers
 DEFAULT_DOMAIN_PROFILES: dict[str, dict[str, float]] = {
     "claude": {
         "coding": 0.85,
@@ -158,6 +159,56 @@ DEFAULT_DOMAIN_PROFILES: dict[str, dict[str, float]] = {
         "research": 0.90,
         "debugging": 0.75,
         "review": 0.80,
+    },
+    "openai": {
+        "coding": 0.82,
+        "analysis": 0.82,
+        "security": 0.78,
+        "architecture": 0.80,
+        "writing": 0.85,
+        "research": 0.80,
+        "debugging": 0.78,
+        "review": 0.82,
+    },
+    "deepseek": {
+        "coding": 0.88,
+        "analysis": 0.78,
+        "security": 0.70,
+        "architecture": 0.75,
+        "writing": 0.70,
+        "research": 0.65,
+        "debugging": 0.82,
+        "review": 0.75,
+    },
+    "kimi": {
+        "coding": 0.78,
+        "analysis": 0.80,
+        "security": 0.68,
+        "architecture": 0.72,
+        "writing": 0.78,
+        "research": 0.82,
+        "debugging": 0.70,
+        "review": 0.75,
+    },
+    "minimax": {
+        "coding": 0.75,
+        "analysis": 0.72,
+        "security": 0.62,
+        "architecture": 0.68,
+        "writing": 0.75,
+        "research": 0.72,
+        "debugging": 0.65,
+        "review": 0.70,
+    },
+    "ollama": {
+        "coding": 0.65,
+        "analysis": 0.60,
+        "security": 0.50,
+        "architecture": 0.55,
+        "writing": 0.62,
+        "research": 0.50,
+        "debugging": 0.60,
+        "review": 0.58,
     },
 }
 
