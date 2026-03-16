@@ -1,11 +1,41 @@
 # SESSION CONTINUITY - NEXUS V12.4 "COGNITIVE BOOST"
 
-**Date**: 2026-02-15
-**Session**: V12.4 COGNITIVE BOOST - Codebase Expansion and Hardening
-**Status**: V12.4 COGNITIVE BOOST COMPLETE - Documentation alignment in progress
+**Date**: 2026-03-16
+**Session**: NX-CG Model-Agnostic Swarm Migration — CapabilityRouter + BasePhase
+**Status**: CapabilityRouter migration COMPLETE — all 6 phases on BasePhase, CapabilityRouter wired
 **Branch**: NX-CG
-**Latest Commit**: d90e802 (feat(V12.4): add 5 COGNITIVE BOOST cross-domain analytics modules with 143 tests)
-**Operator**: Claude Code (Opus 4.6)
+**Latest Commit**: 6bf8022 (fix: primary_domain in _route_agents_for_phase)
+**Operator**: Claude Code (Sonnet 4.6)
+
+---
+
+## NX-CG Model-Agnostic Migration Summary (2026-03-16)
+
+### New Files
+- `core/intelligence/swarm/capability_router.py` — CapabilityRouter maps task domains → semantic slots → BaseAsyncDriver
+- `core/intelligence/hive_mind/base_phase.py` — BasePhase with deprecated `.gemini`/`.claude` aliases
+- `tests/test_capability_router.py` — 13 tests
+- `tests/test_base_phase.py` — 11 tests
+
+### Modified Files
+- `core/intelligence/swarm/negotiation_protocol.py` — removed hardcoded `["gemini","claude"]` fallback
+- `core/intelligence/swarm/hybrid_swarm_engine.py` — single-provider mode degradation to SPECIALIST
+- `core/intelligence/hive_mind/orchestrator.py` — CapabilityRouter wired; `_route_agents_for_phase()` helper
+- All 6 HiveMind phases — now extend BasePhase, use `super().__init__(agents=...)`, no direct `.gemini`/`.claude` assignments
+- 3 phases fixed `get_parallel_sessions` to use `self.agent_ids` not hardcoded list
+
+### Key Commits
+| Hash | Description |
+|------|-------------|
+| 6bf8022 | fix: primary_domain in _route_agents_for_phase |
+| d88a494 | fix(hivemind): replace remaining hardcoded [gemini,claude] with self.agent_ids |
+| e1e75a9 | feat(swarm/hivemind): CapabilityRouter + single-provider mode degradation |
+| 50b2b02 | feat(hivemind): wire BasePhase into all 6 HiveMind phases |
+| 73e85b5 | feat(hivemind): add BasePhase with deprecated gemini/claude aliases |
+| 9a49348 | fix(swarm): remove hardcoded [gemini,claude] fallback in NegotiationProtocol |
+| daabad3 | feat(swarm): add CapabilityRouter — model-agnostic slot assignment |
+
+---
 
 ---
 
