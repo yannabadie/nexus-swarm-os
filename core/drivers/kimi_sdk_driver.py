@@ -277,12 +277,10 @@ class KimiSDKDriver(BaseAsyncDriver):
 
             # Track budget if available
             if self._budget_tracker:
-                self._budget_tracker.record_cost(
-                    provider=self._provider,
-                    model=self._model,
+                self._budget_tracker.track_cost(
+                    self._model,
                     input_tokens=input_tokens,
                     output_tokens=output_tokens,
-                    cost_usd=round(cost_total, 6),
                 )
 
             # Handle tool calls if present

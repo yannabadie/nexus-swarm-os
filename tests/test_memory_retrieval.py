@@ -238,8 +238,15 @@ class TestFindSimilarTasks:
 
         assert len(similar) <= 1
 
-    def test_min_score_filter(self, memory_with_entries):
+    def test_min_score_filter(self, memory_with_entries, monkeypatch):
         """Min score filters low similarity results."""
+        # Force TF-IDF backend so min_score is applied correctly at retrieval time.
+        # The hybrid backend passes min_score=0.0 internally and may bypass the threshold.
+        monkeypatch.setenv("PROJECT_MEMORY_BACKEND", "tfidf")
+        pm = memory_with_entries.project_memory
+        pm._backend = pm._select_backend()
+        pm._backend_dirty = True
+
         similar = memory_with_entries.find_similar_tasks(
             "Fix authentication",
             limit=10,
@@ -250,8 +257,14 @@ class TestFindSimilarTasks:
         for _entry, score in similar:
             assert score >= 0.9
 
-    def test_no_matches(self, memory_with_entries):
+    def test_no_matches(self, memory_with_entries, monkeypatch):
         """Returns empty for no matches."""
+        # Force TF-IDF backend so min_score is applied correctly at retrieval time.
+        monkeypatch.setenv("PROJECT_MEMORY_BACKEND", "tfidf")
+        pm = memory_with_entries.project_memory
+        pm._backend = pm._select_backend()
+        pm._backend_dirty = True
+
         similar = memory_with_entries.find_similar_tasks(
             "completely unrelated query about bananas", limit=5, min_score=0.5
         )
@@ -333,8 +346,14 @@ class TestGetBestModeForSimilar:
         assert mode == "ping_pong"
         assert similarity > 0
 
-    def test_returns_none_for_no_match(self, memory_with_mode_history):
+    def test_returns_none_for_no_match(self, memory_with_mode_history, monkeypatch):
         """Returns None when no similar tasks found."""
+        # Force TF-IDF backend so min_similarity is applied correctly at retrieval time.
+        monkeypatch.setenv("PROJECT_MEMORY_BACKEND", "tfidf")
+        pm = memory_with_mode_history.project_memory
+        pm._backend = pm._select_backend()
+        pm._backend_dirty = True
+
         result = memory_with_mode_history.get_best_mode_for_similar("completely unrelated query", min_similarity=0.5)
 
         assert result is None

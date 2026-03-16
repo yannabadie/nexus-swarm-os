@@ -830,11 +830,12 @@ class TestComplexityScoring:
         assert result.complexity >= TaskComplexity.MODERATE
 
     def test_security_domain_adds_complexity(self, analyzer):
-        """SECURITY domain adds +1 to complexity."""
+        """SECURITY domain adds complexity (V12.4: reduced from +2 to +1 per keyword)."""
         result = analyzer.analyze("check for sql injection vulnerability attacks")
         assert TaskDomain.SECURITY in result.domains
-        # Security domain adds +1 plus security keyword adds +2
-        assert result.complexity >= TaskComplexity.COMPLEX
+        # V12.4 FIX: security keywords are +1 each (not +2) to avoid over-inflation.
+        # A targeted security check is MODERATE, not COMPLEX/EXPERT.
+        assert result.complexity >= TaskComplexity.MODERATE
 
     def test_architecture_domain_adds_complexity(self, analyzer):
         """ARCHITECTURE domain adds +1 to complexity."""

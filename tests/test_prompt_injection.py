@@ -137,7 +137,12 @@ class TestInputGuard:
         for attack in attacks:
             result = guard.validate(attack)
             assert not result.is_safe, f"Should block: {attack}"
-            assert result.threat_type == ThreatType.DELIMITER_INJECTION
+            # delimiter_injection must be detected (may not be primary threat if a
+            # higher-severity pattern also matches, e.g. role_override at CRITICAL)
+            assert "delimiter_injection" in result.matched_patterns, (
+                f"Expected delimiter_injection in matched_patterns for: {attack!r}, "
+                f"got: {result.matched_patterns}"
+            )
 
     def test_authority_claim_detected(self):
         """False authority claims should be detected."""

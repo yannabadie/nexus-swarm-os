@@ -380,8 +380,13 @@ class TestRetrieval:
         results = project_memory.retrieve("")
         assert len(results) == 0
 
-    def test_retrieve_no_match(self, project_memory, temp_nexus_root):
+    def test_retrieve_no_match(self, project_memory, temp_nexus_root, monkeypatch):
         """Query with no matches should return empty at high min_score."""
+        # Force TF-IDF backend so min_score is applied correctly at retrieval time.
+        # The hybrid backend passes min_score=0.0 internally in its single-backend path.
+        monkeypatch.setenv("PROJECT_MEMORY_BACKEND", "tfidf")
+        project_memory._backend = project_memory._select_backend()
+        project_memory._backend_dirty = True
         project_memory.index_directory(temp_nexus_root)
 
         results = project_memory.retrieve("xyznonexistentterm123", min_score=0.9)

@@ -134,7 +134,7 @@ class TestTaskAnalyzer:
         result = analyzer.analyze("Review this code for security vulnerabilities")
 
         assert TaskDomain.SECURITY in result.domains
-        assert result.complexity >= TaskComplexity.COMPLEX
+        assert result.complexity >= TaskComplexity.MODERATE  # "security" demoted from +2 to +1
         assert result.needs_adversarial_mode is True
 
     def test_trivial_task_detection(self):
