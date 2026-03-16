@@ -307,8 +307,19 @@ class NegotiationProtocol:
         # V10 FIX F7: Use adaptive max_turns based on complexity
         effective_max_turns = self._get_adaptive_max_turns(task_analysis)
 
-        # Agents alternate: Gemini starts
-        agents = ["gemini", "claude"]
+        # V12.4 Multi-provider: dynamic agent list from registry
+        registry = get_registry()
+        agents = registry.get_active_builtin_ids()
+        if not agents:
+            # No providers registered — return forced result immediately
+            return NegotiationResult(
+                status=NegotiationStatus.FORCED,
+                selected_mode=current_proposal.mode,
+                agent_assignments=current_proposal.agent_assignments,
+                negotiation_history=history,
+                total_turns=0,
+                consensus_confidence=current_proposal.confidence,
+            )
 
         while current_turn < effective_max_turns:
             # Check time-based timeout
@@ -325,7 +336,7 @@ class NegotiationProtocol:
                         consensus_confidence=current_proposal.confidence,
                     )
 
-            agent_id = agents[current_turn % 2]
+            agent_id = agents[current_turn % len(agents)]
 
             # Build context for agent
             context = self._build_negotiation_context(task_analysis, current_proposal, history, agent_id)
@@ -338,7 +349,9 @@ class NegotiationProtocol:
             history.append(message)
 
             # V13.0 CEREBRO LIVE: Emit negotiation exchange
-            other_agent = "claude" if agent_id == "gemini" else "gemini"
+            # V12.4 Multi-provider: dynamic next-agent lookup
+            other_agents = [a for a in agents if a != agent_id]
+            other_agent = other_agents[0] if other_agents else agent_id
             emit_agent_speak(agent_id, message.natural_content[:200], action_type="NEGOTIATE")
             emit_agent_exchange(
                 agent_id,
@@ -541,12 +554,10 @@ class NegotiationProtocol:
                     else:
                         role = "support"
 
-                # V8.4.0: Use registry for agent identification
+                # V12.4 Multi-provider: use registry to resolve agent ID
                 registry = get_registry()
-                if registry.is_gemini(agent_id):
-                    full_agent_id = "gemini_primary"
-                else:
-                    full_agent_id = "claude_opus"
+                agent_desc = registry.get(agent_id)
+                full_agent_id = agent_desc.id if agent_desc else agent_id
 
                 assignments.append(AgentAssignment(agent_id=full_agent_id, role=role, subtask=subtask, confidence=0.8))
 
@@ -616,7 +627,7 @@ Include your formal position in a <negotiate> block:
 <negotiate>
 {{
   "proposed_mode": "your_preferred_mode",
-  "proposed_lead": "gemini or claude",
+  "proposed_lead": "agent_id of preferred lead",
   "confidence": 0.0-1.0,
   "my_role": "lead/support/equal",
   "justification": "why this mode",
