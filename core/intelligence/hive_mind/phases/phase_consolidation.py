@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
 from ..agent_registry import AgentRegistry
+from ..base_phase import BasePhase
 from ..context_manager import HiveMindContextManager
 from ..cost_estimator import CostEstimator
 from ..prompts import CONSOLIDATION_SYSTEM_PROMPT  # V12.4.1: Static prompt for caching
@@ -128,7 +129,7 @@ class ConsolidationPhaseResult:
     agents_deleted: list[str]
 
 
-class KnowledgeConsolidationPhase:
+class KnowledgeConsolidationPhase(BasePhase):
     """
     Phase 7: Knowledge Consolidation
 
@@ -139,23 +140,25 @@ class KnowledgeConsolidationPhase:
 
     def __init__(
         self,
-        gemini_driver: "BaseAsyncDriver",
-        claude_driver: "BaseAsyncDriver",
-        cost_estimator: CostEstimator,
-        context_manager: HiveMindContextManager,
-        agent_registry: AgentRegistry,
-        user_handler: UserInteractionHandler,
+        gemini_driver: "BaseAsyncDriver | None" = None,
+        claude_driver: "BaseAsyncDriver | None" = None,
+        cost_estimator: CostEstimator | None = None,
+        context_manager: HiveMindContextManager | None = None,
+        agent_registry: AgentRegistry | None = None,
+        user_handler: UserInteractionHandler | None = None,
         project_memory: "ProjectMemory" = None,
         task_id: str | None = None,
         session_manager: Optional["SwarmSessionManager"] = None,
         workspace_path: Path | None = None,  # V12.4.1 Epic 1.4: For V2 memory recording
+        *,
+        agents: dict[str, "BaseAsyncDriver"] | None = None,
     ):
         """
         Initialize Phase 7.
 
         Args:
-            gemini_driver: Gemini driver
-            claude_driver: Claude driver
+            gemini_driver: Gemini driver (legacy, prefer agents dict)
+            claude_driver: Claude driver (legacy, prefer agents dict)
             cost_estimator: Cost estimator
             context_manager: Context manager
             agent_registry: Agent registry
@@ -164,9 +167,17 @@ class KnowledgeConsolidationPhase:
             task_id: V9.2 - Unique task identifier for session isolation
             session_manager: V9.2 - Optional session manager for persistence
             workspace_path: V12.4.1 - Workspace path for V2 memory recording
+            agents: V12.4 - Dict mapping provider IDs to driver instances
         """
-        self.gemini = gemini_driver
-        self.claude = claude_driver
+        # V12.4: N-agent support via BasePhase
+        if agents is None:
+            agents = {}
+            if gemini_driver is not None:
+                agents["gemini"] = gemini_driver
+            if claude_driver is not None:
+                agents["claude"] = claude_driver
+        super().__init__(agents=agents)
+        self.agent_ids = list(self.agents.keys())
         self.cost_estimator = cost_estimator
         self.context_manager = context_manager
         self.registry = agent_registry
