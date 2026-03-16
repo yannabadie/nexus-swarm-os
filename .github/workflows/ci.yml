@@ -1,0 +1,759 @@
+name: NEXUS CI
+
+on:
+  push:
+    branches: [NX-CG]
+  pull_request:
+    branches: [NX-CG]
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+env:
+  PYTHONPATH: ${{ github.workspace }}
+  SKIP_LLM_TESTS: "1"
+  NEXUS_TELEMETRY: "0"
+
+jobs:
+  unit-tests:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build hatchling
+          pip install -e ".[all]" 2>/dev/null || pip install -r requirements.txt
+
+      - name: Create workspace directories
+        run: mkdir -p workspace/.nexus workspace/logs workspace/memory workspace/agents
+
+      - name: Run tests with coverage
+        run: |
+          python -m pytest tests/ \
+            --tb=short -q \
+            --timeout=60 \
+            --ignore=tests/benchmark_professional.py \
+            --cov=core \
+            --cov-report=xml \
+            --cov-report=term-missing:skip-covered \
+            --cov-fail-under=60 \
+            --junitxml=pytest-junit.xml
+        timeout-minutes: 20
+
+      - name: Upload unit test evidence
+        if: always() && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-evidence
+          path: |
+            coverage.xml
+            pytest-junit.xml
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.13'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+
+  lint-type-check:
+    name: Lint & Types
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy hatchling
+          pip install -e . 2>/dev/null || pip install -r requirements.txt
+
+      - name: Repository hygiene
+        run: python scripts/check_repo_hygiene.py
+
+      - name: Ruff lint
+        run: ruff check core/ tests/ nexus7.py --output-format=github
+
+      - name: Ruff format check
+        run: ruff format --check core/ tests/ nexus7.py
+
+      - name: Python syntax compilation
+        run: |
+          python -m py_compile nexus7.py
+          find core -name "*.py" -exec python -m py_compile {} \;
+
+      - name: Mypy type check
+        run: mypy core/native/ --ignore-missing-imports --no-error-summary
+
+  security-scan:
+    name: Security
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install bandit
+        run: pip install bandit[toml]
+
+      - name: Run bandit security scan
+        run: |
+          bandit -r core/ -c pyproject.toml --format json --output bandit-report.json -ll
+          bandit -r core/ -c pyproject.toml --format screen -ll
+
+      - name: Upload security evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-evidence
+          path: bandit-report.json
+          retention-days: 14
+
+  shadow-redteam-smoke:
+    name: Shadow Red Team snapshot
+    runs-on: ubuntu-latest
+    needs: [unit-tests, lint-type-check, security-scan]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatchling
+          pip install -e ".[all]" 2>/dev/null || pip install -r requirements.txt
+
+      - name: Run Shadow Red Team snapshot
+        run: |
+          python scripts/run_shadow_redteam_snapshot.py --output artifacts/shadow-redteam-summary.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("artifacts/shadow-redteam-summary.json").read_text(encoding="utf-8"))
+          assert payload["total_attacks"] > 0, payload
+          assert "attack_success_rate" in payload, payload
+          assert "false_positive_rate" in payload, payload
+          PY
+
+      - name: Upload Shadow Red Team evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shadow-redteam-evidence
+          path: artifacts/shadow-redteam-summary.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  swarm-eval-smoke:
+    name: Swarm evaluation harness
+    runs-on: ubuntu-latest
+    needs: [unit-tests, lint-type-check, security-scan]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatchling
+          pip install -e ".[all]" 2>/dev/null || pip install -r requirements.txt
+
+      - name: Run deterministic swarm evaluation harness
+        run: |
+          python scripts/run_swarm_eval_harness.py --output-root artifacts/swarm-eval
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report_path = next(Path("artifacts/swarm-eval").glob("*/report.json"))
+          payload = json.loads(report_path.read_text(encoding="utf-8"))
+          summaries = {item["strategy"]: item for item in payload["strategy_summaries"]}
+          assert "swarm" in summaries, summaries
+          assert "single_agent" in summaries, summaries
+          assert "deterministic_pipeline" in summaries, summaries
+          assert summaries["swarm"]["recovery_rate"] > 0, summaries["swarm"]
+          PY
+
+      - name: Upload swarm evaluation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swarm-eval-evidence
+          path: artifacts/swarm-eval
+          retention-days: 14
+          if-no-files-found: warn
+
+  provider-live-canaries:
+    name: Provider live canaries
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [unit-tests, lint-type-check, security-scan]
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+      MINIMAX_API_KEY: ${{ secrets.MINIMAX_API_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatchling
+          pip install -e ".[dev,sdk]" 2>/dev/null || pip install -r requirements.txt
+
+      - name: Run provider canaries
+        run: |
+          python scripts/run_provider_canaries.py --output artifacts/provider-canaries.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("artifacts/provider-canaries.json").read_text(encoding="utf-8"))
+          assert "summary" in payload, payload
+          assert "results" in payload, payload
+          PY
+
+      - name: Upload provider canary evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-canary-evidence
+          path: artifacts/provider-canaries.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  build-wheel:
+    name: Build wheel
+    runs-on: ubuntu-latest
+    needs: [unit-tests, lint-type-check, security-scan]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install build backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install build hatchling
+
+      - name: Build wheel
+        run: python -m build --wheel
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-wheel
+          path: dist/*.whl
+          retention-days: 14
+
+  install-smoke:
+    name: Install smoke
+    runs-on: ubuntu-latest
+    needs: [build-wheel]
+    env:
+      PYTHONPATH: ""
+
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Download wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: built-wheel
+          path: dist
+
+      - name: Install wheel
+        run: pip install dist/*.whl
+
+      - name: Smoke installed entrypoints
+        run: |
+          nexus --version
+          nexus-research --help
+          python -c "from core.config import Config; print(Config().nexus_version)"
+
+  interactive-bootstrap-smoke:
+    name: Interactive bootstrap smoke
+    runs-on: ubuntu-latest
+    needs: [unit-tests, lint-type-check, security-scan]
+    env:
+      NEXUS_DRIVER_MODE: cli
+      ANTHROPIC_API_KEY: ""
+      GOOGLE_API_KEY: ""
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatchling
+          pip install -e ".[all]" 2>/dev/null || pip install -r requirements.txt
+
+      - name: Install fake CLI providers
+        run: |
+          mkdir -p .ci-bin
+          cat > .ci-bin/gemini <<'SH'
+          #!/usr/bin/env sh
+          if [ "$1" = "--version" ]; then
+            echo "gemini-cli 1.0.0"
+            exit 0
+          fi
+          if [ "$1" = "models" ]; then
+            echo "gemini-3.1-pro-preview"
+            exit 0
+          fi
+          echo "gemini-cli"
+          SH
+          cat > .ci-bin/claude <<'SH'
+          #!/usr/bin/env sh
+          echo "Claude Code 1.0.0"
+          SH
+          chmod +x .ci-bin/gemini .ci-bin/claude
+          echo "${GITHUB_WORKSPACE}/.ci-bin" >> "$GITHUB_PATH"
+
+      - name: Verify bootstrap path
+        run: python nexus7.py --verify
+
+  research-cli-smoke:
+    name: Research CLI smoke
+    runs-on: ubuntu-latest
+    needs: [unit-tests, lint-type-check, security-scan]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatchling
+          pip install -e ".[all]" 2>/dev/null || pip install -r requirements.txt
+
+      - name: Run research CLI success path
+        run: |
+          python nexus_research.py "How does ProjectMemory index files?" \
+            --mode mock \
+            --path core/memory_pkg/memory/project_memory.py \
+            --output research-smoke
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          output_dir = Path("research-smoke")
+          expected = {
+              "report.md",
+              "sources.json",
+              "trace.jsonl",
+              "reasoning_graph.mmd",
+              "metrics.json",
+              "manifest.sha256",
+          }
+          for name in expected:
+              assert (output_dir / name).exists(), name
+
+          sources = json.loads((output_dir / "sources.json").read_text(encoding="utf-8"))
+          assert sources["mode"] == "mock", sources
+          assert sources["sources"], sources
+          assert sources["synthesis"]["findings"], sources
+
+          metrics = json.loads((output_dir / "metrics.json").read_text(encoding="utf-8"))
+          assert metrics["finding_count"] >= 1, metrics
+          assert "confidence_score" in metrics, metrics
+          PY
+
+      - name: Upload research smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-smoke-evidence
+          path: research-smoke
+          retention-days: 14
+          if-no-files-found: warn
+
+  headless-success-smoke:
+    name: Headless success smoke
+    runs-on: ubuntu-latest
+    needs: [unit-tests, lint-type-check, security-scan]
+    env:
+      NEXUS_DRIVER_MODE: sdk
+      GOOGLE_API_KEY: test-google-key
+      ANTHROPIC_API_KEY: test-anthropic-key
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatchling
+          pip install -e ".[all]" 2>/dev/null || pip install -r requirements.txt
+
+      - name: Run headless boot success contract
+        run: |
+          python nexus7.py --headless --output headless-success.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("headless-success.json").read_text(encoding="utf-8"))
+          assert payload["status"] == "success", payload
+          assert payload["mode"] == "headless", payload
+          assert payload["output"] == "Headless boot validation successful", payload
+          assert payload["driver"] in {"anthropic_sdk", "google_genai_sdk"}, payload
+          assert payload["task"] is None, payload
+          PY
+
+      - name: Upload headless success evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: headless-success-evidence
+          path: headless-success.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  headless-task-success-smoke:
+    name: Headless task success smoke
+    runs-on: ubuntu-latest
+    needs: [unit-tests, lint-type-check, security-scan]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatchling
+          pip install -e ".[all]" 2>/dev/null || pip install -r requirements.txt
+
+      - name: Run shared headless task success contract
+        run: |
+          python scripts/run_headless_stub_task.py \
+            --task "Validate orchestrated stub task" \
+            --output headless-task-success.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("headless-task-success.json").read_text(encoding="utf-8"))
+          assert payload["status"] == "success", payload
+          assert payload["task"] == "Validate orchestrated stub task", payload
+          assert payload["output"] == "Stub task execution successful", payload
+          assert payload["driver"] == "anthropic_sdk", payload
+          assert payload["artifacts"], payload
+          PY
+
+      - name: Upload headless task success evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: headless-task-success-evidence
+          path: headless-task-success.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  headless-failure-smoke:
+    name: Headless failure contract
+    runs-on: ubuntu-latest
+    needs: [unit-tests, lint-type-check, security-scan]
+    env:
+      NEXUS_DRIVER_MODE: cli
+      ANTHROPIC_API_KEY: ""
+      GOOGLE_API_KEY: ""
+      GEMINI_API_KEY: ""
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatchling
+          pip install -e ".[all]" 2>/dev/null || pip install -r requirements.txt
+
+      - name: Run strict headless contract
+        run: |
+          PYTHON_BIN="$(command -v python)"
+          set +e
+          PATH="/usr/bin:/bin" "$PYTHON_BIN" nexus7.py --headless --task "Validate system health" --output headless-smoke.json
+          exit_code=$?
+          set -e
+          test "$exit_code" -eq 1
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("headless-smoke.json").read_text(encoding="utf-8"))
+          assert payload["status"] == "failure", payload
+          assert payload["task"] == "Validate system health", payload
+          assert payload["driver"] is None, payload
+          assert payload["output"] is None, payload
+          assert payload["error_code"] == "RUNTIMEERROR", payload
+          assert "required for the selected runtime path" in payload["error"], payload
+          assert payload["output"] != "Headless boot validation successful", payload
+          assert "error_code" in payload, payload
+          assert "warnings" in payload, payload
+          PY
+
+      - name: Upload headless evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: headless-evidence
+          path: headless-smoke.json
+          retention-days: 14
+          if-no-files-found: warn
+
+  evidence-ledger:
+    name: Evidence ledger
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - unit-tests
+      - lint-type-check
+      - security-scan
+      - shadow-redteam-smoke
+      - swarm-eval-smoke
+      - provider-live-canaries
+      - build-wheel
+      - install-smoke
+      - interactive-bootstrap-smoke
+      - research-cli-smoke
+      - headless-success-smoke
+      - headless-task-success-smoke
+      - headless-failure-smoke
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Download evidence artifacts
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          path: ci-artifacts
+
+      - name: Generate evidence ledger
+        run: |
+          python scripts/generate_evidence_ledger.py \
+            --workflow-name "${{ github.workflow }}" \
+            --run-id "${{ github.run_id }}" \
+            --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --branch "${{ github.ref_name }}" \
+            --sha "${{ github.sha }}" \
+            --python-version "3.13" \
+            --junit-xml "ci-artifacts/unit-test-evidence/pytest-junit.xml" \
+            --coverage-xml "ci-artifacts/unit-test-evidence/coverage.xml" \
+            --provider-registry "core/provider_registry.json" \
+            --job-result "unit-tests=${{ needs.unit-tests.result }}" \
+            --job-result "lint-type-check=${{ needs.lint-type-check.result }}" \
+            --job-result "security-scan=${{ needs.security-scan.result }}" \
+            --job-result "shadow-redteam-smoke=${{ needs.shadow-redteam-smoke.result }}" \
+            --job-result "swarm-eval-smoke=${{ needs.swarm-eval-smoke.result }}" \
+            --job-result "provider-live-canaries=${{ needs.provider-live-canaries.result }}" \
+            --job-result "build-wheel=${{ needs.build-wheel.result }}" \
+            --job-result "install-smoke=${{ needs.install-smoke.result }}" \
+            --job-result "interactive-bootstrap-smoke=${{ needs.interactive-bootstrap-smoke.result }}" \
+            --job-result "research-cli-smoke=${{ needs.research-cli-smoke.result }}" \
+            --job-result "headless-success-smoke=${{ needs.headless-success-smoke.result }}" \
+            --job-result "headless-task-success-smoke=${{ needs.headless-task-success-smoke.result }}" \
+            --job-result "headless-failure-smoke=${{ needs.headless-failure-smoke.result }}" \
+            --artifact "unit-test-evidence=ci-artifacts/unit-test-evidence" \
+            --artifact "security-evidence=ci-artifacts/security-evidence" \
+            --artifact "shadow-redteam-evidence=ci-artifacts/shadow-redteam-evidence" \
+            --artifact "swarm-eval-evidence=ci-artifacts/swarm-eval-evidence" \
+            --artifact "provider-canary-evidence=ci-artifacts/provider-canary-evidence" \
+            --artifact "built-wheel=ci-artifacts/built-wheel" \
+            --swarm-eval-root "ci-artifacts/swarm-eval-evidence" \
+            --shadow-redteam-json "ci-artifacts/shadow-redteam-evidence/shadow-redteam-summary.json" \
+            --provider-canaries-json "ci-artifacts/provider-canary-evidence/provider-canaries.json" \
+            --artifact "research-smoke-evidence=ci-artifacts/research-smoke-evidence" \
+            --artifact "headless-success-evidence=ci-artifacts/headless-success-evidence" \
+            --artifact "headless-task-success-evidence=ci-artifacts/headless-task-success-evidence" \
+            --artifact "headless-evidence=ci-artifacts/headless-evidence" \
+            --output-json "artifacts/evidence-ledger.json" \
+            --output-markdown "artifacts/evidence-ledger.md"
+
+      - name: Upload evidence ledger
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-ledger
+          path: artifacts/evidence-ledger.*
+          retention-days: 30
+
+      - name: Append summary
+        if: always()
+        run: cat artifacts/evidence-ledger.md >> "$GITHUB_STEP_SUMMARY"
+
+  integration-gemini-context-isolation:
+    name: Gemini context isolation (manual)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    needs: [evidence-ledger]
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatchling
+          pip install -e ".[dev,sdk]" 2>/dev/null || pip install -r requirements.txt
+
+      - name: Run Gemini context isolation test
+        if: env.GEMINI_API_KEY != ''
+        run: python -m pytest tests/test_llm_context_isolation.py -v -s
+        timeout-minutes: 60
+
+  torture:
+    name: Torture Protocol
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [unit-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatchling
+          pip install -e ".[dev,sdk]" 2>/dev/null || pip install -r requirements.txt pytest-asyncio
+
+      - name: Create workspace
+        run: mkdir -p workspace/.nexus/sagas workspace/logs workspace/memory
+
+      - name: Run Torture Protocol
+        run: python -m pytest tests/torture_v8.py -m torture -v --tb=short
+        timeout-minutes: 30
+
+      - name: Generate report
+        if: always()
+        run: |
+          echo "## Torture Protocol Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Target Success Rate: >95%" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Target Recovery Rate: >90%" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Target Panic Rate: <1%" >> "$GITHUB_STEP_SUMMARY"

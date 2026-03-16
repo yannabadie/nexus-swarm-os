@@ -1,0 +1,57 @@
+# NEXUS Docker Ignore
+# Keep image lean by excluding dev/test/docs artifacts
+
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+dist/
+build/
+.eggs/
+
+# Testing
+.pytest_cache
+.mypy_cache
+.ruff_cache
+htmlcov/
+coverage.xml
+.coverage
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentation (not needed in runtime image)
+docs/
+audit/
+*.md
+!MISSION.md
+
+# Claude/AI config
+.claude/
+
+# Workspace data (mounted as volume)
+workspace/
+
+# Development files
+todo.md
+todo2.md
+SESSION_CONTINUITY.md
+Makefile
+
+# Rust source (compiled in build stage)
+rust/
+
+# Tests (not needed in production)
+tests/
+
+# Environment files (secrets - never bake into image)
+.env
+.env.*

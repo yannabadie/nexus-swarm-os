@@ -1,0 +1,248 @@
+name: Documentation Consistency
+
+on:
+  push:
+    branches: [NX-CG]
+    paths:
+      - ".env"
+      - ".env.example"
+      - "README.md"
+      - "CLAUDE.md"
+      - "ROADMAP.md"
+      - "core/provider_registry.json"
+      - "docs/**"
+      - "scripts/doc_engine.py"
+      - "core/**/*.py"
+  pull_request:
+    branches: [NX-CG]
+    paths:
+      - ".env"
+      - ".env.example"
+      - "README.md"
+      - "CLAUDE.md"
+      - "ROADMAP.md"
+      - "core/provider_registry.json"
+      - "docs/**"
+      - "scripts/doc_engine.py"
+      - "core/**/*.py"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Apply generated documentation updates"
+        required: false
+        default: "false"
+        type: boolean
+
+concurrency:
+  group: documentation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  documentation-check:
+    name: Check generated documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install python-dotenv
+
+      - name: Synchronize generated documentation
+        run: python scripts/doc_engine.py --sync --apply
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Verify architecture map determinism
+        run: |
+          mkdir -p artifacts
+          python scripts/doc_engine.py --gen-map --output artifacts/architecture-map-pass1.md --apply
+          python scripts/doc_engine.py --gen-map --output artifacts/architecture-map-pass2.md --apply
+          python - <<'PY'
+          from pathlib import Path
+
+          pass1 = Path("artifacts/architecture-map-pass1.md").read_text(encoding="utf-8")
+          pass2 = Path("artifacts/architecture-map-pass2.md").read_text(encoding="utf-8")
+          if pass1 != pass2:
+              raise SystemExit("Architecture map generation is not deterministic across repeated runs.")
+          PY
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Validate truth surfaces
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          from core.provider_registry import load_provider_registry
+          from core.version import NEXUS_CANONICAL_BRANCH, NEXUS_VERSION
+
+          errors: list[str] = []
+
+          env_values: dict[str, str] = {}
+          for raw_line in Path(".env.example").read_text(encoding="utf-8").splitlines():
+              line = raw_line.strip()
+              if not line or line.startswith("#") or "=" not in line:
+                  continue
+              key, value = line.split("=", 1)
+              env_values[key.strip()] = value.strip()
+
+          registry = load_provider_registry()["providers"]
+          expected_models = {
+              "CLAUDE_OPUS_MODEL": registry["anthropic"]["models"]["opus"]["default"],
+              "CLAUDE_SONNET_MODEL": registry["anthropic"]["models"]["sonnet"]["default"],
+              "GEMINI_PRO_MODEL": registry["google"]["models"]["pro"]["default"],
+              "GEMINI_FLASH_MODEL": registry["google"]["models"]["flash"]["default"],
+              "DEEPSEEK_MODEL": registry["deepseek"]["models"]["chat"]["default"],
+              "KIMI_MODEL": registry["kimi"]["models"]["thinking"]["default"],
+              "OPENAI_MODEL": registry["openai"]["models"]["flagship"]["default"],
+              "OPENAI_FAST_MODEL": registry["openai"]["models"]["balanced"]["default"],
+              "MINIMAX_MODEL": registry["minimax"]["models"]["reasoning"]["default"],
+              "MINIMAX_FAST_MODEL": registry["minimax"]["models"]["chat"]["default"],
+          }
+          for key, expected_value in expected_models.items():
+              current_value = env_values.get(key)
+              if current_value != expected_value:
+                  errors.append(f".env.example mismatch for {key}: {current_value!r} != {expected_value!r}")
+
+          roadmap = Path("ROADMAP.md").read_text(encoding="utf-8")
+          if f"**Version**: {NEXUS_VERSION}" not in roadmap:
+              errors.append("ROADMAP.md does not expose the canonical version from core.version")
+          if f"**Maintainer**: Yann Abadie | **Branch**: {NEXUS_CANONICAL_BRANCH}" not in roadmap:
+              errors.append("ROADMAP.md does not expose the canonical branch from core.version")
+          if "Use CI evidence ledger for current status." not in roadmap:
+              errors.append("ROADMAP.md must direct readers to the CI evidence ledger for current status")
+          if "Last Updated:" in roadmap:
+              errors.append("ROADMAP.md still contains a stale Last Updated field")
+
+          if errors:
+              raise SystemExit("\n".join(errors))
+          PY
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Fail on documentation drift
+        run: |
+          git diff --exit-code README.md CLAUDE.md
+
+      - name: Upload generated docs for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-generated
+          path: |
+            README.md
+            CLAUDE.md
+            .env.example
+            ROADMAP.md
+            artifacts/architecture-map-pass1.md
+            artifacts/architecture-map-pass2.md
+          retention-days: 14
+
+  documentation-apply:
+    name: Apply documentation updates
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.apply
+    needs: [documentation-check]
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install python-dotenv
+
+      - name: Apply documentation sync
+        run: python scripts/doc_engine.py --sync --apply
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Generate canonical architecture map
+        run: python scripts/doc_engine.py --gen-map --output docs/ARCHITECTURE_MAP_GENERATED.md --apply
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Validate truth surfaces
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          from core.provider_registry import load_provider_registry
+          from core.version import NEXUS_CANONICAL_BRANCH, NEXUS_VERSION
+
+          errors: list[str] = []
+
+          env_values: dict[str, str] = {}
+          for raw_line in Path(".env.example").read_text(encoding="utf-8").splitlines():
+              line = raw_line.strip()
+              if not line or line.startswith("#") or "=" not in line:
+                  continue
+              key, value = line.split("=", 1)
+              env_values[key.strip()] = value.strip()
+
+          registry = load_provider_registry()["providers"]
+          expected_models = {
+              "CLAUDE_OPUS_MODEL": registry["anthropic"]["models"]["opus"]["default"],
+              "CLAUDE_SONNET_MODEL": registry["anthropic"]["models"]["sonnet"]["default"],
+              "GEMINI_PRO_MODEL": registry["google"]["models"]["pro"]["default"],
+              "GEMINI_FLASH_MODEL": registry["google"]["models"]["flash"]["default"],
+              "DEEPSEEK_MODEL": registry["deepseek"]["models"]["chat"]["default"],
+              "KIMI_MODEL": registry["kimi"]["models"]["thinking"]["default"],
+              "OPENAI_MODEL": registry["openai"]["models"]["flagship"]["default"],
+              "OPENAI_FAST_MODEL": registry["openai"]["models"]["balanced"]["default"],
+              "MINIMAX_MODEL": registry["minimax"]["models"]["reasoning"]["default"],
+              "MINIMAX_FAST_MODEL": registry["minimax"]["models"]["chat"]["default"],
+          }
+          for key, expected_value in expected_models.items():
+              current_value = env_values.get(key)
+              if current_value != expected_value:
+                  errors.append(f".env.example mismatch for {key}: {current_value!r} != {expected_value!r}")
+
+          roadmap = Path("ROADMAP.md").read_text(encoding="utf-8")
+          if f"**Version**: {NEXUS_VERSION}" not in roadmap:
+              errors.append("ROADMAP.md does not expose the canonical version from core.version")
+          if f"**Maintainer**: Yann Abadie | **Branch**: {NEXUS_CANONICAL_BRANCH}" not in roadmap:
+              errors.append("ROADMAP.md does not expose the canonical branch from core.version")
+          if "Use CI evidence ledger for current status." not in roadmap:
+              errors.append("ROADMAP.md must direct readers to the CI evidence ledger for current status")
+          if "Last Updated:" in roadmap:
+              errors.append("ROADMAP.md still contains a stale Last Updated field")
+
+          if errors:
+              raise SystemExit("\n".join(errors))
+          PY
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Commit updates if needed
+        run: |
+          if git diff --quiet README.md CLAUDE.md docs/ARCHITECTURE_MAP_GENERATED.md .env.example ROADMAP.md; then
+            echo "No documentation updates to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md CLAUDE.md docs/ARCHITECTURE_MAP_GENERATED.md .env.example ROADMAP.md
+          git commit -m "docs: synchronize generated documentation [skip ci]"
+          git push

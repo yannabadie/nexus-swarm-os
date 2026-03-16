@@ -1,0 +1,63 @@
+{
+  "home_isolation": {
+    "test": "HOME_ISOLATION",
+    "home_a": "C:\\Code\\NEXUS\\NEXUS-N7A\\.session_homes\\proof_agent_A_56f43e7f",
+    "home_b": "C:\\Code\\NEXUS\\NEXUS-N7A\\.session_homes\\proof_agent_B_11a78736",
+    "uuid_a": "proof_agent_A_56f43e7f",
+    "uuid_b": "proof_agent_B_11a78736",
+    "homes_different": true,
+    "a_contains_session_id": true,
+    "b_contains_session_id": true,
+    "PASS": true,
+    "verdict": "ISOLATED - Each agent has unique HOME"
+  },
+  "cwd_preservation": {
+    "test": "CWD_PRESERVATION",
+    "subprocess_cwd": "C:\\Code\\NEXUS\\NEXUS-N7A",
+    "expected_cwd": "C:\\Code\\NEXUS\\NEXUS-N7A",
+    "PASS": true,
+    "verdict": "CWD PRESERVED at workspace root"
+  },
+  "env_leak_prevention": {
+    "test": "ENV_LEAK_PREVENTION",
+    "secret_set_in": "Agent A",
+    "secret_value": "TOP_SECRET_99e4ad467...",
+    "checked_in": "Agent B",
+    "value_seen_by_b": "NOT_FOUND",
+    "leaked": false,
+    "PASS": true,
+    "verdict": "NO LEAK - Environments isolated"
+  },
+  "concurrent_isolation": {
+    "test": "CONCURRENT_ISOLATION",
+    "agents_spawned": 5,
+    "unique_homes_count": 5,
+    "all_unique": true,
+    "homes": {
+      "concurrent_agent_0_b27799": "C:\\Code\\NEXUS\\NEXUS-N7A\\.session_homes\\concurrent_agent_0_b27799",
+      "concurrent_agent_1_6be3d7": "C:\\Code\\NEXUS\\NEXUS-N7A\\.session_homes\\concurrent_agent_1_6be3d7",
+      "concurrent_agent_2_0b1eae": "C:\\Code\\NEXUS\\NEXUS-N7A\\.session_homes\\concurrent_agent_2_0b1eae",
+      "concurrent_agent_3_a5fb47": "C:\\Code\\NEXUS\\NEXUS-N7A\\.session_homes\\concurrent_agent_3_a5fb47",
+      "concurrent_agent_4_816ef5": "C:\\Code\\NEXUS\\NEXUS-N7A\\.session_homes\\concurrent_agent_4_816ef5"
+    },
+    "PASS": true,
+    "verdict": "All 5 agents isolated"
+  },
+  "cleanup_verification": {
+    "test": "CLEANUP_VERIFICATION",
+    "session_id": "cleanup_test_86a2e1a7",
+    "directory_created": true,
+    "cleanup_returned": true,
+    "directory_removed": true,
+    "PASS": true,
+    "verdict": "Cleanup working correctly"
+  },
+  "_summary": {
+    "total_tests": 5,
+    "passed": 5,
+    "failed": 0,
+    "overall_pass": true,
+    "timestamp": "2025-12-13T21:48:19.866463",
+    "workspace": "C:\\Code\\NEXUS\\NEXUS-N7A"
+  }
+}

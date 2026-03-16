@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  /* NEXUS Color Palette */
+  --color-primary: #3B82F6;
+  --color-secondary: #10B981;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+  --color-nexus-dark: #1E293B;
+  --color-nexus-darker: #0F172A;
+
+  /* Agent Colors */
+  --color-claude: #22C55E;
+  --color-gemini: #06B6D4;
+  --color-swarm: #A855F7;
+
+  /* Font Families */
+  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Base styles */
+body {
+  @apply bg-nexus-darker text-white antialiased;
+  font-family: var(--font-family-sans);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-nexus-darker;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}

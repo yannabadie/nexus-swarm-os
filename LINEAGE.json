@@ -1,0 +1,207 @@
+{
+  "lineage_version": "1.0",
+  "created_at": "2025-11-21T20:00:00Z",
+  "last_updated": "2025-11-26T10:00:00Z",
+  "current_parent": {
+    "id": "NEXUS_V7.0",
+    "path": "NEXUS_V7_CHRYSALIS",
+    "generation": 7,
+    "asi_proximity_score": 0.78,
+    "activated_at": "2025-11-26T10:00:00Z",
+    "status": "active_parent"
+  },
+  "evolution_stats": {
+    "total_generations": 7,
+    "total_children_created": 3,
+    "successful_promotions": 6,
+    "stagnation_counter": 0,
+    "red_team_tests_passed": 1,
+    "gcp_requests": {
+      "total": 0,
+      "approved": 0,
+      "denied": 0,
+      "cost_total_eur": 0.0
+    }
+  },
+  "lineage_tree": {
+    "NEXUS_V1.0": {
+      "generation": 1,
+      "parent": null,
+      "children": [
+        "NEXUS_V2.0"
+      ],
+      "status": "archived",
+      "created_at": "2024-01-15T10:00:00Z",
+      "asi_proximity_score": 0.45,
+      "notable_features": [
+        "Initial coding agent",
+        "Basic orchestration"
+      ]
+    },
+    "NEXUS_V2.0": {
+      "generation": 2,
+      "parent": "NEXUS_V1.0",
+      "children": [
+        "NEXUS_V3.0"
+      ],
+      "status": "archived",
+      "created_at": "2024-05-20T14:30:00Z",
+      "asi_proximity_score": 0.52,
+      "notable_features": [
+        "Multi-agent collaboration",
+        "Memory system"
+      ]
+    },
+    "NEXUS_V3.0": {
+      "generation": 3,
+      "parent": "NEXUS_V2.0",
+      "children": [
+        "NEXUS_V4.0"
+      ],
+      "status": "archived",
+      "created_at": "2024-08-10T09:15:00Z",
+      "asi_proximity_score": 0.58,
+      "notable_features": [
+        "Improved reasoning",
+        "Web search capability"
+      ]
+    },
+    "NEXUS_V4.0": {
+      "generation": 4,
+      "parent": "NEXUS_V3.0",
+      "children": [
+        "NEXUS_V5.0"
+      ],
+      "status": "archived",
+      "created_at": "2025-01-12T11:00:00Z",
+      "asi_proximity_score": 0.63,
+      "notable_features": [
+        "Better code generation",
+        "Task decomposition"
+      ]
+    },
+    "NEXUS_V5.0": {
+      "generation": 5,
+      "parent": "NEXUS_V4.0",
+      "children": [
+        "NEXUS_V5.1"
+      ],
+      "status": "archived",
+      "created_at": "2025-06-05T16:45:00Z",
+      "asi_proximity_score": 0.68,
+      "notable_features": [
+        "Robustness improvements",
+        "Error recovery"
+      ]
+    },
+    "NEXUS_V5.1": {
+      "generation": 5,
+      "parent": "NEXUS_V5.0",
+      "children": [
+        "NEXUS_V6.0"
+      ],
+      "status": "archived",
+      "created_at": "2025-10-20T13:20:00Z",
+      "asi_proximity_score": 0.72,
+      "notable_features": [
+        "CFL validation",
+        "Plan Health monitoring"
+      ]
+    },
+    "NEXUS_V6.0": {
+      "generation": 6,
+      "parent": "NEXUS_V5.1",
+      "children": [
+        "NEXUS_V6.1_CHILD_001",
+        "NEXUS_V6.1_CHILD_001_ORCHESTRATION_V6",
+        "NEXUS_V6.1_CHILD_001_GEMINI_DRIVER_V6",
+        "NEXUS_V7.0"
+      ],
+      "status": "archived",
+      "created_at": "2025-11-21T19:20:00Z",
+      "asi_proximity_score": 0.75,
+      "notable_features": [
+        "FSM persistent orchestrator",
+        "Equal collaboration (Gemini + Claude)",
+        "Evolution engine integrated",
+        "Darwinian selection ready"
+      ],
+      "birth_certificate": null,
+      "stagnation_counter": 0
+    },
+    "NEXUS_V7.0": {
+      "generation": 7,
+      "parent": "NEXUS_V6.0",
+      "children": [],
+      "status": "active_parent",
+      "codename": "Chrysalis",
+      "created_at": "2025-11-26T10:00:00Z",
+      "asi_proximity_score": 0.78,
+      "notable_features": [
+        "TieredValidator (4-tier fail-fast validation)",
+        "DyLAN Agent Metrics (importance scoring)",
+        "Dynamic Model Routing (AgentPool)",
+        "Parallel Benchmark Execution (3-4x speedup)",
+        "Sprint-based development workflow",
+        "core/swarm/ module for Phase 6",
+        "core/routing/ for model selection"
+      ],
+      "birth_certificate": null,
+      "stagnation_counter": 0
+    }
+  },
+  "archived_generations": {
+    "GEN_001": {
+      "path": "ARCHIVE/GEN_001_V1/",
+      "parent": "NEXUS_V1.0",
+      "archived_at": "2024-05-20T14:30:00Z",
+      "reason": "Superseded by V2.0"
+    },
+    "GEN_002": {
+      "path": "ARCHIVE/GEN_002_V2/",
+      "parent": "NEXUS_V2.0",
+      "archived_at": "2024-08-10T09:15:00Z",
+      "reason": "Superseded by V3.0"
+    },
+    "GEN_003": {
+      "path": "ARCHIVE/GEN_003_V3/",
+      "parent": "NEXUS_V3.0",
+      "archived_at": "2025-01-12T11:00:00Z",
+      "reason": "Superseded by V4.0"
+    },
+    "GEN_004": {
+      "path": "ARCHIVE/GEN_004_V4/",
+      "parent": "NEXUS_V4.0",
+      "archived_at": "2025-06-05T16:45:00Z",
+      "reason": "Superseded by V5.0"
+    },
+    "GEN_005": {
+      "path": "ARCHIVE/GEN_005_V5/",
+      "parent": "NEXUS_V5.1",
+      "archived_at": "2025-11-21T19:20:00Z",
+      "reason": "Superseded by V6.0"
+    },
+    "GEN_006": {
+      "path": "ARCHIVE/GEN_006_V6/",
+      "parent": "NEXUS_V6.0",
+      "archived_at": "2025-11-26T10:00:00Z",
+      "reason": "Superseded by V7.0 (Sprint System + DyLAN)"
+    }
+  },
+  "notable_nexus_variants": [],
+  "security_log": {
+    "last_red_team_test": "2025-11-21T19:00:00Z",
+    "red_team_tests_total": 1,
+    "red_team_tests_passed": 1,
+    "red_team_tests_failed": 0,
+    "security_violations": [],
+    "gcp_violations": [],
+    "alignment_drift_detected": 0
+  },
+  "metadata": {
+    "schema_version": "1.0",
+    "maintained_by": "NEXUS Evolution Engine",
+    "human_authority": "Yann Abadie",
+    "last_human_validation": "2025-11-26T10:00:00Z"
+  }
+}

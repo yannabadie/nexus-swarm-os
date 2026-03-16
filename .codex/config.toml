@@ -1,0 +1,12 @@
+model = "gpt-5.4"
+model_reasoning_effort = "xhigh"
+model_context_window = 1050000
+model_auto_compact_token_limit = 900000
+
+[shell_environment_policy]
+inherit = "core"
+
+[shell_environment_policy.set]
+PROJECT_NAME = "NEXUS"
+PROJECT_VERSION = "V12.4"
+PYTHONPATH = "."

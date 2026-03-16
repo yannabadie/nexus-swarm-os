@@ -1,0 +1,141 @@
+{
+  "protocolVersion": "0.3.0",
+  "name": "NEXUS",
+  "description": "Collaborative orchestration runtime for multi-agent execution, local-first research, and MCP-connected tooling.",
+  "url": "http://localhost:8080",
+  "preferredTransport": "JSONRPC",
+  "additionalInterfaces": [
+    {
+      "url": "ws://localhost:8080/ws/stream",
+      "transport": "websocket"
+    }
+  ],
+  "provider": {
+    "organization": "NEXUS Project",
+    "url": "https://github.com/yannabadie/NEXUS/tree/NX-CG"
+  },
+  "version": "12.4.0",
+  "documentationUrl": "http://localhost:8080/docs",
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false,
+    "stateTransitionHistory": true,
+    "extensions": [
+      {
+        "uri": "urn:nexus:swarm-engine",
+        "description": "Dynamic multi-agent collaboration with 6 negotiated modes",
+        "required": false
+      },
+      {
+        "uri": "urn:nexus:evolution",
+        "description": "Agent spawning and mutation via evolutionary brainstorming",
+        "required": false
+      },
+      {
+        "uri": "urn:nexus:mcp",
+        "description": "Model Context Protocol server/client integration",
+        "required": false
+      }
+    ]
+  },
+  "securitySchemes": {
+    "bearer": {
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "JWT",
+      "description": "JWT token obtained via /api/auth/login"
+    },
+    "apiKey": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-API-Key",
+      "description": "API key for service-to-service calls"
+    }
+  },
+  "security": [
+    {"bearer": []},
+    {"apiKey": []}
+  ],
+  "defaultInputModes": ["text/plain", "application/json"],
+  "defaultOutputModes": ["text/plain", "application/json"],
+  "skills": [
+    {
+      "id": "collaborative-problem-solving",
+      "name": "Collaborative Problem Solving",
+      "description": "Analyzes complex tasks and orchestrates Claude + Gemini collaboration using the optimal swarm mode (PARALLEL, SEQUENTIAL, LEAD_SUPPORT, PING_PONG, SPECIALIST, RED_BLUE).",
+      "tags": ["orchestration", "multi-agent", "collaboration", "swarm"],
+      "examples": [
+        "Refactor the authentication module with security review",
+        "Analyze this codebase and propose improvements",
+        "Debug this failing test suite"
+      ],
+      "inputModes": ["text/plain"],
+      "outputModes": ["text/plain", "application/json"]
+    },
+    {
+      "id": "agent-spawning",
+      "name": "Agent Spawning & Evolution",
+      "description": "Generates specialized agents for domain-specific tasks via evolutionary brainstorming. Agents persist in workspace/agents/ with BIRTH_CERTIFICATEs.",
+      "tags": ["evolution", "spawning", "specialization"],
+      "examples": [
+        "Spawn a security expert agent",
+        "Create a specialized agent for this FastAPI project",
+        "Evolve current agents for better performance"
+      ],
+      "inputModes": ["text/plain"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "code-execution",
+      "name": "Secure Code Execution",
+      "description": "Executes shell commands and code through validated execution policies. Docker sandboxing is the default isolation path when available; validated host execution is a local-development opt-in.",
+      "tags": ["execution", "bash", "sandbox", "coding"],
+      "examples": [
+        "Run the test suite",
+        "Execute this Python script safely",
+        "Build and validate the project"
+      ],
+      "inputModes": ["text/plain"],
+      "outputModes": ["text/plain"]
+    },
+    {
+      "id": "rag-memory",
+      "name": "Project Memory & RAG",
+      "description": "Retrieves relevant project context using BM25S sparse retrieval and optional dense embeddings (LanceDB + sentence-transformers). Tracks success patterns.",
+      "tags": ["memory", "rag", "retrieval", "context"],
+      "examples": [
+        "What patterns worked best for auth implementations?",
+        "Retrieve context about the swarm engine",
+        "Search project memory for deployment configurations"
+      ],
+      "inputModes": ["text/plain"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "document-ingestion",
+      "name": "Multi-Format Document Ingestion",
+      "description": "Ingests PDF, DOCX, PPTX, XLSX, HTML, images, and audio into project memory using IBM Docling. 100% local processing.",
+      "tags": ["ingestion", "documents", "pdf", "docling"],
+      "examples": [
+        "Ingest this PDF specification into memory",
+        "Process these architecture documents",
+        "Add this Excel data to the knowledge base"
+      ],
+      "inputModes": ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/html", "image/*"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "web-research",
+      "name": "Web Research",
+      "description": "Searches the web and fetches content for up-to-date information gathering and research tasks.",
+      "tags": ["research", "web", "search"],
+      "examples": [
+        "Research the latest Python 3.14 changes",
+        "Find best practices for FastAPI security",
+        "Look up the current A2A protocol specification"
+      ],
+      "inputModes": ["text/plain"],
+      "outputModes": ["text/plain", "application/json"]
+    }
+  ]
+}
