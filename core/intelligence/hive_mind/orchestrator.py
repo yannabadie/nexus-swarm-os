@@ -52,6 +52,9 @@ from .cost_estimator import CostEstimator
 
 # V12.4: Phase audit logging for decision tracking
 from .phase_audit_logger import get_phase_audit_logger
+from core.intelligence.swarm.capability_router import CapabilityRouter
+from core.intelligence.swarm.task_analyzer import TaskAnalysis, TaskDomain
+
 from .phases import (
     AdaptiveRetryPhase,
     ArchitectureGenerationPhase,
@@ -279,61 +282,87 @@ class TrueHiveMind:
         except Exception:
             pass
 
+        # V12.4: CapabilityRouter for model-agnostic slot assignment
+        try:
+            from core.foundation.agents.unified_registry import get_registry as _get_registry
+
+            self._capability_router: CapabilityRouter | None = CapabilityRouter(_get_registry())
+        except Exception:
+            self._capability_router = None
+
         # Initialize phases
         self._init_phases()
 
+    def _route_agents_for_phase(self) -> dict[str, "BaseAsyncDriver"]:
+        """Route available providers to semantic slots via CapabilityRouter.
+
+        Falls back to self.agents if router unavailable or no providers registered.
+        """
+        if self._capability_router is None:
+            return self.agents
+        try:
+            dummy = TaskAnalysis(
+                raw_input="",
+                complexity=TaskComplexity.MODERATE,
+                domains=[TaskDomain.GENERAL],
+                gemini_fit_score=0.5,
+                claude_fit_score=0.5,
+            )
+            return self._capability_router.route(dummy)
+        except RuntimeError:
+            # No providers registered yet — use existing agents dict
+            return self.agents
+
     def _init_phases(self):
         """Initialize all 7 phases."""
+        # V12.4: Route providers to semantic slots via CapabilityRouter
+        routed_agents = self._route_agents_for_phase()
+
         # Phase 1: Independent Analysis
         # V12.4.1 Epic 1.4: Pass workspace_path for V2 memory access
         self.phase_analysis = IndependentAnalysisPhase(
-            gemini_driver=self.gemini,
-            claude_driver=self.claude,
             cost_estimator=self.cost_estimator,
             context_manager=self.context_manager,
             workspace_path=self.workspace_path,
+            agents=routed_agents,
         )
 
         # Phase 2: Strategic Debate
         self.phase_debate = StrategicDebatePhase(
-            gemini_driver=self.gemini,
-            claude_driver=self.claude,
             cost_estimator=self.cost_estimator,
             context_manager=self.context_manager,
             debate_config=self.debate_config,
+            agents=routed_agents,
         )
 
         # Phase 3: Architecture Generation
         self.phase_architecture = ArchitectureGenerationPhase(
-            gemini_driver=self.gemini,
-            claude_driver=self.claude,
             cost_estimator=self.cost_estimator,
             context_manager=self.context_manager,
             agent_registry=self.agent_registry,
             user_handler=self.user_handler,
             workspace_path=self.workspace_path,
+            agents=routed_agents,
         )
 
         # Phase 4: Monitored Execution
         # V8.4.5: Pass swarm_engine for SwarmBridge delegation (Dictator Mode)
         self.phase_execution = MonitoredExecutionPhase(
-            gemini_driver=self.gemini,
-            claude_driver=self.claude,
             cost_estimator=self.cost_estimator,
             context_manager=self.context_manager,
             swarm_engine=self.swarm_engine,
+            agents=routed_agents,
         )
 
         # Phase 5: Failure Diagnosis
         self.phase_diagnosis = FailureDiagnosisPhase(
-            gemini_driver=self.gemini,
-            claude_driver=self.claude,
             cost_estimator=self.cost_estimator,
             context_manager=self.context_manager,
             user_handler=self.user_handler,
+            agents=routed_agents,
         )
 
-        # Phase 6: Adaptive Retry
+        # Phase 6: Adaptive Retry (no drivers needed)
         self.phase_retry = AdaptiveRetryPhase(
             cost_estimator=self.cost_estimator, context_manager=self.context_manager, blacklist=self.strategy_blacklist
         )
@@ -341,14 +370,13 @@ class TrueHiveMind:
         # Phase 7: Knowledge Consolidation
         # V12.4.1 Epic 1.4: Pass workspace_path for V2 memory recording
         self.phase_consolidation = KnowledgeConsolidationPhase(
-            gemini_driver=self.gemini,
-            claude_driver=self.claude,
             cost_estimator=self.cost_estimator,
             context_manager=self.context_manager,
             agent_registry=self.agent_registry,
             user_handler=self.user_handler,
             project_memory=self.project_memory,
             workspace_path=self.workspace_path,
+            agents=routed_agents,
         )
 
     def _set_state(self, new_state: HiveMindState):

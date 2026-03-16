@@ -63,6 +63,7 @@ from .mode_executors import (  # noqa: E402
     get_executor,
 )
 from .negotiation_protocol import NegotiationProtocol, NegotiationResult, NegotiationStatus  # noqa: E402
+from core.foundation.agents.unified_registry import get_registry  # noqa: E402  # V12.4 mode degradation
 from .task_analyzer import TaskComplexity  # noqa: E402
 from .task_completion_validator import get_adaptive_max_rounds  # noqa: E402
 
@@ -289,6 +290,24 @@ class HybridSwarmEngine:
             else:
                 final_mode = proposal.mode
                 agent_assignments = proposal.agent_assignments
+
+            # V12.4: Graceful degradation — multi-agent modes require 2+ providers
+            try:
+                _available = get_registry().get_active_builtin_ids()
+                if len(_available) <= 1:
+                    _multi_agent_modes = {
+                        CollaborationMode.PARALLEL,
+                        CollaborationMode.LEAD_SUPPORT,
+                        CollaborationMode.PING_PONG,
+                        CollaborationMode.RED_BLUE,
+                    }
+                    if final_mode in _multi_agent_modes:
+                        logger.info(
+                            f"[SWARM] Single provider detected — degrading {final_mode.value} → SPECIALIST"
+                        )
+                        final_mode = CollaborationMode.SPECIALIST
+            except Exception:
+                pass  # Registry unavailable — proceed with selected mode
 
             # V7.5 Phase 7: Create isolated session for this task
             # V7.8.2 Phase 7b: EPHEMERAL sessions for trivial tasks (no persistence)
