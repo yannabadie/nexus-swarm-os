@@ -305,6 +305,7 @@ class TrueHiveMind:
                 raw_input="",
                 complexity=TaskComplexity.MODERATE,
                 domains=[TaskDomain.GENERAL],
+                primary_domain=TaskDomain.GENERAL,
                 gemini_fit_score=0.5,
                 claude_fit_score=0.5,
             )
