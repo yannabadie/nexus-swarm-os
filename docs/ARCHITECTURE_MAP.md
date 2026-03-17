@@ -152,18 +152,18 @@ graph TD
     end
 
     subgraph ClaudeRouting["Claude Routing"]
-        TYPE -->|BRAINSTORM| OPUS[claude-opus-4-5-20251101]
+        TYPE -->|BRAINSTORM| OPUS[claude-opus-4-6]
         TYPE -->|REDTEAM| OPUS
         TYPE -->|ARCHITECT| OPUS
         TYPE -->|EVOLUTION| OPUS
-        TYPE -->|TOOL| SONNET[claude-sonnet-4-5-20250929]
+        TYPE -->|TOOL| SONNET[claude-sonnet-4-6]
         TYPE -->|VALIDATION| SONNET
         TYPE -->|SIMPLE| SONNET
         TYPE -->|FORMAT| SONNET
     end
 
     subgraph GeminiRouting["Gemini Routing"]
-        TYPE -->|REASONING| PRO[gemini-3-pro-preview]
+        TYPE -->|REASONING| PRO[gemini-3.1-pro-preview]
         TYPE -->|RESEARCH| PRO
         TYPE -->|ANALYSIS| PRO
     end
@@ -296,15 +296,15 @@ graph TD
 
 | File | LOC | Purpose |
 |------|-----|---------|
-| `core/swarm/hybrid_swarm_engine.py` | 749 | Main swarm orchestrator |
-| `core/swarm/mode_selector.py` | 972 | DyLAN-based mode selection |
-| `core/swarm/mode_executors.py` | 74 | **V9.6**: Re-export module (was 1188) |
-| `core/swarm/executors/` | ~770 | **V9.6**: 7 extracted executor files |
-| `core/swarm/collaboration_modes.py` | 234 | Mode definitions + fallback chain |
-| `core/swarm/negotiation_protocol.py` | 627 | Negotiation logic |
-| `core/swarm/task_analyzer.py` | 518 | Complexity detection |
-| `core/swarm/agent_metrics.py` | 626 | AgentProfile, DyLAN scoring |
-| `core/swarm/session_manager.py` | 669 | Session isolation (V8.1.6) |
+| `core/intelligence/swarm/hybrid_swarm_engine.py` | 749 | Main swarm orchestrator |
+| `core/intelligence/swarm/mode_selector.py` | 972 | DyLAN-based mode selection |
+| `core/intelligence/swarm/mode_executors.py` | 74 | **V9.6**: Re-export module (was 1188) |
+| `core/intelligence/swarm/executors/` | ~770 | **V9.6**: 7 extracted executor files |
+| `core/intelligence/swarm/collaboration_modes.py` | 234 | Mode definitions + fallback chain |
+| `core/intelligence/swarm/negotiation_protocol.py` | 627 | Negotiation logic |
+| `core/intelligence/swarm/task_analyzer.py` | 518 | Complexity detection |
+| `core/intelligence/swarm/agent_metrics.py` | 626 | AgentProfile, DyLAN scoring |
+| `core/intelligence/swarm/session_manager.py` | 669 | Session isolation (V8.1.6) |
 
 ---
 
@@ -397,16 +397,16 @@ graph TD
 
 | File | LOC | Purpose |
 |------|-----|---------|
-| `core/hive_mind/orchestrator.py` | 653 | TrueHiveMind coordinator |
-| `core/hive_mind/types.py` | 396 | 25+ dataclasses, HiveMindState enum |
-| `core/hive_mind/phases/phase_analysis.py` | 500 | Phase 1 implementation |
-| `core/hive_mind/phases/phase_debate.py` | 595 | Phase 2 implementation |
-| `core/hive_mind/phases/phase_architecture.py` | 502 | Phase 3 implementation |
-| `core/hive_mind/phases/phase_execution.py` | 513 | Phase 4 implementation |
-| `core/hive_mind/phases/phase_diagnosis.py` | 439 | Phase 5 implementation |
-| `core/hive_mind/phases/phase_retry.py` | 221 | Phase 6 implementation |
-| `core/hive_mind/phases/phase_consolidation.py` | 588 | Phase 7 implementation |
-| `core/hive_mind/user_interaction.py` | 595 | Breakpoint handling |
+| `core/intelligence/hive_mind/orchestrator.py` | 653 | TrueHiveMind coordinator |
+| `core/intelligence/hive_mind/types.py` | 396 | 25+ dataclasses, HiveMindState enum |
+| `core/intelligence/hive_mind/phases/phase_analysis.py` | 500 | Phase 1 implementation |
+| `core/intelligence/hive_mind/phases/phase_debate.py` | 595 | Phase 2 implementation |
+| `core/intelligence/hive_mind/phases/phase_architecture.py` | 502 | Phase 3 implementation |
+| `core/intelligence/hive_mind/phases/phase_execution.py` | 513 | Phase 4 implementation |
+| `core/intelligence/hive_mind/phases/phase_diagnosis.py` | 439 | Phase 5 implementation |
+| `core/intelligence/hive_mind/phases/phase_retry.py` | 221 | Phase 6 implementation |
+| `core/intelligence/hive_mind/phases/phase_consolidation.py` | 588 | Phase 7 implementation |
+| `core/intelligence/hive_mind/user_interaction.py` | 595 | Breakpoint handling |
 
 ### 5.5 HiveMind ↔ Swarm Integration (V9.6)
 
@@ -485,7 +485,7 @@ session_uuid = f"{task_id}_{role}_{agent_id}"
 **Post-Refactoring Structure:**
 
 ```
-core/swarm/executors/           # V9.6 Extracted
+core/intelligence/swarm/executors/           # V9.6 Extracted
 +-- __init__.py                 # All exports
 +-- base.py                     # ModeExecutor + execute_with_fallback
 +-- registry.py                 # get_executor(), EXECUTOR_REGISTRY
@@ -799,8 +799,8 @@ graph TD
 |---------|--------------|
 | Main Entry | `nexus7.py` |
 | FSM Orchestrator | `orchestration_v7.py` |
-| Swarm Engine | `core/swarm/hybrid_swarm_engine.py` |
-| Hive Mind | `core/hive_mind/orchestrator.py` |
+| Swarm Engine | `core/intelligence/swarm/hybrid_swarm_engine.py` |
+| Hive Mind | `core/intelligence/hive_mind/orchestrator.py` |
 | Agent Spawning | `core/interface/repl.py` (spawn_agent) |
 | Model Routing | `core/routing/model_router.py` |
 | RAG Memory | `core/memory/project_memory.py` |

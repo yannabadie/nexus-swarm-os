@@ -808,14 +808,14 @@ class OrchestratorV7:
 
     def _handle_stagnation(self) -> dict:
         """Handle stagnation détectée"""
-        self.stagnation_detector.get_stagnation_message()
+        stagnation_msg = self.stagnation_detector.get_stagnation_message()
 
         # Force Gemini to decide (V8.4.0: use normalized ID)
         self.active_agent = "gemini"
         self.stagnation_detector.reset()
 
         return self.result_handler.make_result(
-            "BRAINSTORMING", "[warning]️ Stagnation detected. Forcing decision...", "Gemini", False, error="STAGNATION"
+            "BRAINSTORMING", stagnation_msg, "Gemini", False, error="STAGNATION"
         )
 
     def _handle_error(self, error_msg: str) -> dict:

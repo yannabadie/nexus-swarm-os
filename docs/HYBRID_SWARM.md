@@ -1,8 +1,8 @@
-# NEXUS V7.0 "Chrysalis" - Hybrid Swarm Engine
+# NEXUS V12.4 - Hybrid Swarm Engine
 
-**Version**: Sprint 9
-**Date**: 2025-11-26
-**Author**: Claude Opus 4.5
+**Current Version**: V12.4 NX-CG (model-agnostic, CapabilityRouter)
+**Original**: V7.0 "Chrysalis" Sprint 9 (2025-11-26)
+**Last Updated**: 2026-03-17
 
 ---
 

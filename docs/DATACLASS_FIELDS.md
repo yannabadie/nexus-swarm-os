@@ -382,6 +382,10 @@ AnalysisPhaseResult DOES NOT have:
 HiveMindState DOES NOT have:
   - HIVE_COMPLETE (use HIVE_SUCCESS)
 
+> **WARNING OUTDATED (V12.4)**: `GeminiDriverV7` and `ClaudeDriverHybrid` are replaced by
+> `BaseAsyncDriver` / `AsyncGeminiDriver` / `AsyncClaudeDriver`. See `core/drivers/` for
+> current driver internals.
+
 GeminiDriverV7.invoke() signature:
   - invoke(context, session_uuid=None)
   - NOT invoke(context, task_type=...)
