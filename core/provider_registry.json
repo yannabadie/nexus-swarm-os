@@ -71,7 +71,7 @@
     "kimi": {
       "display_name": "Moonshot Kimi",
       "sdk_supported": true,
-      "docs_url": "https://platform.moonshot.ai/docs/guide/use-kimi-k2-thinking-model",
+      "docs_url": "https://platform.moonshot.ai/docs/guide/kimi-k2-5-quickstart",
       "lookup": {
         "strategy": "api+docs",
         "requires_api_key": false,
@@ -79,7 +79,7 @@
       },
       "models": {
         "thinking": {
-          "default": "kimi-k2-thinking",
+          "default": "kimi-k2.5",
           "fallback": "kimi-k2-thinking",
           "status": "active"
         },
@@ -151,7 +151,6 @@
     "gpt-5.2": "gpt-5.4",
     "gpt-5.2-mini": "gpt-5-mini",
     "gpt-5.2-nano": "gpt-5-nano",
-    "kimi-k2.5": "kimi-k2-thinking",
     "kimi-k2-turbo-preview": "kimi-k2-thinking-turbo",
     "MiniMax-M1": "MiniMax-M2.5"
   },
