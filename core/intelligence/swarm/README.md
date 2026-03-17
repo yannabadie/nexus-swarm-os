@@ -49,6 +49,7 @@ The **swarm** module implements the Hybrid Swarm Engine - a dynamic multi-agent 
 | `hybrid_swarm_engine.py` | Main orchestration engine | `HybridSwarmEngine`, `SwarmResult`, `SwarmPhase` |
 | `collaboration_modes.py` | Mode definitions | `CollaborationMode`, `ModeCharacteristics` |
 | `task_analyzer.py` | Complexity analysis | `TaskAnalyzer`, `TaskComplexity`, `TaskDomain` |
+| `capability_router.py` | Model-agnostic slot assignment | `CapabilityRouter`, `AGENT_DOMAIN_STRENGTHS` |
 | `mode_selector.py` | DyLAN-based selection | `ModeSelector`, `ModeProposal`, `AgentAssignment` |
 | `negotiation_protocol.py` | Hybrid negotiation | `NegotiationProtocol`, `NegotiationResult` |
 | `mode_executors.py` | 6 mode executors | `ParallelExecutor`, `SequentialExecutor`, etc. |
@@ -75,7 +76,7 @@ The **swarm** module implements the Hybrid Swarm Engine - a dynamic multi-agent 
 #### PARALLEL
 ```
 +---------+     +---------+
-| Gemini  |     | Claude  |  Both work simultaneously
+| Primary |     |Secondary|  Both work simultaneously
 |  Task   |     |  Task   |  Results merged via strategy
 +----+----+     +----+----+
      |               |
@@ -236,6 +237,34 @@ SWARM_SELF_HEALING=True             # Enable graceful degradation
 - `pydantic` - Validation
 - Standard library
 
+## CapabilityRouter (V12.4 NX-CG)
+
+The `CapabilityRouter` maps task domains to semantic agent slots, decoupling phases from specific provider IDs.
+
+```python
+from core.intelligence.swarm.capability_router import CapabilityRouter
+from core.foundation.agents.unified_registry import get_registry
+
+router = CapabilityRouter(get_registry())
+agents = router.route(task_analysis)
+# agents = {"primary": <driver>, "secondary": <driver>, ...}
+```
+
+**Semantic slots**: `primary`, `secondary`, `critic`, `executor`
+
+**Scoring**: `AGENT_DOMAIN_STRENGTHS` maps 7 providers × 13 domains to float scores (0.0–1.0):
+
+| Domain | Best providers |
+|--------|---------------|
+| `CODING` | deepseek, claude |
+| `RESEARCH` | gemini, claude |
+| `ANALYSIS` | gemini, claude |
+| `MATH` | deepseek, gemini |
+| `WRITING` | claude, kimi |
+| `REASONING` | claude, openai |
+
+**Single-provider degradation**: When only 1 provider is registered, multi-agent modes (`PARALLEL`, `LEAD_SUPPORT`, `PING_PONG`, `RED_BLUE`) automatically degrade to `SPECIALIST` to avoid no-op multi-agent calls.
+
 ## Version History
 
 - **V7.0** - Sprint 9: Initial Hybrid Swarm Engine
@@ -244,3 +273,4 @@ SWARM_SELF_HEALING=True             # Enable graceful degradation
 - **V8.3** - SwarmBridge (HiveMind integration)
 - **V9.1** - Service layer extraction
 - **V12.4** - Adaptive rounds, cost optimization
+- **V12.4 NX-CG** - Model-agnostic migration: CapabilityRouter, 7-provider domain strengths, single-provider mode degradation

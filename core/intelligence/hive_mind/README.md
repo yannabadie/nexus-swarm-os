@@ -11,7 +11,7 @@ HIVE MIND 7-PHASE PIPELINE
 ==========================
 
 Phase 1: ANALYSIS
-  - Independent Gemini/Claude analysis in parallel
+  - Independent multi-agent analysis in parallel (N providers via CapabilityRouter)
 
 Phase 2: DEBATE
   - Resolve disagreements
@@ -46,6 +46,7 @@ Terminal states:
 | File | Purpose | Key Exports |
 |------|---------|-------------|
 | `orchestrator.py` | Main pipeline orchestrator | `TrueHiveMind`, `HiveMindResult` |
+| `base_phase.py` | Base class for all phases | `BasePhase` (agents dict, deprecated `.gemini`/`.claude` aliases) |
 | `types.py` | Core dataclasses & enums | `HiveMindState`, `IndependentAnalysis`, `DebateResult` |
 | `agent_registry.py` | Anti-duplication registry | `AgentRegistry` |
 | `cost_estimator.py` | Budget control | `CostEstimator` |
@@ -65,9 +66,9 @@ Terminal states:
 ### Phase 1: Independent Analysis
 **States**: `HIVE_ANALYZING_GEMINI`, `HIVE_ANALYZING_CLAUDE`, `HIVE_COMPARING_ANALYSES`
 
-Both agents analyze the task independently without communication:
-- Gemini produces JSON-structured analysis
-- Claude produces natural language analysis
+All active agents analyze the task independently without communication (N-agent support via CapabilityRouter):
+- Primary agent produces JSON-structured analysis
+- Secondary agent produces natural language analysis
 - System compares and calculates agreement score (0-1)
 
 ### Phase 2: Strategic Debate
@@ -217,9 +218,29 @@ HIVE_MIND_MIN_AGREEMENT=0.7       # Skip debate if agreement >= this
 - `pydantic` - Validation
 - Standard library (asyncio, dataclasses)
 
+## BasePhase (V12.4 NX-CG)
+
+All 6 HiveMind phase classes now extend `BasePhase`, which stores agents as a provider-agnostic `dict[str, BaseAsyncDriver]`:
+
+```python
+from core.intelligence.hive_mind.base_phase import BasePhase
+
+class MyPhase(BasePhase):
+    def __init__(self, agents: dict | None = None, **kwargs):
+        super().__init__(agents=agents)
+        # self.agents["primary"]   → primary driver
+        # self.agents["secondary"] → secondary driver
+        # self.agent_ids           → ["primary", "secondary", ...]
+```
+
+**Backward compatibility**: `.gemini` and `.claude` properties emit `DeprecationWarning` and map to `agents["primary"]` / `agents["secondary"]` respectively.
+
+**Agent routing**: `TrueHiveMind` uses `CapabilityRouter` to resolve slots before instantiating phases — phases never see raw provider IDs.
+
 ## Version History
 
 - **V8.0** - TRUE HIVE MIND initial implementation
 - **V8.3.0** - SwarmBridge integration
 - **V8.4.4** - SagaManager checkpoint/recovery
 - **V12.4** - Adaptive debate, cost optimization
+- **V12.4 NX-CG** - Model-agnostic migration: BasePhase, CapabilityRouter wired in orchestrator, all 6 phases provider-agnostic

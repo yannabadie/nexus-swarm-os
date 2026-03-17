@@ -67,13 +67,15 @@ class ModeExecutor(ABC):
 ### ParallelExecutor
 ```python
 class ParallelExecutor(ModeExecutor):
-    """Both agents work simultaneously, merge results."""
+    """All active agents work simultaneously, merge results."""
 
     async def execute(self, task, context, agents) -> ExecutionResult:
-        # Run both agents in parallel
-        gemini_task = asyncio.create_task(agents.gemini.invoke(task))
-        claude_task = asyncio.create_task(agents.claude.invoke(task))
-        results = await asyncio.gather(gemini_task, claude_task)
+        # Run all registered agents in parallel (provider-agnostic)
+        tasks = [
+            asyncio.create_task(driver.invoke(task))
+            for driver in agents.active_drivers()
+        ]
+        results = await asyncio.gather(*tasks)
         # Merge using configured strategy
         return self.merge_strategy.merge(results)
 ```
@@ -184,3 +186,4 @@ EXECUTOR_REGISTRY = {
 - **V7.0** - Sprint 9: Initial 6 executors
 - **V7.5** - Self-healing fallback chains
 - **V12.4** - Adaptive round limits
+- **V12.4 NX-CG** - Provider-agnostic: executor `base.py` uses `agent_desc.provider.value` instead of hardcoded string checks
