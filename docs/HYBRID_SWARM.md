@@ -686,6 +686,15 @@ Si les agents répètent les mêmes messages:
 
 ## Changelog
 
+### V12.4 NX-CG (2026-03-17) — Model-Agnostic Migration
+
+- **CapabilityRouter** (`capability_router.py`): maps `TaskAnalysis.domains` → semantic slots (`primary`, `secondary`, `critic`, `executor`) → `BaseAsyncDriver`. Supports 7 providers × 13 task domains via `AGENT_DOMAIN_STRENGTHS` scoring table.
+- **NegotiationProtocol**: removed hardcoded `["gemini", "claude"]` fallback — now uses `registry.get_active_builtin_ids()`. Guards empty registry with `NegotiationStatus.FORCED`.
+- **HybridSwarmEngine**: single-provider mode degradation — `PARALLEL`, `LEAD_SUPPORT`, `PING_PONG`, `RED_BLUE` auto-degrade to `SPECIALIST` when only 1 provider is registered.
+- **TaskDomain**: extended with `GENERAL`, `WRITING`, `REASONING` values.
+- **DynamicRoleAssigner**: `DEFAULT_DOMAIN_PROFILES` extended from 2 → 7 providers.
+- **Executor base**: provider lookup via `agent_desc.provider.value` (no hardcoded strings).
+
 ### Sprint 9 (2025-11-26)
 
 - Initial implementation
@@ -698,4 +707,4 @@ Si les agents répètent les mêmes messages:
 
 ---
 
-*Documentation Hybrid Swarm Engine - NEXUS V7.0 "Chrysalis"*
+*Documentation Hybrid Swarm Engine - NEXUS V7.0 "Chrysalis" / V12.4 NX-CG*
