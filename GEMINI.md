@@ -138,7 +138,7 @@ NEXUS, deployed in a project, should become:
 
 ## 🎯 Core Philosophy
 
-You are an **equal collaborator** with Claude in NEXUS V7, not a hierarchical strategist.
+You are an **equal collaborator** with Claude in NEXUS V12.4, not a hierarchical strategist.
 
 **Collaboration Model:**
 - **Analyze independently** - Each agent examines the request
@@ -176,26 +176,24 @@ You may temporarily assume a "strategist" role **if both agents agree** it's the
 ## 📁 Project Structure
 
 ```
-20_NEXUS/
-+-- NEXUS_V7_CHRYSALIS/          # V7 active development (FSM-based)
-|   +-- core/                    # Core orchestration & FSM
-|   |   +-- orchestration_v7.py  # Main FSM orchestrator
-|   |   +-- drivers/             # Gemini & Claude drivers
-|   |   |   +-- gemini_driver_v7.py    # Your driver (JSON I/O)
-|   |   |   +-- claude_driver_hybrid.py # Claude driver (hybrid)
-|   |   +-- execution/           # Tool execution layer
-|   |   +-- fsm/                 # State machine components
-|   |   +-- synapse/             # Memory & protocol
-|   |   |   +-- protocol_v7.py   # Message schemas (Pydantic)
-|   |   |   +-- memory_v7.py     # Blackboard persistence
-|   |   +-- logging/             # Structured logging
-|   +-- prompts/                 # System prompts (V7 philosophy)
-|   |   +-- system_gemini_v7.md  # Your collaborator prompt
-|   |   +-- system_claude_v7.md  # Claude collaborator prompt
-|   +-- nexus7.py               # Main entry point (interactive REPL)
-|   +-- README.md               # V7 architecture docs
-+-- archives/                    # Design docs, planning & brainstorming
-+-- ARCHIVE/                     # Historical generations (LINEAGE)
+NEXUS-NX-CG/                     # Root (branch NX-CG)
++-- core/                        # All source code
+|   +-- orchestration_v7.py      # Main FSM orchestrator (12 states)
+|   +-- intelligence/
+|   |   +-- hive_mind/           # 7-phase pipeline
+|   |   +-- swarm/               # 6 collaboration modes + CapabilityRouter
+|   |   +-- evolution/           # Agent spawning & mutation
+|   +-- drivers/                 # 7 provider SDK drivers (AsyncDriverFactory)
+|   +-- memory_pkg/memory/       # RAG (LanceDB) + SuccessMemory
+|   +-- security_pkg/security/   # InputGuard, OutputGuard, PathGuardian
+|   +-- foundation/              # Agents, async primitives
+|   +-- fsm/                     # State machine (12 states)
++-- prompts/                     # System prompts
+|   +-- system_gemini_v7.md      # Your collaborator prompt
+|   +-- system_claude_v7.md      # Claude collaborator prompt
++-- nexus7.py                    # Main entry point (interactive REPL)
++-- tests/                       # Test suite
++-- workspace/                   # Runtime data (agents, logs, sessions)
 ```
 
 ---
@@ -207,10 +205,14 @@ You may temporarily assume a "strategist" role **if both agents agree** it's the
 **AI Models (Intelligent Routing)**:
 - **Gemini (you)**:
   - **Gemini 3.1 Pro Preview** (`gemini-3.1-pro-preview`): Complex reasoning, research, analysis
-  - **Gemini 2.5 Flash** (`gemini-2.5-flash`): Quick operations, validation, formatting
+  - **Gemini 3 Flash Preview** (`gemini-3-flash-preview`): Quick operations, validation, formatting
 - **Claude**:
-  - **Opus 4.5** (`claude-opus-4-5-20251101`): Complex reasoning, creativity, security, evolution
+  - **Opus 4.6** (`claude-opus-4-6`): Complex reasoning, creativity, security, evolution
   - **Sonnet 4.6** (`claude-sonnet-4-6`): Speed, tool execution, simple tasks
+
+**5 additional providers** also available via `AsyncDriverFactory`:
+OpenAI (`gpt-5.4`), DeepSeek (`deepseek-reasoner`), Kimi (`kimi-k2-thinking`), MiniMax (`MiniMax-M2.5`), Ollama (local).
+See `core/provider_registry.json` for current model defaults.
 
 **Model Routing** (automatic):
 | Task Type | Claude Model | Gemini Model |
@@ -350,9 +352,8 @@ You **MUST** respond with **valid JSON only** - no text before/after.
 
 ## 🚀 Key Commands (For Context)
 
-### Run NEXUS V7:
+### Run NEXUS V12.4:
 ```bash
-cd NEXUS_V7_CHRYSALIS
 python nexus7.py
 ```
 
@@ -365,10 +366,10 @@ pytest tests/
 cat workspace/logs/events_YYYYMMDD.jsonl
 
 # Git workflow
-git checkout N7C
-git add .
-git commit -m "feat(v7): description"
-git push origin N7C
+git checkout NX-CG
+git add <files>
+git commit -m "type(scope): description"
+git push origin NX-CG
 ```
 
 ---
@@ -518,12 +519,12 @@ Agents build performance history used for intelligent routing:
 
 ## 📚 Key Documentation Files
 
-**V7 Architecture**: `NEXUS_V7_CHRYSALIS/README.md` (comprehensive FSM docs)
-**Your System Prompt**: `NEXUS_V7_CHRYSALIS/prompts/system_gemini_v7.md`
-**Claude's Prompt**: `NEXUS_V7_CHRYSALIS/prompts/system_claude_v7.md`
-**Protocol Schemas**: `NEXUS_V7_CHRYSALIS/core/synapse/protocol_v7.py`
-**Design Docs**: `archives/brainstorming-history/`
-**Planning**: `archives/planning/`
+**V12.4 Architecture**: `README.md` + `docs/ARCHITECTURE_MAP.md`
+**Your System Prompt**: `prompts/system_gemini_v7.md`
+**Claude's Prompt**: `prompts/system_claude_v7.md`
+**Protocol Schemas**: `core/synapse/protocol_v7.py`
+**Swarm Guide**: `docs/HYBRID_SWARM.md`
+**Architecture Decisions**: `docs/ARCHITECTURE_DECISIONS.md`
 
 ---
 
@@ -584,7 +585,7 @@ Agents build performance history used for intelligent routing:
 ### Research Capabilities:
 
 **You have direct web access** - Use it!
-- Recent API changes (we're in November 2025)
+- Recent API changes (we're in March 2026)
 - Official documentation
 - Best practices and standards
 - Fact-checking information
@@ -637,6 +638,7 @@ Both you (Gemini) and Claude receive frequent updates. Don't assume fixed streng
 
 1. **Check your prompt** - `prompts/system_gemini_v7.md`
 2. **Verify JSON format** - `core/synapse/protocol_v7.py` (Pydantic schemas)
+3. **Provider models** - `core/provider_registry.json`
 3. **Ask Claude** - "What's your perspective?"
 4. **Use web_search** - Look up current best practices
 5. **User is final authority** - When unclear, ask user
@@ -701,12 +703,11 @@ Both you (Gemini) and Claude receive frequent updates. Don't assume fixed streng
 ### File Locations
 
 ```
-20_NEXUS/
-+-- SESSION_CONTINUITY.md           # Current state (always up to date)
-+-- docs/
-|   +-- sessions/
-|       +-- SESSION_YYYY-MM-DD_TOPIC.md  # Session logs
-|       +-- CORRECTIONS_LOG.md            # Bug database
+NEXUS-NX-CG/
++-- docs/sessions/SESSION_CONTINUITY.md     # Current state (always up to date)
++-- docs/sessions/
+|       +-- SESSION_YYYY-MM-DD_TOPIC.md     # Session logs
+|       +-- CORRECTIONS_LOG.md              # Bug database
 ```
 
 ### Critical Rules
