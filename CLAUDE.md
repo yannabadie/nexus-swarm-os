@@ -78,7 +78,7 @@ NEXUS/
 |   +-- security_pkg/security/           # InputGuard, OutputGuard, PathGuardian
 |   +-- foundation/                      # Agents, async primitives
 |   +-- fsm/                             # State machine (12 states)
-|   +-- [30+ other modules]              # See docs/MODULE_MAP.md
+|   +-- [30+ other modules]              # See docs/ARCHITECTURE_MAP.md
 +-- tests/                               # Test suite (see CI evidence ledger for current counts)
 +-- workspace/                           # Runtime data (agents, logs, sessions)
 +-- KERNEL.py                            # Legacy governance artifact (not default runtime authority)

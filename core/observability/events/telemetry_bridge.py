@@ -577,7 +577,3 @@ def emit_agent_speak(
 
 # Lazy import to get actual enum
 from core.observability.events.types import CerebroEventType  # noqa: E402  # after module setup
-
-# Type hint import (deferred to avoid circular import at module load)
-if False:  # TYPE_CHECKING equivalent without import
-    from core.observability.events.types import CerebroEventType

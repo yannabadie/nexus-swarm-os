@@ -1,18 +1,25 @@
-# NEXUS V8.0 - Driver Implementation Internals
+# NEXUS Driver Implementation Internals
 
-**Purpose**: Document how LLM drivers actually work to prevent incorrect assumptions.
-**Last Updated**: 2025-12-08
-**Version**: 1.0
+> **WARNING DOCUMENT STATUS: OUTDATED (V8.0 -> V12.4)**
+>
+> This document was written for V8.0 sync CLI drivers (`GeminiDriverV7`, `ClaudeDriverHybrid`).
+> As of V12.4, all drivers are **async** and SDK-based. The sync/blocking description is
+> no longer accurate. See `core/drivers/` for current implementation.
+>
+> **Current driver hierarchy (V12.4)**:
+> - `BaseAsyncDriver` (protocol) -- `core/drivers/protocol.py`
+> - `AsyncGeminiDriver` -- `core/drivers/async_gemini_driver.py`
+> - `AsyncClaudeDriver` -- `core/drivers/async_claude_driver.py`
+> - `AnthropicSDKDriver` -- `core/drivers/anthropic_sdk_driver.py`
+> - `GoogleGenAISDKDriver` -- `core/drivers/google_genai_sdk_driver.py`
+> - `AsyncDriverFactory` -- `core/drivers/async_factory.py`
+>
+> Historical reference below preserved for context.
 
 ---
 
-## CRITICAL: Common Misconceptions
-
-| Misconception | Reality |
-|---------------|---------|
-| "Drivers use subprocess.run" | Actually use `subprocess.Popen` |
-| "Drivers are async" | Drivers are **SYNC** (blocking) |
-| "PARALLEL mode runs in parallel" | Actually sequential due to sync drivers |
+**Original**: V8.0 Driver Internals
+**Last Updated (original)**: 2025-12-08
 
 ---
 
