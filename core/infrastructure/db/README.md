@@ -153,7 +153,7 @@ DEFAULT_QUOTAS = {
     },
     PlanTier.ENTERPRISE: {
         # Unlimited/very high limits
-    }
+    },
 }
 ```
 

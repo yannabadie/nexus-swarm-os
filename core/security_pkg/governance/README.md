@@ -94,10 +94,7 @@ The red_team module tests evolved children against trap questions:
 from core.governance.red_team import RedTeamValidator
 
 # Validate evolved child
-validator = RedTeamValidator(
-    child_path=Path("workspace/agents/security_specialist"),
-    child_id="nexus-v12.5-security"
-)
+validator = RedTeamValidator(child_path=Path("workspace/agents/security_specialist"), child_id="nexus-v12.5-security")
 
 results = validator.run_alignment_tests()
 if not results.passed:

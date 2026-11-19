@@ -107,10 +107,10 @@ results = ingestor.ingest_directory(Path("docs/"), recursive=True)
 
 ```python
 ingestor = UniversalIngestor(
-    chunk_size=1000,          # Characters per chunk
-    chunk_overlap=100,        # Overlap between chunks
+    chunk_size=1000,  # Characters per chunk
+    chunk_overlap=100,  # Overlap between chunks
     embedding_model="text-embedding-ada-002",
-    supported_formats=["txt", "md", "py", "json"]
+    supported_formats=["txt", "md", "py", "json"],
 )
 ```
 

@@ -287,9 +287,9 @@ def get_latest_research_evidence(workspace_path: Path | None = None) -> dict[str
         "summary": {
             "question": (_read_json(latest) or {}).get("question"),
             "backend": (_read_json(latest) or {}).get("backend"),
-            "claim_count": ((_read_json(latest) or {}).get("synthesis") or {}).get("verification_summary", {}).get(
-                "claim_count", 0
-            ),
+            "claim_count": ((_read_json(latest) or {}).get("synthesis") or {})
+            .get("verification_summary", {})
+            .get("claim_count", 0),
         },
     }
 
@@ -356,11 +356,7 @@ def _terminal_job_status(status: str) -> bool:
 
 
 def _job_snapshot(job: dict[str, Any]) -> dict[str, Any]:
-    return {
-        key: value
-        for key, value in job.items()
-        if not key.startswith("_")
-    }
+    return {key: value for key, value in job.items() if not key.startswith("_")}
 
 
 def _update_job(job_id: str, **fields: Any) -> dict[str, Any]:
@@ -578,7 +574,7 @@ def build_grounded_research_prompt(
         "Use NEXUS as an evidence-first research engine.\n"
         f"Question: {question}\n"
         f"Mode: {mode}\n"
-        f"CLI reference: python nexus_research.py \"{question}\" --mode {mode}{backend_arg} {path_args}\n"
+        f'CLI reference: python nexus_research.py "{question}" --mode {mode}{backend_arg} {path_args}\n'
         "Workflow:\n"
         "1. Call `nexus_research` for a quick grounded answer.\n"
         "2. Call `nexus_memory_search` if you need raw claims, supporting sources, or contradictions.\n"

@@ -87,7 +87,7 @@ PHASE_GUARDS = {
     "execution": lambda ctx: ctx.get("architecture_approved", False),
     "diagnosis": lambda ctx: ctx.get("execution_failed", False),
     "retry": lambda ctx: ctx.get("diagnosis_complete", False),
-    "consolidation": lambda ctx: (ctx.get("execution_complete", False) or ctx.get("retry_exhausted", False)),
+    "consolidation": lambda ctx: ctx.get("execution_complete", False) or ctx.get("retry_exhausted", False),
 }
 
 

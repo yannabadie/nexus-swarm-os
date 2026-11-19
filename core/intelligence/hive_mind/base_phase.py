@@ -16,6 +16,7 @@ Backward compat:
   self.gemini  -> self.agents.get("primary") or self.agents.get("gemini")
   self.claude  -> self.agents.get("secondary") or self.agents.get("claude")
 """
+
 from __future__ import annotations
 
 import warnings

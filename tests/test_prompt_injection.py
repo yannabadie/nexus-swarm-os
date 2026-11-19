@@ -140,8 +140,7 @@ class TestInputGuard:
             # delimiter_injection must be detected (may not be primary threat if a
             # higher-severity pattern also matches, e.g. role_override at CRITICAL)
             assert "delimiter_injection" in result.matched_patterns, (
-                f"Expected delimiter_injection in matched_patterns for: {attack!r}, "
-                f"got: {result.matched_patterns}"
+                f"Expected delimiter_injection in matched_patterns for: {attack!r}, got: {result.matched_patterns}"
             )
 
     def test_authority_claim_detected(self):

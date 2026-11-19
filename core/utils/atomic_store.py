@@ -172,7 +172,7 @@ class AtomicJsonStore:
                     except PermissionError:
                         if _attempt == _max_retries - 1:
                             raise
-                        time.sleep(0.01 * (2 ** _attempt))
+                        time.sleep(0.01 * (2**_attempt))
 
             except Exception:
                 # Clean up temp file on error

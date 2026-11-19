@@ -26,11 +26,7 @@ results = await memory.query("How does authentication work?")
 from core.memory_pkg import get_success_memory_v2
 
 memory = get_success_memory_v2()
-await memory.record_success(
-    task="fix auth bug",
-    approach="Used JWT validation",
-    outcome="Tests passed"
-)
+await memory.record_success(task="fix auth bug", approach="Used JWT validation", outcome="Tests passed")
 ```
 
 ### Skill Crystallization

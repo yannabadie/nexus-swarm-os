@@ -556,7 +556,9 @@ class StrategicDebatePhase(BasePhase):
                 resolved_disagreements=[],
                 unresolved_disagreements=[],
                 consensus_confidence=comparison.agreement_score,
-                satisfactions={aid: 0.8 for aid in self.agent_ids} if self.agent_ids else {"gemini": 0.8, "claude": 0.8},
+                satisfactions={aid: 0.8 for aid in self.agent_ids}
+                if self.agent_ids
+                else {"gemini": 0.8, "claude": 0.8},
             ),
             final_approach=primary.proposed_approach,
             final_capabilities=comparison.merged_capabilities,

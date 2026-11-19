@@ -96,10 +96,10 @@ This document describes how V8 Hive Mind integrates with existing V7 systems.
 # In NexusConfig (nexus_config.py)
 
 # V8 Hive Mind Settings
-hive_mind_enabled: bool = True           # Enable V8 Hive Mind
-hive_mind_moderate: bool = True          # Route MODERATE to Hive Mind (user decision)
-hive_mind_budget_limit: int = 50000      # Token budget per task
-hive_mind_max_debate_turns: int = 10     # Max debate turns
+hive_mind_enabled: bool = True  # Enable V8 Hive Mind
+hive_mind_moderate: bool = True  # Route MODERATE to Hive Mind (user decision)
+hive_mind_budget_limit: int = 50000  # Token budget per task
+hive_mind_max_debate_turns: int = 10  # Max debate turns
 hive_mind_breakpoints_enabled: bool = True  # User breakpoints
 ```
 

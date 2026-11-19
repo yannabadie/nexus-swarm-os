@@ -52,9 +52,7 @@ Unifies episodic (SuccessMemory) and procedural (AutoMemory) for hybrid recommen
 ```python
 coordinator = MemoryCoordinator(success_memory, auto_memory, workspace_path)
 recommendation = coordinator.recommend(
-    task_description="Implement authentication",
-    task_type="CODING",
-    complexity="MODERATE"
+    task_description="Implement authentication", task_type="CODING", complexity="MODERATE"
 )
 # Returns: UnifiedRecommendation(mode, lead, confidence, source)
 ```
@@ -84,14 +82,11 @@ memory.record_success(
     duration_seconds=45.2,
     complexity="MODERATE",
     domains=["security", "coding"],
-    quality_score=0.95
+    quality_score=0.95,
 )
 
 # Retrieve similar tasks
-matches = memory.query_similar(
-    task_description="Add OAuth login",
-    limit=5
-)
+matches = memory.query_similar(task_description="Add OAuth login", limit=5)
 ```
 
 **Storage:** `workspace/memory/successes.json` (AtomicJsonStore)
@@ -106,18 +101,11 @@ memory = SuccessMemoryV2(workspace_path)
 memory.record_success(task_id, analysis, result, quality_score=0.95)
 
 # Semantic search (not hash-based!)
-similar = memory.find_similar_tasks(
-    "implement JWT authentication",
-    limit=3,
-    min_score=0.1
-)
+similar = memory.find_similar_tasks("implement JWT authentication", limit=3, min_score=0.1)
 # Returns: [(SuccessEntry, similarity_score), ...]
 
 # Get best mode for similar task
-mode, task_id, score = memory.get_best_mode_for_similar(
-    "add OAuth login",
-    query_domains=["security", "coding"]
-)
+mode, task_id, score = memory.get_best_mode_for_similar("add OAuth login", query_domains=["security", "coding"])
 ```
 
 **Key Improvements over V1:**
@@ -151,21 +139,16 @@ blacklist.add_failed_strategy(
     error_message="KeyError: 'exp' field missing",
     retry_count=3,
     complexity="MODERATE",
-    domains=["security", "coding"]
+    domains=["security", "coding"],
 )
 
 # Check if similar strategy is blacklisted (semantic!)
-is_bad, reason = blacklist.is_blacklisted(
-    "implement token-based authentication",
-    swarm_mode="ping_pong"
-)
+is_bad, reason = blacklist.is_blacklisted("implement token-based authentication", swarm_mode="ping_pong")
 
 if is_bad:
     print(f"BLOCKED: {reason}")
     # Suggests alternatives based on mode
-    alternatives = blacklist.suggest_alternatives(
-        "implement token-based authentication", limit=3
-    )
+    alternatives = blacklist.suggest_alternatives("implement token-based authentication", limit=3)
 ```
 
 **Key Improvements over V1:**
@@ -194,7 +177,7 @@ memory.learn(
     lead_agent="claude",
     swarm_mode="LEAD_SUPPORT",
     outcome="SUCCESS",
-    metrics={"duration": 30.5, "quality": 0.9}
+    metrics={"duration": 30.5, "quality": 0.9},
 )
 
 # Query learned patterns
@@ -272,6 +255,7 @@ OWASP LLM01:2025 protection against prompt injection in RAG content.
 
 ```python
 from core.security import get_spotlighter
+
 spotlighter = get_spotlighter()
 
 # Sanitize retrieved content before LLM

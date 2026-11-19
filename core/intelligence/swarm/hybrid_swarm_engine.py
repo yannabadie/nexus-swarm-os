@@ -302,9 +302,7 @@ class HybridSwarmEngine:
                         CollaborationMode.RED_BLUE,
                     }
                     if final_mode in _multi_agent_modes:
-                        logger.info(
-                            f"[SWARM] Single provider detected — degrading {final_mode.value} → SPECIALIST"
-                        )
+                        logger.info(f"[SWARM] Single provider detected — degrading {final_mode.value} → SPECIALIST")
                         final_mode = CollaborationMode.SPECIALIST
             except Exception:
                 pass  # Registry unavailable — proceed with selected mode
@@ -520,8 +518,11 @@ class HybridSwarmEngine:
             # V8.1.6: Pass session_uuid for thread-safe file access
             # V12.4 FIX: Pass isolated_env for session isolation (5th param from executors)
             response = self.invoke_agent(
-                agent_id, task_type, context,
-                session_uuid=session_uuid, isolated_env=isolated_env,
+                agent_id,
+                task_type,
+                context,
+                session_uuid=session_uuid,
+                isolated_env=isolated_env,
             )
             elapsed = (datetime.now() - start).total_seconds()
 

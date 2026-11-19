@@ -1,5 +1,6 @@
 # tests/test_base_phase.py
 """Tests for BasePhase — deprecated alias behavior."""
+
 from __future__ import annotations
 
 import warnings
@@ -10,6 +11,7 @@ from core.intelligence.hive_mind.base_phase import BasePhase
 
 class ConcretePhase(BasePhase):
     """Minimal concrete subclass for testing."""
+
     pass
 
 

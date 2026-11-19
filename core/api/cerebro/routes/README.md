@@ -22,6 +22,7 @@ FastAPI route modules for CEREBRO API. Organized by domain: health, streaming, s
 ```python
 from core.context import get_current_session
 
+
 @router.get("/endpoint")
 async def endpoint():
     ctx = get_current_session()
@@ -58,7 +59,7 @@ await AuditLogger.log_file(
     action=AuditAction.FILE_READ,
     file_path="/path/to/file.py",
     success=True,
-    request=request
+    request=request,
 )
 ```
 

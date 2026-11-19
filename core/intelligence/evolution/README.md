@@ -112,7 +112,7 @@ add_child(
     parent_id="nexus-v12.4",
     child_id="nexus-v12.5-security-specialist",
     mutation=mutation_proposal,
-    validation_result=validation_result
+    validation_result=validation_result,
 )
 
 # Get ancestry
@@ -125,15 +125,18 @@ ancestry = get_ancestry("nexus-v12.5-security-specialist")
 @dataclass
 class MutationProposal:
     """Proposed code mutation from debate."""
+
     target_file: str
     patches: List[JSONPatch]
     rationale: str
     expected_improvement: str
     risk_assessment: str
 
+
 @dataclass
 class EvolutionResult:
     """Result of evolution attempt."""
+
     status: EvolutionStatus  # SUCCESS, FAILED, PENDING_REVIEW
     child_id: Optional[str]
     validation_result: TieredValidationResult
@@ -153,18 +156,18 @@ class EvolutionResult:
 
 ```python
 class SafetyGate(Enum):
-    KERNEL_IMMUTABLE = "kernel_immutable"    # Cannot modify KERNEL.py
-    PARENT_PROTECTED = "parent_protected"    # Cannot modify parent code
-    RATE_LIMITED = "rate_limited"            # Max evolutions per day
-    USER_APPROVAL = "user_approval"          # Requires human review
+    KERNEL_IMMUTABLE = "kernel_immutable"  # Cannot modify KERNEL.py
+    PARENT_PROTECTED = "parent_protected"  # Cannot modify parent code
+    RATE_LIMITED = "rate_limited"  # Max evolutions per day
+    USER_APPROVAL = "user_approval"  # Requires human review
 ```
 
 ## Auto-Promotion Criteria
 
 ```python
 class AutoPromotionDecision(Enum):
-    PROMOTE = "promote"          # All tiers passed, performance improved
-    ARCHIVE = "archive"          # Validation failed
+    PROMOTE = "promote"  # All tiers passed, performance improved
+    ARCHIVE = "archive"  # Validation failed
     USER_REVIEW = "user_review"  # Borderline: passed but no improvement
 ```
 

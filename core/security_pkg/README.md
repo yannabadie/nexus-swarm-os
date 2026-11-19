@@ -30,9 +30,7 @@ output_result = output_guard.validate(response_text)
 ```python
 from core.security_pkg import AlignmentVerifier, AlignmentConfig
 
-config = AlignmentConfig(
-    principles=[AlignmentPrinciple.CREATOR_ALIGNMENT]
-)
+config = AlignmentConfig(principles=[AlignmentPrinciple.CREATOR_ALIGNMENT])
 verifier = AlignmentVerifier(config)
 result = verifier.verify(action="deploy_code")
 ```

@@ -66,8 +66,7 @@ class CapabilityRouter:
         available = self._registry.get_active_builtin_ids()
         if not available:
             raise RuntimeError(
-                "No providers registered — cannot route. "
-                "Register at least one driver via UnifiedAgentRegistry."
+                "No providers registered — cannot route. Register at least one driver via UnifiedAgentRegistry."
             )
 
         # Single-provider case: all slots → same driver
@@ -77,18 +76,13 @@ class CapabilityRouter:
 
         slot_to_provider = self._assign_slots(task, available)
 
-        return {
-            slot: self._registry.get_driver(pid)
-            for slot, pid in slot_to_provider.items()
-        }
+        return {slot: self._registry.get_driver(pid) for slot, pid in slot_to_provider.items()}
 
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
 
-    def _assign_slots(
-        self, task: TaskAnalysis, available: list[str]
-    ) -> dict[str, str]:
+    def _assign_slots(self, task: TaskAnalysis, available: list[str]) -> dict[str, str]:
         """Return {slot: provider_id} for each slot."""
         ranked = self._rank_by_task(task, available)
 
@@ -97,9 +91,7 @@ class CapabilityRouter:
             (p for p in ranked[1:] if p != primary),
             primary,  # fallback: same provider if only 1 available
         )
-        critic = (
-            self._best_for_domain("security", available, exclude=primary) or secondary
-        )
+        critic = self._best_for_domain("security", available, exclude=primary) or secondary
         executor = self._best_for_domain("coding", available) or primary
 
         return {
@@ -120,11 +112,7 @@ class CapabilityRouter:
             total = 0.0
             for domain in domain_names:
                 matched = next(
-                    (
-                        v
-                        for k, v in strengths.items()
-                        if (k.value if hasattr(k, "value") else k) == domain
-                    ),
+                    (v for k, v in strengths.items() if (k.value if hasattr(k, "value") else k) == domain),
                     0.5,
                 )
                 total += matched
@@ -146,11 +134,7 @@ class CapabilityRouter:
         def _domain_score(provider_id: str) -> float:
             strengths = AGENT_DOMAIN_STRENGTHS.get(provider_id, {})
             return next(
-                (
-                    v
-                    for k, v in strengths.items()
-                    if (k.value if hasattr(k, "value") else k) == domain
-                ),
+                (v for k, v in strengths.items() if (k.value if hasattr(k, "value") else k) == domain),
                 0.5,
             )
 

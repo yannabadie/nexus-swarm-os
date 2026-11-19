@@ -480,6 +480,7 @@ class StagnationDetector:
             return {"should_swap": False, "reason": "No swap needed", "new_lead": None}
 
         from core.foundation.agents.unified_registry import get_registry
+
         new_lead = get_registry().get_alternate(current_lead.lower()) or current_lead.lower()
 
         return {

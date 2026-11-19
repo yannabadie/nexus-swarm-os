@@ -56,6 +56,7 @@ from core.intelligence.reasoning import GOT_AVAILABLE
 
 if GOT_AVAILABLE:
     from core.intelligence.reasoning import GraphOfThought, ThoughtNode
+
     # Use GoT reasoning
     graph = GraphOfThought()
 else:

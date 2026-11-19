@@ -65,15 +65,11 @@ await AuditLogger.log(
     action=AuditAction.FILE_WRITE,
     resource_type="file",
     resource_id="/path/to/file.txt",
-    status="success"
+    status="success",
 )
 
 # Query audit logs
-logs = await AuditLogger.query(
-    tenant_id=tenant_id,
-    action=AuditAction.PERMISSION_DENIED,
-    limit=100
-)
+logs = await AuditLogger.query(tenant_id=tenant_id, action=AuditAction.PERMISSION_DENIED, limit=100)
 ```
 
 **Features:**
@@ -96,6 +92,7 @@ logger.info("System initialized", extra={"component": "orchestrator"})
 
 # Get driver logger (lightweight)
 from core.observability import get_driver_logger
+
 driver_logger = get_driver_logger("gemini")
 driver_logger.debug("API call", latency_ms=42)
 ```
@@ -109,20 +106,10 @@ driver_logger.debug("API call", latency_ms=42)
 ### Telemetry Subsystem
 
 ```python
-from core.observability import (
-    TelemetryCollector,
-    BudgetTracker,
-    get_profiler,
-    init_otel
-)
+from core.observability import TelemetryCollector, BudgetTracker, get_profiler, init_otel
 
 # Track API calls
-TelemetryCollector.record_llm_call(
-    model="claude-sonnet-4-6-20250929",
-    tokens_in=150,
-    tokens_out=300,
-    latency_ms=1200
-)
+TelemetryCollector.record_llm_call(model="claude-sonnet-4-6-20250929", tokens_in=150, tokens_out=300, latency_ms=1200)
 
 # Budget tracking
 tracker = get_budget_tracker()
@@ -150,19 +137,14 @@ init_otel(service_name="nexus", otlp_endpoint="http://localhost:4317")
 ### Events Subsystem
 
 ```python
-from core.observability import (
-    CerebroEvent,
-    CerebroEventType,
-    get_redis_bus,
-    get_event_analytics
-)
+from core.observability import CerebroEvent, CerebroEventType, get_redis_bus, get_event_analytics
 
 # Publish event to Redis (for external UIs like CEREBRO)
 event = CerebroEvent(
     event_type=CerebroEventType.INTERACTION_ASK,
     tenant_id="tenant_123",
     workspace_id="default",
-    payload={"prompt": "Continue?"}
+    payload={"prompt": "Continue?"},
 )
 await get_redis_bus().publish(event)
 
@@ -191,12 +173,7 @@ from core.events import CerebroEvent
 **After P5.6 Phase 1:**
 ```python
 # All imports from unified package
-from core.observability import (
-    AuditLogger,
-    get_logger,
-    BudgetTracker,
-    CerebroEvent
-)
+from core.observability import AuditLogger, get_logger, BudgetTracker, CerebroEvent
 
 # Or from subpackages
 from core.observability.audit import AuditLogger

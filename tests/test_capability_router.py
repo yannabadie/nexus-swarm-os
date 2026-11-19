@@ -1,5 +1,6 @@
 # tests/test_capability_router.py
 """Tests for CapabilityRouter — model-agnostic slot assignment."""
+
 from __future__ import annotations
 
 from dataclasses import FrozenInstanceError

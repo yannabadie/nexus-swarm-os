@@ -814,9 +814,7 @@ class OrchestratorV7:
         self.active_agent = "gemini"
         self.stagnation_detector.reset()
 
-        return self.result_handler.make_result(
-            "BRAINSTORMING", stagnation_msg, "Gemini", False, error="STAGNATION"
-        )
+        return self.result_handler.make_result("BRAINSTORMING", stagnation_msg, "Gemini", False, error="STAGNATION")
 
     def _handle_error(self, error_msg: str) -> dict:
         """Handle recoverable error"""

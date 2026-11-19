@@ -23,8 +23,11 @@ Hierarchical cancellation with propagation.
 token = CancellationToken()
 child = token.create_child()
 
+
 def on_cancel():
     print("Cancelled!")
+
+
 token.on_cancel(on_cancel)
 
 token.cancel(reason="User requested")
@@ -70,11 +73,7 @@ Fire-and-forget task error tracking.
 
 ```python
 manager = SafeTaskManager()
-task = await manager.create_task(
-    some_coro(),
-    name="background_job",
-    on_error=lambda e: print(f"Error: {e}")
-)
+task = await manager.create_task(some_coro(), name="background_job", on_error=lambda e: print(f"Error: {e}"))
 stats = manager.get_stats()
 ```
 
@@ -84,16 +83,20 @@ Lightweight async pub/sub for synchronization events.
 ```python
 bus = get_event_bus()
 
+
 def handler(event: SyncEvent):
     print(event.payload)
 
+
 bus.subscribe(EventType.STATE_CHANGE, handler)
-bus.publish(SyncEvent(
-    event_type=EventType.STATE_CHANGE,
-    source="orchestrator",
-    task_id="task-123",
-    payload={"from": "IDLE", "to": "BRAINSTORMING"}
-))
+bus.publish(
+    SyncEvent(
+        event_type=EventType.STATE_CHANGE,
+        source="orchestrator",
+        task_id="task-123",
+        payload={"from": "IDLE", "to": "BRAINSTORMING"},
+    )
+)
 ```
 
 ## Dependencies

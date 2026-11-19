@@ -226,8 +226,12 @@ DEFAULT_EVAL_CASES: tuple[EvalTaskCase, ...] = (
             claude_fit=0.92,
         ),
         expected_keywords=(
-            "race condition", "thread safety", "asyncio.Lock",
-            "resource leak", "connection pool", "concurrent",
+            "race condition",
+            "thread safety",
+            "asyncio.Lock",
+            "resource leak",
+            "connection pool",
+            "concurrent",
         ),
         preferred_mode=CollaborationMode.RED_BLUE,
         description="Code review that benefits from RED_BLUE: Blue proposes fixes, Red finds remaining issues.",
@@ -249,8 +253,12 @@ DEFAULT_EVAL_CASES: tuple[EvalTaskCase, ...] = (
             claude_fit=0.88,
         ),
         expected_keywords=(
-            "event sourcing", "CQRS", "orchestration_v7",
-            "trade-off", "incremental", "solo developer",
+            "event sourcing",
+            "CQRS",
+            "orchestration_v7",
+            "trade-off",
+            "incremental",
+            "solo developer",
         ),
         preferred_mode=CollaborationMode.LEAD_SUPPORT,
         description=(
@@ -275,8 +283,12 @@ DEFAULT_EVAL_CASES: tuple[EvalTaskCase, ...] = (
             claude_fit=0.85,
         ),
         expected_keywords=(
-            "deprecated", "provider_registry", "migration checklist",
-            "priority", "async_gemini_driver", "replacement",
+            "deprecated",
+            "provider_registry",
+            "migration checklist",
+            "priority",
+            "async_gemini_driver",
+            "replacement",
         ),
         preferred_mode=CollaborationMode.SEQUENTIAL,
         description=(
@@ -334,7 +346,9 @@ class DeterministicAgentSimulator:
 
     def pipeline_response(self, case: EvalTaskCase, lead_id: str, support_id: str) -> list[AgentResponse]:
         self.set_case(case)
-        lead = self.invoke(lead_id, "execution", f"LEAD_SUPPORT MODE - You are LEAD:\n{case.prompt}\n\nProvide complete solution.")
+        lead = self.invoke(
+            lead_id, "execution", f"LEAD_SUPPORT MODE - You are LEAD:\n{case.prompt}\n\nProvide complete solution."
+        )
         support = self.invoke(
             support_id,
             "execution",
@@ -521,7 +535,6 @@ class DeterministicAgentSimulator:
             105,
             1.1,
         )
-
 
     # =========================================================================
     # V12.4: New multi-agent collaboration task responses
@@ -789,7 +802,9 @@ class SwarmEvalHarness:
         return output_dir
 
     def _run_single_agent(self, case: EvalTaskCase) -> EvalRunResult:
-        agent_id = case.baseline_agent or ("gemini_primary" if case.analysis.recommended_lead == "gemini" else "claude_opus")
+        agent_id = case.baseline_agent or (
+            "gemini_primary" if case.analysis.recommended_lead == "gemini" else "claude_opus"
+        )
         response = self.simulator.single_agent_response(case, agent_id)
         return self._score_run(
             strategy="single_agent",
@@ -801,7 +816,9 @@ class SwarmEvalHarness:
         )
 
     def _run_deterministic_pipeline(self, case: EvalTaskCase) -> EvalRunResult:
-        lead_id = case.baseline_agent or ("gemini_primary" if case.analysis.recommended_lead == "gemini" else "claude_opus")
+        lead_id = case.baseline_agent or (
+            "gemini_primary" if case.analysis.recommended_lead == "gemini" else "claude_opus"
+        )
         support_id = "claude_opus" if lead_id == "gemini_primary" else "gemini_primary"
         responses = self.simulator.pipeline_response(case, lead_id, support_id)
         final_output = responses[-1].content
@@ -826,7 +843,12 @@ class SwarmEvalHarness:
                 workspace_path=workspace_path,
             )
             engine.task_analyzer.analyze = lambda _task: case.analysis  # type: ignore[method-assign]
-            result = engine.process_task(case.prompt, blackboard={"workspace_path": workspace_path}, force_mode=case.preferred_mode, skip_negotiation=True)
+            result = engine.process_task(
+                case.prompt,
+                blackboard={"workspace_path": workspace_path},
+                force_mode=case.preferred_mode,
+                skip_negotiation=True,
+            )
 
         failure_mode = None
         if result.execution_result.status.value != "completed":

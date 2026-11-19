@@ -157,10 +157,7 @@ from core.telemetry import TelemetryCollector
 from pathlib import Path
 
 # Initialize collector
-collector = TelemetryCollector(
-    config=config,
-    output_file=Path("workspace/telemetry.jsonl")
-)
+collector = TelemetryCollector(config=config, output_file=Path("workspace/telemetry.jsonl"))
 
 # Record API call with automatic cost tracking
 collector.record_api_call(
@@ -170,7 +167,7 @@ collector.record_api_call(
     tokens_out=800,
     latency_seconds=2.5,
     success=True,
-    task_type="brainstorm"
+    task_type="brainstorm",
 )
 
 # Record swarm task
@@ -180,7 +177,7 @@ collector.record_swarm_task(
     duration_seconds=15.2,
     success=True,
     agents_used=["gemini", "claude"],
-    negotiation_turns=2
+    negotiation_turns=2,
 )
 
 # Check budget before expensive operation

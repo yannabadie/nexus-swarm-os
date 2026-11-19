@@ -75,17 +75,17 @@ class InteractionProvider(ABC):
 ```python
 @dataclass
 class Choice:
-    key: str          # Selection key (e.g., "a", "b")
+    key: str  # Selection key (e.g., "a", "b")
     description: str  # Display text
 ```
 
 ### InteractionLevel
 ```python
 class InteractionLevel(Enum):
-    SILENT = 0      # No output
-    MINIMAL = 1     # Errors only
-    NORMAL = 2      # Standard output
-    VERBOSE = 3     # Debug output
+    SILENT = 0  # No output
+    MINIMAL = 1  # Errors only
+    NORMAL = 2  # Standard output
+    VERBOSE = 3  # Debug output
 ```
 
 ## Configuration
@@ -102,6 +102,7 @@ Set `NEXUS_INTERACTION_MODE` environment variable:
 
 ```python
 from core.interaction import get_interaction_provider
+
 
 async def my_function():
     provider = get_interaction_provider()
@@ -120,7 +121,7 @@ async def my_function():
             Choice("a", "Option A"),
             Choice("b", "Option B"),
         ],
-        default="a"
+        default="a",
     )
 ```
 

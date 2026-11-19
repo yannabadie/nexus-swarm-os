@@ -19,6 +19,7 @@ from core.metagraph.query_engine import query_dependencies
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _extract(source: str, module: str = "test_mod") -> ASTSymbolExtractor:
     """Parse source string and return the extractor with results."""
     tree = ast.parse(textwrap.dedent(source))
@@ -34,16 +35,13 @@ def _dep_types(ext: ASTSymbolExtractor) -> list[DependencyType]:
 
 def _call_targets(ext: ASTSymbolExtractor) -> list[str]:
     """Return qualified names of CALLS targets."""
-    return [
-        d.target.qualified_name
-        for d in ext.dependencies
-        if d.dep_type == DependencyType.CALLS
-    ]
+    return [d.target.qualified_name for d in ext.dependencies if d.dep_type == DependencyType.CALLS]
 
 
 # ---------------------------------------------------------------------------
 # visit_Call tests
 # ---------------------------------------------------------------------------
+
 
 class TestVisitCall:
     """Tests for the new visit_Call method."""
@@ -155,6 +153,7 @@ class TestVisitCall:
 # Function scope tracking tests
 # ---------------------------------------------------------------------------
 
+
 class TestFunctionScope:
     """Tests for current_function tracking."""
 
@@ -165,10 +164,7 @@ class TestFunctionScope:
                 do_work()
         """)
         calls = [d for d in ext.dependencies if d.dep_type == DependencyType.CALLS]
-        assert any(
-            d.source.qualified_name == "test_mod.my_func"
-            for d in calls
-        )
+        assert any(d.source.qualified_name == "test_mod.my_func" for d in calls)
 
     def test_current_function_restored_after_function(self):
         """current_function should be restored after visiting a function."""
@@ -198,6 +194,7 @@ class TestFunctionScope:
 # ---------------------------------------------------------------------------
 # _get_call_name tests
 # ---------------------------------------------------------------------------
+
 
 class TestGetCallName:
     """Tests for _get_call_name helper."""
@@ -232,6 +229,7 @@ class TestGetCallName:
 # ---------------------------------------------------------------------------
 # Path normalization tests
 # ---------------------------------------------------------------------------
+
 
 class TestPathNormalization:
     """Tests for Windows path separator handling."""
@@ -287,6 +285,7 @@ class TestPathNormalization:
 # Query engine phantom symbol resolution tests
 # ---------------------------------------------------------------------------
 
+
 class TestPhantomSymbolResolution:
     """Tests that query_dependencies prefers real symbols over phantoms."""
 
@@ -340,6 +339,7 @@ class TestPhantomSymbolResolution:
 # ---------------------------------------------------------------------------
 # Integration: DependencyType.CALLS enum exists
 # ---------------------------------------------------------------------------
+
 
 class TestDependencyTypeEnum:
     """Verify CALLS enum member exists."""

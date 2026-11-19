@@ -71,10 +71,7 @@ class ParallelExecutor(ModeExecutor):
 
     async def execute(self, task, context, agents) -> ExecutionResult:
         # Run all registered agents in parallel (provider-agnostic)
-        tasks = [
-            asyncio.create_task(driver.invoke(task))
-            for driver in agents.active_drivers()
-        ]
+        tasks = [asyncio.create_task(driver.invoke(task)) for driver in agents.active_drivers()]
         results = await asyncio.gather(*tasks)
         # Merge using configured strategy
         return self.merge_strategy.merge(results)
@@ -105,9 +102,7 @@ class LeadSupportExecutor(ModeExecutor):
         review_task = f"Review: {lead_result.content}"
         support_review = await agents.support.invoke(review_task)
         # Lead incorporates feedback
-        return await agents.lead.invoke(
-            f"Incorporate feedback: {support_review.content}"
-        )
+        return await agents.lead.invoke(f"Incorporate feedback: {support_review.content}")
 ```
 
 ### PingPongExecutor

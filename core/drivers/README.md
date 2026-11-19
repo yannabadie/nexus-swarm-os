@@ -82,10 +82,10 @@ class DriverProtocol(Protocol):
 @dataclass
 class DriverResponse:
     status: DriverResponseStatus  # SUCCESS, ERROR, TOOL_CALL
-    content: str                  # Text response
-    tool_calls: List[ToolCall]    # Requested tool executions
-    usage: Optional[Dict]         # Token usage stats
-    model: str                    # Model identifier
+    content: str  # Text response
+    tool_calls: List[ToolCall]  # Requested tool executions
+    usage: Optional[Dict]  # Token usage stats
+    model: str  # Model identifier
 ```
 
 ### AsyncDriverFactory
@@ -141,18 +141,10 @@ class ToolExecutorProtocol(Protocol):
 ```python
 from core.drivers import create_async_claude_driver, AsyncClaudeDriverConfig
 
-config = AsyncClaudeDriverConfig(
-    model="claude-opus-4-6-20250116",
-    max_tokens=8192,
-    temperature=0.7
-)
+config = AsyncClaudeDriverConfig(model="claude-opus-4-6-20250116", max_tokens=8192, temperature=0.7)
 driver = create_async_claude_driver(config)
 
-response = await driver.invoke(
-    prompt="Analyze this code",
-    tools=[read_tool, edit_tool],
-    session_uuid="session-123"
-)
+response = await driver.invoke(prompt="Analyze this code", tools=[read_tool, edit_tool], session_uuid="session-123")
 ```
 
 ### CLI Adapter (Legacy)

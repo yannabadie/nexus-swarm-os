@@ -50,6 +50,7 @@ Abstract base class defining the backend protocol.
 ```python
 from abc import ABC, abstractmethod
 
+
 class MemoryBackend(ABC):
     @abstractmethod
     def build_index(self, chunks: List[Chunk]) -> None:
@@ -57,12 +58,7 @@ class MemoryBackend(ABC):
 
     @abstractmethod
     def retrieve(
-        self,
-        query_terms: Set[str],
-        chunks: List[Chunk],
-        limit: int = 5,
-        min_score: float = 0.0,
-        raw_query: str = ""
+        self, query_terms: Set[str], chunks: List[Chunk], limit: int = 5, min_score: float = 0.0, raw_query: str = ""
     ) -> List[Tuple[Chunk, float]]:
         pass
 
@@ -130,16 +126,13 @@ RRF (Reciprocal Rank Fusion) of Dense + BM25S backends.
 from core.memory.backends import HybridBackend
 
 if HybridBackend.is_available():
-    backend = HybridBackend(
-        storage_dir=Path("workspace/memory"),
-        embedding_engine=get_embedding_engine()
-    )
+    backend = HybridBackend(storage_dir=Path("workspace/memory"), embedding_engine=get_embedding_engine())
     backend.build_index(chunks)
     results = backend.retrieve(
         query_terms={"authentication", "login"},
         chunks=all_chunks,
         limit=5,
-        raw_query="How do I implement authentication?"
+        raw_query="How do I implement authentication?",
     )
 ```
 
