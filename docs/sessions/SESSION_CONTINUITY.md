@@ -1,15 +1,55 @@
 # SESSION CONTINUITY - NEXUS V12.4 "COGNITIVE BOOST"
 
-**Date**: 2026-03-16
-**Session**: NX-CG Model-Agnostic Swarm Migration — CapabilityRouter + BasePhase
-**Status**: CapabilityRouter migration COMPLETE — all 6 phases on BasePhase, CapabilityRouter wired
-**Branch**: NX-CG
-**Latest Commit**: 6bf8022 (fix: primary_domain in _route_agents_for_phase)
-**Operator**: Claude Code (Sonnet 4.6)
+**Date**: 2026-11-19
+**Session**: CI repair — make NEXUS CI honestly green
+**Status**: Reproduced green locally for push/PR events; the scheduled `torture` job is still red (see below). Not yet run on GitHub.
+**Branch**: fix/ci-green (default branch NX-CG untouched)
+**Latest Commit**: 6c19766 (fix(ci): read test totals from <testsuites>-rooted JUnit files)
+**Operator**: Claude Code (Sonnet 5.5)
 
 ---
 
-## NX-CG Model-Agnostic Migration Summary (2026-03-16)
+## CI Repair (2026-11-19)
+
+`NEXUS CI` had never passed (76 runs, first push to last scheduled run on 2026-05-17); every run failed at tests and
+lint, so all other jobs were skipped behind those gates. The logs have expired, so everything was reproduced locally
+by executing the workflow's own `run:` steps in clean clones, on Python 3.11, 3.12 and 3.13.
+
+### Causes found and fixed
+
+| Cause | Effect | Fix |
+|-------|--------|-----|
+| sqlmodel >= 0.0.45 rejects naive datetimes on its default column type | 24 tests; audit entries silently dropped | `NaiveDatetime` on the 14 naive-UTC columns; sqlmodel floor raised to 0.0.45 |
+| mcp 2.x renamed `FastMCP` to `MCPServer` | MCP server defined no tools (12 tests, 2 more silently skipped) | accept both names |
+| Recent FastAPI keeps included routers as `_IncludedRouter` (no `.path`) | 3 route-registration tests | `route_paths` fixture using FastAPI's own route walker |
+| Kimi K2.5 default changed in the registry only | `.env.example` check in Documentation Consistency, 1 test | `.env.example`, test and GEMINI.md synced |
+| Swarm evaluation harness: multi-agent modes degraded to SPECIALIST (since e1e75a9) and calls throttled by default provider quotas | CI assertion `recovery_rate > 0`, 3 tests, 67-180 s runs | harness declares simulated providers and quotas for the run, restores global state |
+| Never formatted/linted with ruff | 45 `ruff check` errors, 67 files for `ruff format` (40 are Markdown) | fixed in code, no rule changes |
+| Canary and torture jobs installed `.[dev,sdk]` but core imports sqlmodel (`db` extra) | both scheduled jobs failed at import | install `.[dev,sdk,db]` |
+| Evidence ledger read JUnit totals from the wrong element | ledger recorded "0 tests" for 11,396 passing | sum the `<testsuite>` children |
+
+### Result (code at 6c19766)
+
+- pytest as CI runs it: 0 failed, 0 errors, 11401 passed, 29 skipped on 3.11, 3.12 and 3.13; coverage 78.37% (floor 60%).
+  Before: 43 failed, 11339 passed, 31 skipped; coverage 77.87%.
+- `ruff check`, `ruff format --check`, mypy, bandit, repository hygiene: clean. Documentation Consistency: passes.
+- Every job of `NEXUS CI` passes for push events. For scheduled events everything passes except `torture`.
+
+### Still open
+
+- `torture` (scheduled/dispatch only): 20 of 76 tests fail. They assert saga-context keys that do not exist in
+  `SagaContext`, index the `PhaseCheckpoint` dataclass like a dict, or expect `rollback_to()` to run the compensation of
+  the target phase itself (it runs only the later phases'). Whether the tests or the saga are right is a design decision.
+- `core/provider_registry.py` (seed and `refresh_provider_registry` mapping) still encodes `kimi-k2-thinking`; a registry
+  refresh would revert the K2.5 default.
+- `NEXUS CI` is disabled for inactivity on GitHub and only triggers on pushes to NX-CG or pull requests to it.
+
+---
+
+## Previous session (2026-03-16): NX-CG Model-Agnostic Migration Summary
+
+**Status then**: CapabilityRouter migration COMPLETE — all 6 phases on BasePhase, CapabilityRouter wired
+**Branch then**: NX-CG | **Latest commit then**: 6bf8022 | **Operator**: Claude Code (Sonnet 4.6)
 
 ### New Files
 - `core/intelligence/swarm/capability_router.py` — CapabilityRouter maps task domains → semantic slots → BaseAsyncDriver
