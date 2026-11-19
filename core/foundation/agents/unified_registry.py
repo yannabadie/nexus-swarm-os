@@ -185,6 +185,27 @@ class UnifiedAgentRegistry:
         if normalized not in self._builtin_ids:
             self._builtin_ids.append(normalized)
 
+    def unregister_driver(self, agent_id: str) -> bool:
+        """
+        Detach the driver of an agent while keeping the agent itself registered.
+
+        The inverse of register_driver(): afterwards the agent no longer counts as active and its
+        position in the round-robin order is released.
+
+        Args:
+            agent_id: ID of agent or alias
+
+        Returns:
+            True if a driver was detached, False if the agent had no driver
+        """
+        normalized = self._normalize_id(agent_id)
+        if normalized not in self._drivers:
+            return False
+        del self._drivers[normalized]
+        if normalized in self._builtin_ids:
+            self._builtin_ids.remove(normalized)
+        return True
+
     def _normalize_id(self, agent_id: str) -> str:
         """Normalize agent ID to lowercase, resolving aliases"""
         if agent_id in self._aliases:

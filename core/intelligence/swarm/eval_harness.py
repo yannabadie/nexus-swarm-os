@@ -16,11 +16,15 @@ from __future__ import annotations
 import json
 import statistics
 import tempfile
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from core.foundation.agents.unified_registry import get_registry
+from core.infrastructure.resilience.unified_rate_limiter import APIRateLimitConfig, get_api_rate_limiter_registry
 from core.intelligence.reasoning.evaluation_panel import EvaluationPanel
 
 from .agent_metrics import create_default_pool
@@ -697,6 +701,25 @@ class DeterministicAgentSimulator:
         )
 
 
+# The simulator plays the two builtin providers of create_default_pool(); the registry knows them by these ids.
+_SIMULATED_PROVIDER_IDS = ("gemini", "claude")
+
+# Quota for the simulated agents. It is far above what a run issues, so the (unchanged) rate-limiting path
+# runs for every call without ever waiting.
+_SIMULATED_QUOTA = APIRateLimitConfig(requests_per_minute=600_000, burst_size=100_000)
+
+
+class _SimulatedProviderDriver:
+    """Registry driver that marks a simulated provider as active.
+
+    Agents are invoked through the simulator handed to HybridSwarmEngine (``invoke_agent``), never through
+    the registry, so reaching this driver would mean a real provider call was attempted by mistake.
+    """
+
+    async def invoke(self, prompt: str, **kwargs: Any) -> str:
+        raise RuntimeError("Simulated providers are served by DeterministicAgentSimulator, not by registry drivers.")
+
+
 class SwarmEvalHarness:
     """Deterministic comparative evaluation harness for the swarm layer."""
 
@@ -710,14 +733,37 @@ class SwarmEvalHarness:
         self.simulator = DeterministicAgentSimulator()
         self.panel = EvaluationPanel()
 
+    @contextmanager
+    def _simulated_providers(self) -> Iterator[None]:
+        """Make the engine see the simulated agents as live, well-provisioned providers.
+
+        HybridSwarmEngine degrades multi-agent modes to SPECIALIST unless the registry reports two or more
+        active providers, and every agent call passes through per-provider rate limiting. Neither belongs in
+        an offline simulation, so the harness declares its providers and their quota for the duration of a
+        run (the production code paths stay in use) and leaves the process-wide registry and limiters exactly
+        as it found them.
+        """
+        registry = get_registry()
+        attached = [provider_id for provider_id in _SIMULATED_PROVIDER_IDS if registry.get_driver(provider_id) is None]
+        for provider_id in attached:
+            registry.register_driver(provider_id, _SimulatedProviderDriver())
+        quotas = {agent_id: _SIMULATED_QUOTA for agent_id in create_default_pool().agents}
+        try:
+            with get_api_rate_limiter_registry().limits_override(quotas):
+                yield
+        finally:
+            for provider_id in attached:
+                registry.unregister_driver(provider_id)
+
     def run(self) -> EvalHarnessReport:
         generated_at = datetime.now(UTC).isoformat()
         runs: list[EvalRunResult] = []
 
-        for case in self.task_cases:
-            runs.append(self._run_single_agent(case))
-            runs.append(self._run_deterministic_pipeline(case))
-            runs.append(self._run_swarm(case))
+        with self._simulated_providers():
+            for case in self.task_cases:
+                runs.append(self._run_single_agent(case))
+                runs.append(self._run_deterministic_pipeline(case))
+                runs.append(self._run_swarm(case))
 
         summaries = []
         for strategy in ("single_agent", "deterministic_pipeline", "swarm"):

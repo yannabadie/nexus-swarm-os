@@ -37,6 +37,8 @@ import logging
 import threading
 import time
 from collections import deque
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -822,6 +824,32 @@ class APIRateLimiterRegistry:
                 requests_per_minute=config.requests_per_minute, burst_size=config.burst_size, provider=provider
             )
         return self._limiters[provider]
+
+    @contextmanager
+    def limits_override(self, overrides: Mapping[str, APIRateLimitConfig]) -> Iterator[None]:
+        """
+        Temporarily give providers their own limits; the previous limiters are restored on exit.
+
+        Meant for offline simulations whose "providers" are not real APIs, so production quotas must
+        not throttle them. The limiters keep working through the normal acquire/release path; only
+        their capacity differs. Providers that had no limiter before get none again afterwards.
+
+        Args:
+            overrides: Provider key -> limits to apply inside the block
+        """
+        previous = {provider: self._limiters.get(provider) for provider in overrides}
+        for provider, config in overrides.items():
+            self._limiters[provider] = APIRateLimiter(
+                requests_per_minute=config.requests_per_minute, burst_size=config.burst_size, provider=provider
+            )
+        try:
+            yield
+        finally:
+            for provider, limiter in previous.items():
+                if limiter is None:
+                    self._limiters.pop(provider, None)
+                else:
+                    self._limiters[provider] = limiter
 
     def get_all_stats(self) -> dict[str, dict]:
         """Get statistics from all API rate limiters."""
