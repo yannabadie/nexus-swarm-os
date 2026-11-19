@@ -497,3 +497,23 @@ def sample_task_analysis():
         confidence=0.8,
         detected_keywords=["fix", "bug"],
     )
+
+
+@pytest.fixture
+def route_paths():
+    """Return a callable listing every path served by a FastAPI app, flattened across included routers.
+
+    Recent FastAPI releases record ``include_router()`` lazily: ``app.routes`` then holds ``_IncludedRouter``
+    entries that have no ``.path`` of their own. ``fastapi.routing.iter_route_contexts`` is what FastAPI's own
+    OpenAPI generation uses to flatten them into effective routes (prefixes included). Older releases copy the
+    child routes straight into ``app.routes``, so there the plain ``.path`` attribute is already enough.
+    """
+
+    def _route_paths(app) -> list[str]:
+        try:
+            from fastapi.routing import iter_route_contexts
+        except ImportError:  # older FastAPI: app.routes already contains the flattened routes
+            return [route.path for route in app.routes if hasattr(route, "path")]
+        return [context.path for context in iter_route_contexts(app.routes) if context.path]
+
+    return _route_paths

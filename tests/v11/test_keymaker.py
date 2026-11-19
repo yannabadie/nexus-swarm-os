@@ -366,12 +366,12 @@ class TestKeymakerConfig:
 class TestAuthRouterRegistered:
     """Tests that auth router is properly registered."""
 
-    def test_auth_routes_in_app(self):
+    def test_auth_routes_in_app(self, route_paths):
         """Auth routes should be registered in CEREBRO app."""
         from core.api.cerebro.app import create_cerebro_app
 
         app = create_cerebro_app()
-        routes = [route.path for route in app.routes]
+        routes = route_paths(app)
 
         # V11.6 KEYMAKER routes
         assert "/api/auth/login" in routes

@@ -269,12 +269,12 @@ class TestTelemetryBridgePersistence:
 class TestCORTEXRoutes:
     """Tests that all CORTEX routes are registered."""
 
-    def test_routes_in_app(self):
+    def test_routes_in_app(self, route_paths):
         """All CORTEX routes should be registered in app."""
         from core.api.cerebro.app import create_cerebro_app
 
         app = create_cerebro_app()
-        routes = [route.path for route in app.routes]
+        routes = route_paths(app)
 
         # V11.5 CORTEX routes
         assert "/api/state/snapshot" in routes
