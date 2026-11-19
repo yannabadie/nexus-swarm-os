@@ -18,6 +18,7 @@ from datetime import UTC, datetime, timedelta
 from enum import Enum
 from uuid import UUID, uuid4
 
+from pydantic import NaiveDatetime
 from sqlmodel import Field, SQLModel
 
 # =============================================================================
@@ -133,7 +134,7 @@ class AuditLog(SQLModel, table=True):
     user_agent: str | None = Field(default=None, max_length=500)
 
     # Timestamp
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None), index=True)
+    timestamp: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None), index=True)
 
     def __repr__(self) -> str:
         return f"AuditLog({self.action}, user={self.user_id}, status={self.status})"
@@ -183,9 +184,9 @@ class HITLRequest(SQLModel, table=True):
     answer: str | None = Field(default=None, max_length=2000)
 
     # Timestamps
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
-    answered_at: datetime | None = Field(default=None)
-    expires_at: datetime = Field(default_factory=lambda: (datetime.now(UTC) + timedelta(hours=24)).replace(tzinfo=None))
+    created_at: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
+    answered_at: NaiveDatetime | None = Field(default=None)
+    expires_at: NaiveDatetime = Field(default_factory=lambda: (datetime.now(UTC) + timedelta(hours=24)).replace(tzinfo=None))
 
     def is_expired(self) -> bool:
         """Check if request has expired."""

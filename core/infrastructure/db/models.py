@@ -28,6 +28,7 @@ from enum import Enum
 from typing import Optional
 from uuid import UUID, uuid4
 
+from pydantic import NaiveDatetime
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -74,8 +75,8 @@ class Tenant(SQLModel, table=True):
     status: TenantStatus = Field(default=TenantStatus.ACTIVE)
 
     # Metadata
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
+    created_at: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
+    updated_at: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     # Contact
     email: str | None = Field(default=None, max_length=255)
@@ -128,10 +129,10 @@ class User(SQLModel, table=True):
 
     # Status
     is_active: bool = Field(default=True)
-    last_login: datetime | None = Field(default=None)
+    last_login: NaiveDatetime | None = Field(default=None)
 
     # Metadata
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
+    created_at: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     # Relationships
     tenant: Tenant | None = Relationship(back_populates="users")
@@ -179,8 +180,8 @@ class Workspace(SQLModel, table=True):
 
     # Metadata
     description: str | None = Field(default=None, max_length=500)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
+    created_at: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
+    updated_at: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     # Status
     is_active: bool = Field(default=True)
@@ -237,8 +238,8 @@ class Quota(SQLModel, table=True):
     monthly_spend_usd: float = Field(default=0.0)
 
     # Reset tracking
-    daily_reset_at: datetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
-    monthly_reset_at: datetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
+    daily_reset_at: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
+    monthly_reset_at: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     # Relationships
     tenant: Tenant | None = Relationship(back_populates="quota")
