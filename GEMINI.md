@@ -211,7 +211,7 @@ NEXUS-NX-CG/                     # Root (branch NX-CG)
   - **Sonnet 4.6** (`claude-sonnet-4-6`): Speed, tool execution, simple tasks
 
 **5 additional providers** also available via `AsyncDriverFactory`:
-OpenAI (`gpt-5.4`), DeepSeek (`deepseek-reasoner`), Kimi (`kimi-k2-thinking`), MiniMax (`MiniMax-M2.5`), Ollama (local).
+OpenAI (`gpt-5.4`), DeepSeek (`deepseek-reasoner`), Kimi (`kimi-k2.5`), MiniMax (`MiniMax-M2.5`), Ollama (local).
 See `core/provider_registry.json` for current model defaults.
 
 **Model Routing** (automatic):

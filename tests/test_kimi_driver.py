@@ -430,7 +430,7 @@ class TestKimiFactoryIntegration:
 
             assert driver is not None
             assert driver._provider == "kimi"
-            assert driver._model == "kimi-k2-thinking"
+            assert driver._model == "kimi-k2.5"
 
             # Verify singleton pattern
             driver2 = factory.get_kimi_sdk()
