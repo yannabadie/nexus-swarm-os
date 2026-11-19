@@ -38,9 +38,15 @@ from typing import Any
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s", stream=sys.stderr)
 logger = logging.getLogger("nexus.mcp.server")
 
-# Check for MCP SDK availability
+# Check for MCP SDK availability.
+# mcp 1.x exposes the high-level server as `mcp.server.fastmcp.FastMCP`; mcp 2.x renamed it to
+# `mcp.server.mcpserver.MCPServer`. Both provide the @tool/@resource/@prompt decorators and
+# run(transport=...) that this module relies on, so accept either.
 try:
-    from mcp.server.fastmcp import FastMCP
+    try:
+        from mcp.server.fastmcp import FastMCP  # mcp 1.x
+    except ImportError:
+        from mcp.server.mcpserver import MCPServer as FastMCP  # mcp 2.x
 
     MCP_AVAILABLE = True
 except ImportError:
