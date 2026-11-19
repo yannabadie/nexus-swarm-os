@@ -43,12 +43,14 @@ class MCPRequest:
     params: Optional[Dict] = None
     id: Optional[str] = None
 
+
 @dataclass
 class MCPResponse:
     jsonrpc: str = "2.0"
     result: Optional[Any] = None
     error: Optional[MCPError] = None
     id: Optional[str] = None
+
 
 @dataclass
 class MCPTool:
@@ -92,10 +94,7 @@ config = registry.get_server("filesystem")
 client = MCPClient(**config)
 
 # Direct usage
-client = MCPClient(
-    command=["npx", "-y", "@modelcontextprotocol/server-filesystem"],
-    env={"MCP_ROOT": "/tmp"}
-)
+client = MCPClient(command=["npx", "-y", "@modelcontextprotocol/server-filesystem"], env={"MCP_ROOT": "/tmp"})
 client.initialize()
 
 # Call tool

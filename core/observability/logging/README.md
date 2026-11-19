@@ -151,6 +151,7 @@ logger.error("Tool execution failed", tool="bash", error=str(e))
 
 # Driver logging
 from core.logging import get_driver_logger
+
 driver_logger = get_driver_logger()
 driver_logger.log_request("claude", prompt, token_count)
 ```

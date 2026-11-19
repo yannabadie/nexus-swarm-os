@@ -164,10 +164,7 @@ class CodeGraph:
         """Find all symbols defined in a file."""
         # Normalize to forward slashes for cross-platform comparison
         normalized_path = file_path.replace("\\", "/")
-        return [
-            sym for sym in self.symbols.values()
-            if sym.file_path.replace("\\", "/") == normalized_path
-        ]
+        return [sym for sym in self.symbols.values() if sym.file_path.replace("\\", "/") == normalized_path]
 
     def get_transitive_dependencies(
         self,

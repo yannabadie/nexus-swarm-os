@@ -125,7 +125,7 @@ isolated_env = manager.get_isolated_env("task_001_lead", "swarm")
 proc = subprocess.Popen(
     ["gemini", "chat", "--model", "gemini-3-pro-preview"],
     env=isolated_env,
-    cwd=workspace_path  # CWD is NOT changed!
+    cwd=workspace_path,  # CWD is NOT changed!
 )
 
 # Cleanup after task completion

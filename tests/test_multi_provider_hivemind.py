@@ -6,7 +6,6 @@ support N agents via dict fields while maintaining backward-compatible
 properties for the original 2-agent (gemini/claude) API.
 """
 
-
 import pytest
 
 from core.intelligence.hive_mind.types import (
@@ -356,9 +355,7 @@ class TestCrossTypeIntegration:
 
     def test_full_pipeline_three_agents(self) -> None:
         """Simulate a 3-agent pipeline."""
-        agents = {aid: _make_analysis(aid, c) for aid, c in [
-            ("gemini", 0.9), ("claude", 0.7), ("deepseek", 0.85)
-        ]}
+        agents = {aid: _make_analysis(aid, c) for aid, c in [("gemini", 0.9), ("claude", 0.7), ("deepseek", 0.85)]}
 
         d = Disagreement(
             topic="approach",

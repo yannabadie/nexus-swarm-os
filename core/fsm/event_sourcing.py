@@ -130,9 +130,9 @@ class FSMEventStore:
                 if loop.is_running():
                     task = asyncio.ensure_future(self._append_redis(event))
                     task.add_done_callback(
-                        lambda t: logger.warning("Redis FSM event write failed: %s", t.exception())
-                        if t.exception()
-                        else None
+                        lambda t: (
+                            logger.warning("Redis FSM event write failed: %s", t.exception()) if t.exception() else None
+                        )
                     )
                 else:
                     loop.run_until_complete(self._append_redis(event))

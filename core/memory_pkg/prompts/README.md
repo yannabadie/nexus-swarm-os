@@ -56,11 +56,9 @@ gemini_prompt = load_prompt("system_gemini_v7")
 claude_prompt = load_prompt("system_claude_v7")
 
 # Load with template variables
-evolution_prompt = load_prompt("evolution_brainstorm", {
-    "child_count": 3,
-    "parent_id": "NEXUS_V7",
-    "lineage_context": "..."
-})
+evolution_prompt = load_prompt(
+    "evolution_brainstorm", {"child_count": 3, "parent_id": "NEXUS_V7", "lineage_context": "..."}
+)
 ```
 
 ### Design Notes

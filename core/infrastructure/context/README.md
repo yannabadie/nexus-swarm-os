@@ -18,12 +18,12 @@ Immutable context for request-scoped tenant isolation.
 ```python
 @dataclass(frozen=True)
 class SessionContext:
-    tenant_id: str              # Tenant UUID
-    user_id: str                # User UUID
-    workspace_id: str           # Workspace UUID
-    role: UserRole              # ADMIN, USER, SERVICE, GUEST
-    request_id: str             # Unique request ID
-    created_at: datetime        # Context creation time
+    tenant_id: str  # Tenant UUID
+    user_id: str  # User UUID
+    workspace_id: str  # Workspace UUID
+    role: UserRole  # ADMIN, USER, SERVICE, GUEST
+    request_id: str  # Unique request ID
+    created_at: datetime  # Context creation time
     workspace_root: Optional[Path]  # Filesystem root for workspace
 ```
 
@@ -71,6 +71,7 @@ if has_active_session():
 ```python
 from core.context import require_context
 
+
 @require_context
 def tenant_specific_operation():
     ctx = get_current_session()
@@ -91,10 +92,10 @@ ctx = ensure_context()
 ### UserRole Enum
 ```python
 class UserRole(Enum):
-    ADMIN = "admin"      # Full access
-    USER = "user"        # Standard user
+    ADMIN = "admin"  # Full access
+    USER = "user"  # Standard user
     SERVICE = "service"  # Service account
-    GUEST = "guest"      # Read-only
+    GUEST = "guest"  # Read-only
 ```
 
 ## Dependencies

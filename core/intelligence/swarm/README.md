@@ -171,11 +171,11 @@ class TaskAnalyzer:
 ### TaskComplexity
 ```python
 class TaskComplexity(Enum):
-    TRIVIAL = 1   # /status, /clear - Skip negotiation
-    SIMPLE = 2    # Basic tasks
+    TRIVIAL = 1  # /status, /clear - Skip negotiation
+    SIMPLE = 2  # Basic tasks
     MODERATE = 3  # Standard multi-agent (HiveMind eligible)
-    COMPLEX = 4   # Careful coordination
-    EXPERT = 5    # RED_BLUE or specialist required
+    COMPLEX = 4  # Careful coordination
+    EXPERT = 5  # RED_BLUE or specialist required
 ```
 
 ### NegotiationProtocol
@@ -210,9 +210,9 @@ Each agent maintains performance history:
 class AgentProfile:
     agent_id: str
     importance_scores: Dict[TaskDomain, float]  # Per-domain quality
-    success_rate: float                          # Overall success
-    avg_response_time: float                     # Latency
-    specializations: List[TaskDomain]            # Best domains
+    success_rate: float  # Overall success
+    avg_response_time: float  # Latency
+    specializations: List[TaskDomain]  # Best domains
 ```
 
 ## Configuration

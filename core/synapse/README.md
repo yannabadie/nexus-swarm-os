@@ -51,16 +51,16 @@ For communication actions (TALK, DELEGATE, CONTINUE):
 
 ```python
 class LightMessageV7(BaseModel):
-    sender: str                          # "Gemini" or "Claude"
-    action_type: str                     # TALK, DELEGATE, CONTINUE
-    content: Optional[str] = ""          # Message content
+    sender: str  # "Gemini" or "Claude"
+    action_type: str  # TALK, DELEGATE, CONTINUE
+    content: Optional[str] = ""  # Message content
     thought_process: List[ThoughtChain]  # Reasoning steps
-    reflection: Optional[str] = None     # Self-reflection
-    next_agent: Optional[str] = None     # Target agent (auto-alternates)
-    status: Optional[str] = "CONTINUE"   # CONTINUE, FINISHED, ERROR
-    action_summary: Optional[str] = None # Summary of action taken
-    instructions_for_next: Optional[str] # Instructions for next agent
-    strategic_plan_update: List[Dict]    # Plan modifications
+    reflection: Optional[str] = None  # Self-reflection
+    next_agent: Optional[str] = None  # Target agent (auto-alternates)
+    status: Optional[str] = "CONTINUE"  # CONTINUE, FINISHED, ERROR
+    action_summary: Optional[str] = None  # Summary of action taken
+    instructions_for_next: Optional[str]  # Instructions for next agent
+    strategic_plan_update: List[Dict]  # Plan modifications
 ```
 
 ### HeavyMessageV7
@@ -69,14 +69,14 @@ For action-oriented messages (TOOL_USE, FINISH, ERROR):
 ```python
 class HeavyMessageV7(BaseModel):
     sender: str
-    action_type: str                     # TOOL_USE, FINISH, ERROR
+    action_type: str  # TOOL_USE, FINISH, ERROR
     content: Optional[str] = ""
     thought_process: List[ThoughtChain]
-    tool_name: Optional[str] = None      # Tool to execute
-    tool_params: Optional[Dict] = None   # Tool parameters
-    tool_result: Optional[str] = None    # Execution result
+    tool_name: Optional[str] = None  # Tool to execute
+    tool_params: Optional[Dict] = None  # Tool parameters
+    tool_result: Optional[str] = None  # Execution result
     error_message: Optional[str] = None  # Error details
-    final_response: Optional[str] = None # Task completion response
+    final_response: Optional[str] = None  # Task completion response
 ```
 
 ### ThoughtChain
@@ -84,8 +84,8 @@ Represents a reasoning step:
 
 ```python
 class ThoughtChain(BaseModel):
-    step: int          # Step number
-    reasoning: str     # Reasoning content
+    step: int  # Step number
+    reasoning: str  # Reasoning content
 ```
 
 ## Action Types
@@ -125,19 +125,18 @@ if next_agent is None:
 from core.synapse.protocol_v7 import LightMessageV7, HeavyMessageV7
 
 # Parsing agent response (auto-repairs typos)
-msg = LightMessageV7.model_validate({
-    "sender": "gemini",          # -> "Gemini"
-    "action_type": "delegation", # -> "DELEGATE"
-    "content": "Please analyze the code",
-    # next_agent missing -> auto-set to "Claude"
-})
+msg = LightMessageV7.model_validate(
+    {
+        "sender": "gemini",  # -> "Gemini"
+        "action_type": "delegation",  # -> "DELEGATE"
+        "content": "Please analyze the code",
+        # next_agent missing -> auto-set to "Claude"
+    }
+)
 
 # Tool use message
 tool_msg = HeavyMessageV7(
-    sender="Claude",
-    action_type="TOOL_USE",
-    tool_name="read",
-    tool_params={"file_path": "src/main.py"}
+    sender="Claude", action_type="TOOL_USE", tool_name="read", tool_params={"file_path": "src/main.py"}
 )
 ```
 

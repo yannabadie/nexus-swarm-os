@@ -126,17 +126,18 @@ from core.utils.atomic_store import AtomicJsonStore
 from pathlib import Path
 
 # Extract JSON from LLM response
-response = "Here's the data:\\n```json\\n{\"tool\": \"read\", \"args\": {}}\\n```"
+response = 'Here\'s the data:\\n```json\\n{"tool": "read", "args": {}}\\n```'
 data = extract_json(response)
 print(data)  # {"tool": "read", "args": {}}
 
 # Extract multiple JSON objects
-text = "{\"a\": 1} some text {\"b\": 2}"
+text = '{"a": 1} some text {"b": 2}'
 objects = extract_json_objects(text)
 print(objects)  # [{"a": 1}, {"b": 2}]
 
 # Serialize with custom encoder
 from datetime import datetime
+
 data = {"timestamp": datetime.now(), "path": Path("/tmp/file.txt")}
 json_str = to_json(data)
 

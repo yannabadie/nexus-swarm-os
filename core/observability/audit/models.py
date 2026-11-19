@@ -186,7 +186,9 @@ class HITLRequest(SQLModel, table=True):
     # Timestamps
     created_at: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
     answered_at: NaiveDatetime | None = Field(default=None)
-    expires_at: NaiveDatetime = Field(default_factory=lambda: (datetime.now(UTC) + timedelta(hours=24)).replace(tzinfo=None))
+    expires_at: NaiveDatetime = Field(
+        default_factory=lambda: (datetime.now(UTC) + timedelta(hours=24)).replace(tzinfo=None)
+    )
 
     def is_expired(self) -> bool:
         """Check if request has expired."""

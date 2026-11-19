@@ -887,8 +887,7 @@ class TaskAnalyzer:
                 # Track domain coverage from keywords to avoid double-counting
                 if keyword in ("security", "vulnerability"):
                     keyword_boosted_domains.add("security")
-                if keyword in ("architect", "architecture", "microservices",
-                               "distributed", "event sourcing"):
+                if keyword in ("architect", "architecture", "microservices", "distributed", "event sourcing"):
                     keyword_boosted_domains.add("architecture")
 
         # Domain-based modifiers (only if not already boosted by keywords)

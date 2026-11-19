@@ -25,7 +25,7 @@ await AuditLogger.log(
     resource_type="file",
     resource_id="/path/to/file.py",
     status=AuditStatus.SUCCESS,
-    request=request  # FastAPI Request for IP/user-agent
+    request=request,  # FastAPI Request for IP/user-agent
 )
 
 # Convenience methods
@@ -35,10 +35,7 @@ await AuditLogger.log_permission_denied(tenant_id, user_id, permission, resource
 
 # Query logs
 logs = await AuditLogger.query(
-    tenant_id=user.tenant_id,
-    status=AuditStatus.DENIED,
-    since=datetime.now() - timedelta(days=7),
-    limit=50
+    tenant_id=user.tenant_id, status=AuditStatus.DENIED, since=datetime.now() - timedelta(days=7), limit=50
 )
 
 # Count logs

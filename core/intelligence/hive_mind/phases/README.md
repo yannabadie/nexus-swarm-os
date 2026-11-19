@@ -145,12 +145,7 @@ class ConsolidationPhase:
 ## Usage
 
 ```python
-from core.intelligence.hive_mind.phases import (
-    AnalysisPhase,
-    DebatePhase,
-    ArchitecturePhase,
-    ExecutionPhase
-)
+from core.intelligence.hive_mind.phases import AnalysisPhase, DebatePhase, ArchitecturePhase, ExecutionPhase
 
 # Phases are typically called by TrueHiveMind orchestrator
 analysis = await AnalysisPhase().execute(context, None)

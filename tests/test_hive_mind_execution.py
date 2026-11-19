@@ -130,6 +130,7 @@ def test_hive_mind_execution():
         shutil.rmtree(workspace_path)
     # Reset the AutoMemory global singleton so subsequent tests start fresh.
     from core.memory_pkg.memory.auto_memory import reset_auto_memory
+
     reset_auto_memory()
     print("\n🏁 Test Suite Completed.")
 

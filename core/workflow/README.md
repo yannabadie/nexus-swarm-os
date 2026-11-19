@@ -115,11 +115,7 @@ import asyncio
 registry = get_workflow_registry()
 
 # Configure Redis (optional - falls back to memory)
-registry.configure(
-    redis_url="redis://localhost:6379",
-    use_redis=True,
-    workflow_ttl_hours=72
-)
+registry.configure(redis_url="redis://localhost:6379", use_redis=True, workflow_ttl_hours=72)
 
 # Connect (graceful degradation if Redis unavailable)
 connected = registry.connect()
@@ -134,7 +130,7 @@ workflow = registry.create_workflow(
     tenant_id="tenant_001",
     task="Process customer data",
     workspace_id="ws_default",
-    complexity="MODERATE"
+    complexity="MODERATE",
 )
 print(workflow)
 # {
@@ -147,26 +143,16 @@ print(workflow)
 # }
 
 # Update status
-registry.update_status(
-    workflow_id="wf_abc123",
-    tenant_id="tenant_001",
-    status=WorkflowStatus.RUNNING
-)
+registry.update_status(workflow_id="wf_abc123", tenant_id="tenant_001", status=WorkflowStatus.RUNNING)
 
 # List workflows for tenant
-workflows = registry.list_workflows(
-    tenant_id="tenant_001",
-    status=WorkflowStatus.RUNNING,
-    limit=50
-)
+workflows = registry.list_workflows(tenant_id="tenant_001", status=WorkflowStatus.RUNNING, limit=50)
 
 # Complete workflow
 registry.update_status(
-    workflow_id="wf_abc123",
-    tenant_id="tenant_001",
-    status=WorkflowStatus.COMPLETED,
-    result={"output": "Success"}
+    workflow_id="wf_abc123", tenant_id="tenant_001", status=WorkflowStatus.COMPLETED, result={"output": "Success"}
 )
+
 
 # Distributed locking
 async def critical_section():
@@ -177,6 +163,7 @@ async def critical_section():
         print("In critical section")
         await asyncio.sleep(5)
         # Lock automatically released on exit
+
 
 # Cleanup old workflows
 expired = registry.cleanup_expired(max_age_hours=72)

@@ -197,7 +197,9 @@ class HibernationState(SQLModel, table=True):
 
     # Timestamps
     entered_at: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
-    expires_at: NaiveDatetime = Field(default_factory=lambda: (datetime.now(UTC) + timedelta(hours=24)).replace(tzinfo=None))
+    expires_at: NaiveDatetime = Field(
+        default_factory=lambda: (datetime.now(UTC) + timedelta(hours=24)).replace(tzinfo=None)
+    )
 
     # Status
     is_active: bool = Field(default=True, index=True)

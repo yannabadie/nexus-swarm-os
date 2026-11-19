@@ -178,14 +178,8 @@ def analyze_impact(
 
     # Extract affected files (normalize paths for cross-platform comparison)
     normalized_input = file_path.replace("\\", "/")
-    affected_files = {
-        dep.source.file_path.replace("\\", "/")
-        for dep in all_direct_deps if dep.source.file_path
-    }
-    affected_files.update(
-        sym.file_path.replace("\\", "/")
-        for sym in all_transitive_deps if sym.file_path
-    )
+    affected_files = {dep.source.file_path.replace("\\", "/") for dep in all_direct_deps if dep.source.file_path}
+    affected_files.update(sym.file_path.replace("\\", "/") for sym in all_transitive_deps if sym.file_path)
 
     # Remove the file itself
     affected_files.discard(normalized_input)

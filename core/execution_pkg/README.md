@@ -76,7 +76,7 @@ workflow = Workflow(
         WorkflowStep(name="Build", handler="bash", args=["npm run build"]),
         WorkflowStep(name="Test", handler="bash", args=["pytest"]),
         WorkflowStep(name="Deploy", handler="bash", args=["./deploy.sh"]),
-    ]
+    ],
 )
 
 engine = WorkflowEngine()
@@ -124,10 +124,10 @@ The execution package provides the operational backbone of NEXUS:
 This consolidation provides a unified execution layer:
 ```python
 from core.execution_pkg import (
-    ExecutionEngine,       # Tool execution
-    ModelRouter,          # Model selection
-    ContextBuilder,       # Context preparation
-    SwarmBridge,         # Swarm delegation
+    ExecutionEngine,  # Tool execution
+    ModelRouter,  # Model selection
+    ContextBuilder,  # Context preparation
+    SwarmBridge,  # Swarm delegation
 )
 ```
 

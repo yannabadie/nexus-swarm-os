@@ -144,7 +144,12 @@ def test_run_research_surfaces_conflicting_claims(tmp_path: Path) -> None:
     report_text = outputs["report"].read_text(encoding="utf-8")
     assert "## Contradictions" in report_text
     # Contradictions section should reference the conflicting docs (by filename or concept)
-    assert "legacy_storage" in report_text.lower() or "runtime_storage" in report_text.lower() or "workspace" in report_text.lower() or "nexus_root" in report_text.lower()
+    assert (
+        "legacy_storage" in report_text.lower()
+        or "runtime_storage" in report_text.lower()
+        or "workspace" in report_text.lower()
+        or "nexus_root" in report_text.lower()
+    )
 
 
 def test_run_research_rejects_paths_outside_root(tmp_path: Path) -> None:

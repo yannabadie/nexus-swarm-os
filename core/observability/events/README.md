@@ -103,7 +103,7 @@ event = CerebroEvent(
     event_type=CerebroEventType.INTERACTION_ASK,
     tenant_id="tenant_123",
     workspace_id="default",
-    payload={"prompt": "Continue?", "options": ["Yes", "No"]}
+    payload={"prompt": "Continue?", "options": ["Yes", "No"]},
 )
 await get_redis_bus().publish(event)
 

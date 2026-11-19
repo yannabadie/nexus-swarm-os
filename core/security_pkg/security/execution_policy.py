@@ -154,7 +154,10 @@ class ExecutionPolicy:
         (r"\$\(.*\)", "Command substitution"),
         (r"`.*`", "Backtick command substitution"),
         # Network operations
-        (r"\b\d{4,5}\b.*\b(0\.0\.0\.0|127\.0\.0\.1|localhost)\b|\b(0\.0\.0\.0|127\.0\.0\.1|localhost)\b.*\d{4,5}", "Local network binding"),
+        (
+            r"\b\d{4,5}\b.*\b(0\.0\.0\.0|127\.0\.0\.1|localhost)\b|\b(0\.0\.0\.0|127\.0\.0\.1|localhost)\b.*\d{4,5}",
+            "Local network binding",
+        ),
         (r">/dev/tcp/", "Bash network redirect"),
         # History/log tampering
         (r"history\s+-[cd]", "History manipulation"),

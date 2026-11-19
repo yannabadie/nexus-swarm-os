@@ -70,11 +70,13 @@ from core.interface.commands import CommandRegistry, command
 
 registry = CommandRegistry()
 
+
 # Register via decorator
 @command(name="help", aliases=["?", "h"], description="Show help")
 async def help_command(args: List[str], context: CommandContext) -> CommandResult:
     # Implementation
     return CommandResult(success=True, message=help_text)
+
 
 # Execute command
 result = await registry.execute("/help", context)

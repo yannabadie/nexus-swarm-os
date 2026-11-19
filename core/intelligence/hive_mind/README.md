@@ -225,6 +225,7 @@ All 6 HiveMind phase classes now extend `BasePhase`, which stores agents as a pr
 ```python
 from core.intelligence.hive_mind.base_phase import BasePhase
 
+
 class MyPhase(BasePhase):
     def __init__(self, agents: dict | None = None, **kwargs):
         super().__init__(agents=agents)

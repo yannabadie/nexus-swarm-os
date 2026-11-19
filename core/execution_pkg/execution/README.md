@@ -101,9 +101,7 @@ Exposes spawned agents as callable tools, enabling fractal agent invocation patt
 ```python
 registry = AgentToolRegistry(workspace_path, agent_pool, invoker)
 registry.refresh()  # Discover spawned agents
-result = registry.execute_agent_tool("agent_security_expert", {
-    "task": "Analyze this code for SQL injection"
-})
+result = registry.execute_agent_tool("agent_security_expert", {"task": "Analyze this code for SQL injection"})
 ```
 
 **Features:**
@@ -118,9 +116,7 @@ Runtime generation of custom Python tools with AST validation and subprocess iso
 ```python
 manager = DynamicToolManager(workspace_path)
 result = manager.create_tool(
-    name="fibonacci",
-    code="def run(n): return [0,1] if n<=2 else ...",
-    description="Calculate fibonacci sequence"
+    name="fibonacci", code="def run(n): return [0,1] if n<=2 else ...", description="Calculate fibonacci sequence"
 )
 result = manager.execute_tool("fibonacci", {"n": 10})
 ```

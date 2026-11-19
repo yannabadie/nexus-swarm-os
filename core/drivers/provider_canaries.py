@@ -203,11 +203,7 @@ class ProviderCanaryRunner:
             )
 
         content = (response.content or "").strip()
-        passed = (
-            response.status == DriverResponseStatus.SUCCESS
-            and health_ok is True
-            and CANARY_EXPECTED in content
-        )
+        passed = response.status == DriverResponseStatus.SUCCESS and health_ok is True and CANARY_EXPECTED in content
         return ProviderCanaryResult(
             provider=provider_name,
             configured=True,

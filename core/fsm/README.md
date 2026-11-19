@@ -100,18 +100,18 @@ The **fsm** (Finite State Machine) module provides the low-level orchestration l
 ### OrchestratorState
 ```python
 class OrchestratorState(Enum):
-    IDLE = auto()                    # Awaiting user input
-    BRAINSTORMING = auto()           # Agents exchange TALK messages
-    EXECUTING_TOOL = auto()          # Tool execution (synchronous)
-    VALIDATING_CFL = auto()          # Cognitive Feedback Loop validation
-    EVOLUTION_BRAINSTORM = auto()    # Debate for emergent mutations
-    WAITING_USER = auto()            # Task finished, awaiting next input
-    ERROR = auto()                   # Recoverable error (/reset)
-    PANIC = auto()                   # Fatal error (restart required)
-    SWARM_ANALYZING = auto()         # Swarm analyzes task complexity
-    SWARM_NEGOTIATING = auto()       # Agents negotiate collaboration mode
-    SWARM_EXECUTING = auto()         # Execute negotiated mode
-    HIBERNATE = auto()               # V12.2: WebSocket disconnected
+    IDLE = auto()  # Awaiting user input
+    BRAINSTORMING = auto()  # Agents exchange TALK messages
+    EXECUTING_TOOL = auto()  # Tool execution (synchronous)
+    VALIDATING_CFL = auto()  # Cognitive Feedback Loop validation
+    EVOLUTION_BRAINSTORM = auto()  # Debate for emergent mutations
+    WAITING_USER = auto()  # Task finished, awaiting next input
+    ERROR = auto()  # Recoverable error (/reset)
+    PANIC = auto()  # Fatal error (restart required)
+    SWARM_ANALYZING = auto()  # Swarm analyzes task complexity
+    SWARM_NEGOTIATING = auto()  # Agents negotiate collaboration mode
+    SWARM_EXECUTING = auto()  # Execute negotiated mode
+    HIBERNATE = auto()  # V12.2: WebSocket disconnected
 ```
 
 ### TaskExecutionContext
@@ -119,6 +119,7 @@ class OrchestratorState(Enum):
 @dataclass(frozen=True)
 class TaskExecutionContext:
     """Immutable context for task execution."""
+
     task_id: str
     user_input: str
     start_time: datetime
@@ -172,11 +173,11 @@ class StagnationPredictor:
 
 ```python
 class RecoveryStrategy(Enum):
-    RETRY = "retry"           # Retry current operation
-    ROLLBACK = "rollback"     # Rollback to checkpoint
-    ESCALATE = "escalate"     # Escalate to user
-    RESET = "reset"           # Full state reset
-    HIBERNATE = "hibernate"   # Enter dormant state
+    RETRY = "retry"  # Retry current operation
+    ROLLBACK = "rollback"  # Rollback to checkpoint
+    ESCALATE = "escalate"  # Escalate to user
+    RESET = "reset"  # Full state reset
+    HIBERNATE = "hibernate"  # Enter dormant state
 ```
 
 ## Dependencies

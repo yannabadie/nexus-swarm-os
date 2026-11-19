@@ -64,11 +64,7 @@ The infrastructure package provides **foundational system capabilities** through
 ### Context Subsystem
 
 ```python
-from core.infrastructure import (
-    SessionContext,
-    use_context,
-    get_current_session
-)
+from core.infrastructure import SessionContext, use_context, get_current_session
 
 # Set multi-tenant context
 with use_context(tenant_id="acme", user_id="alice", workspace_id="project-x"):
@@ -83,6 +79,7 @@ async with use_context_async(tenant_id="acme"):
 
 # Decorator for context requirement
 from core.infrastructure import require_context
+
 
 @require_context
 def tenant_specific_function():
@@ -104,26 +101,14 @@ def tenant_specific_function():
 ### Database Subsystem
 
 ```python
-from core.infrastructure import (
-    init_db,
-    get_session,
-    Tenant,
-    User,
-    Workspace,
-    PlanTier,
-    get_tenant_by_slug
-)
+from core.infrastructure import init_db, get_session, Tenant, User, Workspace, PlanTier, get_tenant_by_slug
 
 # Initialize database (creates tables)
 init_db(db_path="workspace/.nexus/nexus.db")
 
 # Create a tenant
 with get_session() as session:
-    tenant = Tenant(
-        name="Acme Corp",
-        slug="acme",
-        plan_tier=PlanTier.PRO
-    )
+    tenant = Tenant(name="Acme Corp", slug="acme", plan_tier=PlanTier.PRO)
     session.add(tenant)
     session.commit()
 
@@ -146,7 +131,7 @@ from core.infrastructure import (
     AutoBootstrap,
     SpawnedAgentLoader,
     BootstrapService,
-    discover_and_register_spawned_agents
+    discover_and_register_spawned_agents,
 )
 
 # Auto-generate NEXUS.md when deployed to new project
@@ -159,6 +144,7 @@ agents = discover_and_register_spawned_agents(workspace_path=Path("workspace"))
 
 # Service layer
 from core.infrastructure import _get_bootstrap_service
+
 service = _get_bootstrap_service()
 result = await service.bootstrap_project()
 ```
@@ -173,21 +159,13 @@ result = await service.bootstrap_project()
 ### Session Subsystem
 
 ```python
-from core.infrastructure import (
-    SessionWorkspaceManager,
-    HomeIsolator,
-    StateRecoveryManager,
-    get_session_analytics
-)
+from core.infrastructure import SessionWorkspaceManager, HomeIsolator, StateRecoveryManager, get_session_analytics
 
 # Session workspace isolation
 manager = SessionWorkspaceManager(workspace_path=Path("workspace"))
 
 # Get isolated environment for subprocess (Gemini session isolation)
-isolated_env = manager.get_isolated_env(
-    session_id="task_123_lead",
-    task_type="swarm"
-)
+isolated_env = manager.get_isolated_env(session_id="task_123_lead", task_type="swarm")
 
 # Pass to subprocess (CWD stays at project root!)
 subprocess.Popen(cmd, env=isolated_env, cwd=workspace_path)
@@ -197,10 +175,7 @@ manager.cleanup_workspace("task_123_lead", "swarm")
 
 # State recovery (V12.4)
 recovery = get_recovery_manager()
-snapshot = await recovery.create_snapshot(
-    session_uuid="abc123",
-    reason="before_risky_operation"
-)
+snapshot = await recovery.create_snapshot(session_uuid="abc123", reason="before_risky_operation")
 
 # Session analytics
 analytics = get_session_analytics()
@@ -218,12 +193,7 @@ print(f"Total sessions: {stats.total_sessions}")
 ### Resilience Subsystem
 
 ```python
-from core.infrastructure import (
-    CircuitBreaker,
-    SystemHealth,
-    get_checkpoint_manager,
-    RuntimeWasteFilter
-)
+from core.infrastructure import CircuitBreaker, SystemHealth, get_checkpoint_manager, RuntimeWasteFilter
 
 # Circuit breaker for fault tolerance
 breaker = get_circuit_breaker("gemini_api")
@@ -242,18 +212,18 @@ report = health.get_health_report()
 # Checkpoint for state recovery
 checkpoint_mgr = get_checkpoint_manager()
 checkpoint = await checkpoint_mgr.create_checkpoint(
-    session_uuid="abc123",
-    state_data={"current_phase": "execution", "step": 5}
+    session_uuid="abc123", state_data={"current_phase": "execution", "step": 5}
 )
 
 # Runtime waste detection (arxiv:2510.26585)
 from core.infrastructure import get_runtime_waste_filter
+
 waste_filter = get_runtime_waste_filter()
 intervention = waste_filter.check_exchange(
     exchange_record={
         "prompt": "...",
         "response": "...",
-        "reasoning_quality": 0.3  # Low quality
+        "reasoning_quality": 0.3,  # Low quality
     }
 )
 if intervention:
@@ -289,7 +259,7 @@ from core.infrastructure import (
     get_session,
     AutoBootstrap,
     SessionWorkspaceManager,
-    CircuitBreaker
+    CircuitBreaker,
 )
 
 # Or from subpackages

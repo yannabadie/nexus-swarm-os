@@ -155,10 +155,7 @@ All handlers can be created via factory functions:
 ```python
 # Create all handlers at once
 handlers = create_all_handlers(
-    workspace_path=Path("/workspace"),
-    validation_service=validator,
-    dynamic_tool_manager=dtm,
-    swarm_bridge=bridge
+    workspace_path=Path("/workspace"), validation_service=validator, dynamic_tool_manager=dtm, swarm_bridge=bridge
 )
 
 # Create specific handler categories
@@ -216,6 +213,7 @@ To create a new handler:
 ```python
 from .base import BaseHandler, ToolResult
 
+
 class MyToolHandler(BaseHandler):
     @property
     def tool_name(self) -> str:
@@ -233,6 +231,7 @@ class MyToolHandler(BaseHandler):
             return self._ok(result)
         except Exception as e:
             return self._error(str(e))
+
 
 # Factory function
 def create_my_tool_handler(workspace_path, validation_service):

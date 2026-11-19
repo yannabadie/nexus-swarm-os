@@ -55,23 +55,16 @@ console.print_banner(
     gemini_model="gemini-3-pro-preview",
     claude_model="claude-opus-4-6-20250116",
     version="V12.4",
-    codename="COGNITIVE BOOST"
+    codename="COGNITIVE BOOST",
 )
 
 # Display result from orchestrator
-console.display_result({
-    "state": "HIVE_SUCCESS",
-    "final_response": "Task completed successfully",
-    "steps_taken": 5,
-    "duration": 12.3
-})
+console.display_result(
+    {"state": "HIVE_SUCCESS", "final_response": "Task completed successfully", "steps_taken": 5, "duration": 12.3}
+)
 
 # Print status
-console.print_status({
-    "fsm_state": "IDLE",
-    "session_id": "abc123",
-    "swarm_mode": "PARALLEL"
-})
+console.print_status({"fsm_state": "IDLE", "session_id": "abc123", "swarm_mode": "PARALLEL"})
 
 # Print error
 console.print_error("Failed to connect to API")

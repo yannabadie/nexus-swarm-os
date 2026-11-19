@@ -412,6 +412,7 @@ if result:
 
 from core.metagraph import get_impact_before_edit
 
+
 def _handle_tool_execution(self, tool_name: str, tool_args: dict):
     """Execute tool with impact analysis."""
 
@@ -434,6 +435,7 @@ def _handle_tool_execution(self, tool_name: str, tool_args: dict):
 
 from core.metagraph import find_experts_for_file
 
+
 def _select_lead_agent(self, file_path: str):
     """Select lead agent based on file expertise."""
 
@@ -455,14 +457,14 @@ MetagraphRAG integrates with NEXUS observability:
 ```python
 # Metrics sent to TelemetryCollector:
 
-metagraph.query.dependency_query     # Query latency
-metagraph.query.impact_analysis      # Query latency
-metagraph.query.semantic_search      # Query latency
-metagraph.query.total                # Query count
-metagraph.scan.duration              # Scan duration
-metagraph.graph.symbols              # Symbol count
-metagraph.graph.dependencies         # Dependency count
-metagraph.update.files               # Updated files count
+metagraph.query.dependency_query  # Query latency
+metagraph.query.impact_analysis  # Query latency
+metagraph.query.semantic_search  # Query latency
+metagraph.query.total  # Query count
+metagraph.scan.duration  # Scan duration
+metagraph.graph.symbols  # Symbol count
+metagraph.graph.dependencies  # Dependency count
+metagraph.update.files  # Updated files count
 ```
 
 View in CEREBRO dashboard or query via TelemetryCollector.
@@ -474,12 +476,14 @@ View in CEREBRO dashboard or query via TelemetryCollector.
 Check environment variable:
 ```python
 import os
+
 print(os.getenv("METAGRAPH_AUTO_SCAN"))  # Should be "true"
 ```
 
 Force manual scan:
 ```python
 from core.metagraph import get_graph
+
 graph = get_graph(force_refresh=True)
 ```
 
@@ -496,6 +500,7 @@ METAGRAPH_MAX_AGE_MINUTES=120  # 2 hours
 Check cache hit rate:
 ```python
 from core.metagraph import get_auditor
+
 stats = get_auditor().get_stats()
 print(f"Cache hit rate: {stats.cache_hit_rate:.1%}")
 ```
@@ -503,6 +508,7 @@ print(f"Cache hit rate: {stats.cache_hit_rate:.1%}")
 If low (<30%), consider forcing refresh:
 ```python
 from core.metagraph import get_graph
+
 graph = get_graph(force_refresh=True)
 ```
 

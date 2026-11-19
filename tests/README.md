@@ -190,10 +190,12 @@ python tests/verify_hive_mind.py
 **MockDriver**: Reusable mock for GeminiDriverV7 and ClaudeDriverHybrid
 ```python
 driver = MockDriver("Gemini")
-driver.set_responses([
-    {"sender": "Gemini", "action_type": "TALK", "content": "...", "status": "CONTINUE"},
-    {"sender": "Gemini", "action_type": "FINISH", "content": "...", "status": "FINISHED"},
-])
+driver.set_responses(
+    [
+        {"sender": "Gemini", "action_type": "TALK", "content": "...", "status": "CONTINUE"},
+        {"sender": "Gemini", "action_type": "FINISH", "content": "...", "status": "FINISHED"},
+    ]
+)
 ```
 
 **MockConfig**: Test configuration with sensible defaults

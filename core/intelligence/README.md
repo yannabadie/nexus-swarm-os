@@ -122,9 +122,9 @@ The intelligence package represents NEXUS's highest-level cognitive capabilities
 This consolidation reduces cognitive load by providing a single import point for all intelligence operations:
 ```python
 from core.intelligence import (
-    HybridSwarmEngine,      # Swarm coordination
-    EvolutionManager,        # Self-improvement
-    MetacognitiveMonitor,    # Quality assurance
-    TrueHiveMind,           # Orchestration
+    HybridSwarmEngine,  # Swarm coordination
+    EvolutionManager,  # Self-improvement
+    MetacognitiveMonitor,  # Quality assurance
+    TrueHiveMind,  # Orchestration
 )
 ```

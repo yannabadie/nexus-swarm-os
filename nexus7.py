@@ -42,8 +42,10 @@ from datetime import UTC
 try:
     from dotenv import load_dotenv
 except ImportError:  # pragma: no cover - exercised only in dependency-light environments
+
     def load_dotenv(*_args, **_kwargs) -> bool:
         return False
+
 
 from core.provider_registry import build_provider_snapshot, get_replacement, refresh_provider_registry
 from core.version import NEXUS_CODENAME, NEXUS_VERSION
