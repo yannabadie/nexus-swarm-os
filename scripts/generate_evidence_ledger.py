@@ -50,16 +50,16 @@ def _parse_junit(path: Path | None) -> dict[str, Any]:
         }
 
     root = ElementTree.parse(path).getroot()
-    suites = root
-    if root.tag == "testsuite":
-        suites = root
+    # JUnit files come in two shapes: <testsuite> as the root, or <testsuites> wrapping <testsuite> children
+    # (what current pytest writes) whose totals live on the children. Use the root when it carries the totals.
+    suites = [root] if root.tag == "testsuite" or "tests" in root.attrib else root.findall("testsuite")
 
-    tests = int(suites.attrib.get("tests", "0"))
-    failures = int(suites.attrib.get("failures", "0"))
-    errors = int(suites.attrib.get("errors", "0"))
-    skipped = int(suites.attrib.get("skipped", "0"))
-    duration = suites.attrib.get("time")
-    duration_seconds = float(duration) if duration is not None else None
+    tests = sum(int(suite.attrib.get("tests", "0")) for suite in suites)
+    failures = sum(int(suite.attrib.get("failures", "0")) for suite in suites)
+    errors = sum(int(suite.attrib.get("errors", "0")) for suite in suites)
+    skipped = sum(int(suite.attrib.get("skipped", "0")) for suite in suites)
+    durations = [float(suite.attrib["time"]) for suite in suites if "time" in suite.attrib]
+    duration_seconds = sum(durations) if durations else None
 
     return {
         "tests": tests,
