@@ -238,11 +238,11 @@ class TestA2ARoute:
 class TestA2AAppIntegration:
     """Test A2A route integration with Cerebro app."""
 
-    def test_a2a_router_registered(self):
+    def test_a2a_router_registered(self, route_paths):
         """A2A router should be registered in the Cerebro app."""
         from core.api.cerebro.app import create_cerebro_app
 
         app = create_cerebro_app()
 
-        routes = [route.path for route in app.routes]
+        routes = route_paths(app)
         assert "/.well-known/agent.json" in routes
