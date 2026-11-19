@@ -321,6 +321,44 @@ class TestDriverRegistration:
         registry.unregister("temp")
         assert registry.get_driver("temp") is None
 
+    def test_unregister_driver_keeps_the_agent(self):
+        """Detaching a driver must leave the agent registered but no longer active"""
+        registry = UnifiedAgentRegistry()
+
+        class MockDriver:
+            async def invoke(self, prompt: str, **kwargs) -> str:
+                return ""
+
+        registry.register_driver("gemini", MockDriver())
+        assert registry.get_active_builtin_ids() == ["gemini"]
+
+        assert registry.unregister_driver("gemini") is True
+
+        assert registry.get_driver("gemini") is None
+        assert registry.get("gemini") is not None  # descriptor stays
+        assert registry.get_active_builtin_ids() == []
+
+    def test_unregister_driver_without_driver_is_a_noop(self):
+        """Should report False when there was no driver to detach"""
+        registry = UnifiedAgentRegistry()
+        assert registry.unregister_driver("gemini") is False
+        assert registry.unregister_driver("does-not-exist") is False
+
+    def test_unregister_driver_restores_round_robin_order(self):
+        """Re-registering after a detach must not keep a stale position"""
+        registry = UnifiedAgentRegistry()
+
+        class MockDriver:
+            async def invoke(self, prompt: str, **kwargs) -> str:
+                return ""
+
+        registry.register_driver("claude", MockDriver())
+        registry.register_driver("gemini", MockDriver())
+        registry.unregister_driver("claude")
+        registry.register_driver("claude", MockDriver())
+
+        assert registry.get_active_builtin_ids() == ["gemini", "claude"]
+
 
 class TestCapabilitySelection:
     """Test capability-based agent selection"""
