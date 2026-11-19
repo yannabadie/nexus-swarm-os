@@ -25,6 +25,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Optional
 from uuid import UUID, uuid4
 
+from pydantic import NaiveDatetime
 from sqlmodel import Field, SQLModel, select
 
 logger = logging.getLogger(__name__)
@@ -195,8 +196,8 @@ class HibernationState(SQLModel, table=True):
     message_history: str | None = Field(default=None, max_length=100000)  # JSON
 
     # Timestamps
-    entered_at: datetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
-    expires_at: datetime = Field(default_factory=lambda: (datetime.now(UTC) + timedelta(hours=24)).replace(tzinfo=None))
+    entered_at: NaiveDatetime = Field(default_factory=lambda: datetime.now(UTC).replace(tzinfo=None))
+    expires_at: NaiveDatetime = Field(default_factory=lambda: (datetime.now(UTC) + timedelta(hours=24)).replace(tzinfo=None))
 
     # Status
     is_active: bool = Field(default=True, index=True)

@@ -40,7 +40,7 @@ ingest = [
 ]
 db = [
     # Data layer + event bus
-    "sqlmodel>=0.0.14",
+    "sqlmodel>=0.0.45",
     "sqlalchemy>=2.0",
     "redis>=5.0.0",
 ]
@@ -53,7 +53,7 @@ api = [
     "python-multipart>=0.0.9",
     "slowapi>=0.1.9",
     "argon2-cffi>=23.1.0",
-    "sqlmodel>=0.0.14",
+    "sqlmodel>=0.0.45",
     "sqlalchemy>=2.0",
     "redis>=5.0.0",
 ]

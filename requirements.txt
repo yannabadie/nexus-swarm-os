@@ -24,7 +24,7 @@ onnxruntime>=1.19.0
 docling>=2.15.0
 
 # === Database & Redis [db] ===
-sqlmodel>=0.0.14
+sqlmodel>=0.0.45
 sqlalchemy>=2.0
 redis>=5.0.0
 
