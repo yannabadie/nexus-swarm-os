@@ -8,7 +8,6 @@ smoke jobs so routine CI can distinguish wiring from live execution.
 
 from __future__ import annotations
 
-import asyncio
 import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime

@@ -173,10 +173,8 @@ class ASTSymbolExtractor(ast.NodeVisitor):
             while isinstance(current, ast.Attribute):
                 parts.insert(0, current.attr)
                 current = current.value
-            if isinstance(current, ast.Name):
-                # Skip 'self' prefix
-                if current.id != "self":
-                    parts.insert(0, current.id)
+            if isinstance(current, ast.Name) and current.id != "self":  # skip 'self' prefix
+                parts.insert(0, current.id)
             return ".".join(parts) if parts else None
         return None
 

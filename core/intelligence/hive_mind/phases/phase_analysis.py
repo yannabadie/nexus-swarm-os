@@ -203,7 +203,7 @@ class IndependentAnalysisPhase(BasePhase):
 
         # Collect results by agent_id, handling errors
         analyses: dict[str, IndependentAnalysis] = {}
-        for agent_id, result in zip(self.agent_ids, raw_results):
+        for agent_id, result in zip(self.agent_ids, raw_results, strict=False):
             if isinstance(result, Exception):
                 logger.error(f"{agent_id} analysis failed: {result}")
                 analyses[agent_id] = self._create_fallback_analysis(agent_id, str(result))
@@ -699,8 +699,6 @@ class IndependentAnalysisPhase(BasePhase):
         from itertools import combinations
 
         disagreements = []
-        total_agreement = 0.0
-        pair_count = 0
 
         all_caps: set[str] = set()
         all_risks: set[str] = set()
@@ -722,10 +720,9 @@ class IndependentAnalysisPhase(BasePhase):
 
         # Check approach similarity (average pairwise)
         approach_agreements = []
-        for (id_a, a), (id_b, b) in combinations(analyses.items(), 2):
+        for a, b in combinations(analyses.values(), 2):
             sim = self._text_similarity(a.proposed_approach, b.proposed_approach)
             approach_agreements.append(sim)
-            pair_count += 1
 
         avg_approach = sum(approach_agreements) / len(approach_agreements) if approach_agreements else 1.0
         if avg_approach < 0.6:
@@ -820,7 +817,7 @@ class IndependentAnalysisPhase(BasePhase):
 
             scorer = get_quality_scorer()
             detector = get_degradation_detector()
-            for agent_id in comparison.analyses.keys():
+            for agent_id in comparison.analyses:
                 profile = scorer.get_agent_profile(agent_id)
                 if profile and profile.avg_calibration < 0.5 and comparison.agreement_score < 0.9:
                     return True  # Low calibration + moderate agreement = debate

@@ -1230,9 +1230,8 @@ class TaskAnalyzer:
                 elif file_path.endswith(".md"):
                     if TaskDomain.DOCUMENTATION not in domain_hints:
                         domain_hints.append(TaskDomain.DOCUMENTATION)
-                elif file_path.endswith((".js", ".ts", ".tsx", ".jsx")):
-                    if TaskDomain.CODING not in domain_hints:
-                        domain_hints.append(TaskDomain.CODING)
+                elif file_path.endswith((".js", ".ts", ".tsx", ".jsx")) and TaskDomain.CODING not in domain_hints:
+                    domain_hints.append(TaskDomain.CODING)
 
                 # Complexity hints from content patterns
                 if "async" in content or "await" in content:

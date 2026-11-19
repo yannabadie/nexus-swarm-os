@@ -37,16 +37,16 @@ class BasePhase:
     def __init__(
         self,
         *,
-        agents: dict[str, "BaseAsyncDriver"] | None = None,
+        agents: dict[str, BaseAsyncDriver] | None = None,
     ) -> None:
-        self.agents: dict[str, "BaseAsyncDriver"] = agents or {}
+        self.agents: dict[str, BaseAsyncDriver] = agents or {}
 
     # ------------------------------------------------------------------
     # Deprecated backward-compat aliases
     # ------------------------------------------------------------------
 
     @property
-    def gemini(self) -> "BaseAsyncDriver | None":
+    def gemini(self) -> BaseAsyncDriver | None:
         """
         Deprecated. Use self.agents["primary"] instead.
 
@@ -60,13 +60,13 @@ class BasePhase:
         return self.agents.get("primary") or self.agents.get("gemini")
 
     @gemini.setter
-    def gemini(self, value: "BaseAsyncDriver | None") -> None:
+    def gemini(self, value: BaseAsyncDriver | None) -> None:
         """Setter kept for legacy __init__ assignments in subclasses."""
         if value is not None:
             self.agents["gemini"] = value
 
     @property
-    def claude(self) -> "BaseAsyncDriver | None":
+    def claude(self) -> BaseAsyncDriver | None:
         """
         Deprecated. Use self.agents["secondary"] instead.
 
@@ -80,7 +80,7 @@ class BasePhase:
         return self.agents.get("secondary") or self.agents.get("claude")
 
     @claude.setter
-    def claude(self, value: "BaseAsyncDriver | None") -> None:
+    def claude(self, value: BaseAsyncDriver | None) -> None:
         """Setter kept for legacy __init__ assignments in subclasses."""
         if value is not None:
             self.agents["claude"] = value

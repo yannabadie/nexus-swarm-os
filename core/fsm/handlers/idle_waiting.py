@@ -4,6 +4,7 @@ NEXUS V12.4 - Idle and Waiting User State Handlers
 Handles IDLE and WAITING_USER states with task routing logic.
 """
 
+import contextlib
 import time
 
 from core.execution_pkg.routing.model_router import TaskType
@@ -282,10 +283,8 @@ class IdleWaitingHandler(BaseHandler):
             for provider in ["deepseek", "openai", "kimi", "minimax"]:
                 avail = getattr(factory, f"{provider}_sdk_available", False)
                 if avail:
-                    try:
+                    with contextlib.suppress(Exception):
                         agents[provider] = factory.get_driver(provider, prefer_sdk=True)
-                    except Exception:
-                        pass
         else:
             # No factory - fall back to orchestrator's primary driver
             agents["gemini"] = self._orch.gemini_driver

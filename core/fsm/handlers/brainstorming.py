@@ -34,10 +34,9 @@ class BrainstormingHandler(BaseHandler):
             self._orch.panic_system.trigger_panic_explicit(reason="ZOMBIE_PLAN", details=health["message"])
             return self._orch._trigger_panic(f"Plan zombie: {health['message']}")
 
-        elif health["status"] in ["STAGNANT", "WARNING"]:
+        elif health["status"] in ["STAGNANT", "WARNING"] and self._orch.config.ui_verbose:
             # Log warning but continue
-            if self._orch.config.ui_verbose:
-                print(f"[PLAN HEALTH] {health['status']}: {health['message']}")
+            print(f"[PLAN HEALTH] {health['status']}: {health['message']}")
 
         # Check stagnation
         if self._orch.stagnation_detector.is_stagnant():

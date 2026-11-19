@@ -6,7 +6,6 @@ support N agents via dict fields while maintaining backward-compatible
 properties for the original 2-agent (gemini/claude) API.
 """
 
-from datetime import datetime
 
 import pytest
 
@@ -17,7 +16,6 @@ from core.intelligence.hive_mind.types import (
     Disagreement,
     IndependentAnalysis,
 )
-
 
 # =============================================================================
 # Helpers
