@@ -18,8 +18,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from core.foundation.agents.unified_registry import UnifiedAgentRegistry
-    from core.foundation.agents.unified_registry import BaseAsyncDriver
+    from core.foundation.agents.unified_registry import BaseAsyncDriver, UnifiedAgentRegistry
     from core.intelligence.swarm.task_analyzer import TaskAnalysis
 
 from core.intelligence.swarm.task_analyzer import AGENT_DOMAIN_STRENGTHS
@@ -51,10 +50,10 @@ class CapabilityRouter:
         # agents = {"primary": driver_a, "secondary": driver_b, ...}
     """
 
-    def __init__(self, registry: "UnifiedAgentRegistry") -> None:
+    def __init__(self, registry: UnifiedAgentRegistry) -> None:
         self._registry = registry
 
-    def route(self, task: "TaskAnalysis") -> dict[str, "BaseAsyncDriver"]:
+    def route(self, task: TaskAnalysis) -> dict[str, BaseAsyncDriver]:
         """
         Assign providers to slots for the given task.
 
@@ -88,7 +87,7 @@ class CapabilityRouter:
     # ------------------------------------------------------------------
 
     def _assign_slots(
-        self, task: "TaskAnalysis", available: list[str]
+        self, task: TaskAnalysis, available: list[str]
     ) -> dict[str, str]:
         """Return {slot: provider_id} for each slot."""
         ranked = self._rank_by_task(task, available)
@@ -110,7 +109,7 @@ class CapabilityRouter:
             SLOT_EXECUTOR: executor,
         }
 
-    def _rank_by_task(self, task: "TaskAnalysis", available: list[str]) -> list[str]:
+    def _rank_by_task(self, task: TaskAnalysis, available: list[str]) -> list[str]:
         """Rank providers by average score across task domains."""
         domain_names = [d.value for d in task.domains] if task.domains else ["general"]
 

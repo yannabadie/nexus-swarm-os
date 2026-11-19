@@ -2,18 +2,20 @@
 """Tests for CapabilityRouter — model-agnostic slot assignment."""
 from __future__ import annotations
 
-import pytest
+from dataclasses import FrozenInstanceError
 from unittest.mock import MagicMock
 
+import pytest
+
 from core.intelligence.swarm.capability_router import (
-    CapabilityRouter,
-    SlotAssignment,
+    ALL_SLOTS,
+    SLOT_CRITIC,
     SLOT_PRIMARY,
     SLOT_SECONDARY,
-    SLOT_CRITIC,
-    ALL_SLOTS,
+    CapabilityRouter,
+    SlotAssignment,
 )
-from core.intelligence.swarm.task_analyzer import TaskAnalysis, TaskDomain, TaskComplexity
+from core.intelligence.swarm.task_analyzer import TaskAnalysis, TaskComplexity, TaskDomain
 
 
 def _make_registry(provider_ids: list[str]):
@@ -110,7 +112,7 @@ class TestSlotAssignment:
 
     def test_slot_assignment_frozen(self):
         sa = SlotAssignment(slot=SLOT_PRIMARY, provider_id="claude", score=0.85)
-        with pytest.raises(Exception):  # frozen dataclass
+        with pytest.raises(FrozenInstanceError):
             sa.slot = "secondary"  # type: ignore
 
 

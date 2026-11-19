@@ -48,6 +48,7 @@ except ImportError:
 _SUCCESS_MEMORY_AVAILABLE = True  # Will attempt lazy import
 SuccessMemory = None  # Populated lazily
 # V10 SYNAPSE: Telemetry instrumentation
+from core.foundation.agents.unified_registry import get_registry  # noqa: E402  # V12.4 mode degradation
 from core.observability.events.telemetry_bridge import (  # noqa: E402  # after optional dependency blocks
     emit_agent_exchange,
     emit_agent_speak,  # noqa: F401  # used by tests via mock.patch()
@@ -63,7 +64,6 @@ from .mode_executors import (  # noqa: E402
     get_executor,
 )
 from .negotiation_protocol import NegotiationProtocol, NegotiationResult, NegotiationStatus  # noqa: E402
-from core.foundation.agents.unified_registry import get_registry  # noqa: E402  # V12.4 mode degradation
 from .task_analyzer import TaskComplexity  # noqa: E402
 from .task_completion_validator import get_adaptive_max_rounds  # noqa: E402
 

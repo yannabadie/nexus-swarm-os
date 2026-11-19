@@ -5,9 +5,7 @@ from __future__ import annotations
 import ast
 import textwrap
 
-import pytest
-
-from core.metagraph.ast_parser import ASTSymbolExtractor, parse_python_file
+from core.metagraph.ast_parser import ASTSymbolExtractor
 from core.metagraph.code_graph import (
     CodeGraph,
     Dependency,
@@ -15,8 +13,7 @@ from core.metagraph.code_graph import (
     Symbol,
     SymbolType,
 )
-from core.metagraph.query_engine import analyze_impact, query_dependencies
-
+from core.metagraph.query_engine import query_dependencies
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -5,7 +5,6 @@ Validates get_next(), get_active_builtin_ids(), and backward-compatible
 get_alternate() behavior with 2, 3, and N registered agents.
 """
 
-import pytest
 from unittest.mock import MagicMock
 
 from core.foundation.agents.unified_registry import get_registry, reset_registry

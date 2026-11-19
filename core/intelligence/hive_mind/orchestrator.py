@@ -34,6 +34,8 @@ from core.execution_pkg.orchestration.sync_bridge import OrchestratorSyncBridge,
 
 # V8.0.1: Hot-Swap Lead Agent
 from core.fsm.stagnation_detector import StagnationDetector
+from core.intelligence.swarm.capability_router import CapabilityRouter
+from core.intelligence.swarm.task_analyzer import TaskAnalysis, TaskDomain
 
 # V10 SYNAPSE: Telemetry instrumentation
 from core.observability.events.telemetry_bridge import get_telemetry_bridge
@@ -52,9 +54,6 @@ from .cost_estimator import CostEstimator
 
 # V12.4: Phase audit logging for decision tracking
 from .phase_audit_logger import get_phase_audit_logger
-from core.intelligence.swarm.capability_router import CapabilityRouter
-from core.intelligence.swarm.task_analyzer import TaskAnalysis, TaskDomain
-
 from .phases import (
     AdaptiveRetryPhase,
     ArchitectureGenerationPhase,

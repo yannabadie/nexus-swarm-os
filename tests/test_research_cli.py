@@ -1,11 +1,10 @@
 import json
-import json
 from pathlib import Path
 
 import pytest
 
-from nexus_research import run_research
 from core.memory_pkg.memory.project_memory import ProjectMemory
+from nexus_research import run_research
 
 
 def _write_sample_doc(root: Path) -> Path:

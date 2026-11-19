@@ -20,6 +20,10 @@ import pytest
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from core.config import Config
+from core.fsm.states import OrchestratorState
+from core.version import NEXUS_CODENAME, NEXUS_VERSION
+
 
 def pytest_configure(config: pytest.Config) -> None:
     """Set SKIP_LLM_TESTS before collection so module-level skip markers evaluate correctly.
@@ -33,10 +37,6 @@ def pytest_configure(config: pytest.Config) -> None:
     """
     if not os.environ.get("SKIP_LLM_TESTS"):
         os.environ["SKIP_LLM_TESTS"] = "1"
-
-from core.config import Config
-from core.fsm.states import OrchestratorState
-from core.version import NEXUS_CODENAME, NEXUS_VERSION
 
 
 class MockDriver:
