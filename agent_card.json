@@ -12,7 +12,7 @@
   ],
   "provider": {
     "organization": "NEXUS Project",
-    "url": "https://github.com/yannabadie/NEXUS/tree/NX-CG"
+    "url": "https://github.com/yannabadie/nexus-swarm-os/tree/NX-CG"
   },
   "version": "12.4.0",
   "documentationUrl": "http://localhost:8080/docs",

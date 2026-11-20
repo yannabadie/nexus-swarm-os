@@ -1,26 +1,21 @@
-NEXUS PROPRIETARY & CONFIDENTIAL LICENSE
-Copyright © 2025 Yann Abadie. Tous droits réservés.
+MIT License
 
-L'accès, le téléchargement ou l'utilisation de ce logiciel (dénommé "NEXUS") et de sa documentation associée sont soumis aux conditions strictes suivantes :
+Copyright (c) 2025-2026 Yann Abadie
 
-1. NATURE CONFIDENTIELLE Ce code source contient des algorithmes inédits, des secrets commerciaux et des informations confidentielles appartenant exclusivement à Yann Abadie. Il ne constitue pas un logiciel libre (Open Source).
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-2. DROITS D'USAGE LIMITÉS L'accès à ce dépôt vous est accordé uniquement à des fins de consultation privée ou d'évaluation personnelle. Toute autre utilisation est strictement interdite sans un accord commercial écrit et signé par l'auteur.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-3. INTERDICTIONS STRICTES Sauf autorisation expresse, il est formellement INTERDIT de :
-
-Copier, distribuer ou publier tout ou partie du code, sous quelque forme que ce soit.
-
-Modifier, adapter ou créer des œuvres dérivées basées sur ce logiciel, que ce soit pour un usage interne ou public.
-
-Utiliser ce logiciel à des fins commerciales, lucratives ou professionnelles.
-
-Faire de l'ingénierie inverse (Reverse Engineering), décompiler ou désassembler le code pour en extraire la logique interne (notamment le Hybrid Swarm Engine).
-
-Entraîner des modèles d'IA ou des systèmes d'apprentissage automatique sur tout ou partie de ce code.
-
-4. PROPRIÉTÉ INTELLECTUELLE La structure, l'organisation et le code de ce projet sont la propriété intellectuelle exclusive de Yann Abadie. Aucun droit de propriété n'est transféré par la présente.
-
-5. VIOLATION Toute utilisation non autorisée constitue une violation des droits d'auteur et sera poursuivie dans toute la rigueur permise par la loi.
-
-Pour toute demande de licence commerciale : security@example.com
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

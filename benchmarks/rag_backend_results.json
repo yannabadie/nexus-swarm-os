@@ -297,7 +297,7 @@
         "embedding_dim": 384,
         "index_built": false,
         "chunk_count": 0,
-        "storage_path": "C:\\Users\\YANN~1.ABA\\AppData\\Local\\Temp\\nexus_rag_dense_b8gu27s2\\lancedb",
+        "storage_path": "<temp>/lancedb",
         "dependencies": "lancedb>=0.4.0, sentence-transformers>=3.2.0",
         "engine": {},
         "chunks_indexed": 0,

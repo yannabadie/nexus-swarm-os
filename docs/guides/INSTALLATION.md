@@ -8,7 +8,7 @@
 
 ## Quick Install (Local)
 ```bash
-git clone https://github.com/yannabadie/NEXUS.git
+git clone https://github.com/yannabadie/nexus-swarm-os.git
 cd NEXUS
 git checkout NX-CG
 python -m pip install -r requirements.txt

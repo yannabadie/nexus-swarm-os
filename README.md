@@ -4,7 +4,7 @@
 
 **Multi-model collaborative orchestration platform with native provider drivers, cross-model verification, and built-in security.**
 
-[![Version](https://img.shields.io/badge/version-12.4.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-12.4.0-blue.svg)](pyproject.toml)
 [![Python](https://img.shields.io/badge/python-3.11+-green.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
 
@@ -99,7 +99,7 @@ nexus-mcp
   "mcpServers": {
     "nexus": {
       "command": "python",
-      "args": ["-m", "core.mcp.server"],
+      "args": ["-m", "core.interface_pkg.mcp.server"],
       "cwd": "/path/to/nexus"
     }
   }
@@ -117,7 +117,7 @@ REST + WebSocket API for programmatic access.
 docker compose --profile api up -d
 
 # Or standalone
-uvicorn core.api.cerebro.app:create_app --factory --host 0.0.0.0 --port 8000
+uvicorn core.api.cerebro.app:create_cerebro_app --factory --host 0.0.0.0 --port 8000
 ```
 
 - REST endpoints at `http://localhost:8000`
@@ -149,7 +149,7 @@ nexus7> Analyze this project and suggest improvements
 | **Google** | `GoogleGenAISDKDriver` | gemini-3.1-pro-preview, gemini-3-flash-preview | `google-genai` |
 | **OpenAI** | `OpenAISDKDriver` | gpt-5.4, gpt-5-mini, gpt-5-nano | `openai` |
 | **DeepSeek** | `DeepSeekSDKDriver` | deepseek-chat, deepseek-reasoner | OpenAI-compatible |
-| **Moonshot Kimi** | `KimiSDKDriver` | kimi-k2-thinking, kimi-k2-thinking-turbo | OpenAI-compatible |
+| **Moonshot Kimi** | `KimiSDKDriver` | kimi-k2.5 | OpenAI-compatible |
 | **MiniMax** | `MiniMaxSDKDriver` | MiniMax-M2.5, MiniMax-M2.5-HighSpeed | OpenAI-compatible |
 | **Ollama** | `OllamaDriver` | Any local model | Local inference |
 
@@ -161,17 +161,11 @@ Driver mode is configurable: `auto` (SDK when key is available, CLI fallback), `
 
 ## Installation
 
-### From PyPI
-
-```bash
-pip install nexus-swarm-os
-```
-
 ### From Source
 
 ```bash
-git clone https://github.com/yannabadie/NEXUS.git
-cd NEXUS && git checkout NX-CG
+git clone https://github.com/yannabadie/nexus-swarm-os.git
+cd nexus-swarm-os
 
 # Core only (lightweight, ~20MB)
 pip install -e .
@@ -229,7 +223,7 @@ nexus-mcp
 
 ```bash
 pip install -e ".[api]"
-uvicorn core.api.cerebro.app:create_app --factory --port 8000
+uvicorn core.api.cerebro.app:create_cerebro_app --factory --port 8000
 ```
 
 ---
